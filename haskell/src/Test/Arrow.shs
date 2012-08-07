@@ -1,0 +1,57 @@
+module Test.Arrow where
+
+import Control.Arrow
+import Control.Arrow.Syntax
+
+import Control.Category
+import Text.ParserCombinators.PArrow
+
+foo f = proc x -> f -< x+1
+
+bar f = proc x -> f x -<< x+1
+
+baz f1 f2 =
+  proc x -> if x == 0
+              then f1 -< x+1
+              else f2 -<< x+2
+
+addA f g = proc x -> do
+                y <- f -< x
+                z <- g -< x
+                returnA -< y + z
+
+symbol = undefined
+term = undefined
+data Sign = PLUS | MINUS
+data ParseArrow a b = ParseArrow
+
+instance Category ParseArrow where
+  id = ParseArrow
+  f . g = ParseArrow
+instance Arrow ParseArrow where
+  arr _ = ParseArrow
+  first _ = ParseArrow
+instance ArrowZero ParseArrow where
+  zeroArrow = ParseArrow
+instance ArrowPlus ParseArrow where
+  _ <+> _ = ParseArrow
+
+
+-- copied from http://www.haskell.org/haskellwiki/Arrow
+data Expr = Plus Expr Expr | Minus Expr Expr
+
+expr :: ParseArrow () Expr
+expr = proc () -> do
+        t <- term -< ()
+        exprTail -< t
+
+exprTail :: ParseArrow Expr Expr
+exprTail = proc e -> do
+        symbol PLUS -< ()
+        t <- term   -< ()
+        exprTail -< Plus e t
+   <+> do
+        symbol MINUS -< ()
+        t <- term    -< ()
+        exprTail -< Minus e t
+   <+> returnA -< e

@@ -1,0 +1,40 @@
+module Data.EBNF.Syntax where
+
+import org.sugarj.languages.Haskell
+
+import Meta.LiftToTop
+
+context-free syntax
+  EBNFDecl -> HaskellTopdecl
+
+  EBNFNonterminal "::=" {EBNFRule "|"}* -> EBNFDecl {cons("EBNFDecl")}
+  
+  EBNFSymbol* EBNFCons? -> EBNFRule {cons("EBNFRule")}
+  "{" HaskellConid "}" -> EBNFCons {cons("EBNFCons")}
+
+  EBNFTerminal -> EBNFSymbol {cons("EBNFTerminal")}
+  EBNFNonterminal -> EBNFSymbol {cons("EBNFNonterminal")}
+    
+
+context-free syntax
+  HaskellString -> EBNFTerminal
+  HaskellConid -> EBNFNonterminal
+
+
+desugarings
+  desugar-ebnf
+
+rules
+  desugar-ebnf :
+    e@EBNFDecl(_,_) ->
+    <<?None> metasyntax < id + !LiftToTop(metasyntax, <id>)> topdecls
+    where <ebnf-data <+ !None> e => data;
+          <ebnf-parser <+ !None> e => parser;
+          ![data, parser] => decls;
+          <ebnf-metasyntax <+ !None> e => metasyntax;
+          <filter(not(?None)); foldr(id, \(x,y) -> TopdeclSeq(x, y)\)> decls => topdecls
+
+  ebnf-data = fail
+  ebnf-parser = fail
+  ebnf-metasyntax = fail
+

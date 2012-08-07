@@ -1,0 +1,72 @@
+module Test.Lambda.Eval where
+
+import Data.List((\\))
+
+import Test.Lambda.Syntax hiding (var,ident,zero,succ,app)
+
+lookupEnv _ Nil = Nothing
+lookupEnv v (Cons v' val env) =
+  if v == v'
+    then Just val
+    else lookupEnv v env
+
+eval |[ Exp | Var$v ]| env =
+  case lookupEnv v env of
+    Nothing -> error $ "undefined variable " ++ show v
+    Just val -> val
+eval |[ (Exp$e1 Exp$e2) ]| env =
+  let |[ (lambda $v. Exp$e, $env') ]| = eval e1 env
+      val = eval e2 env 
+  in eval e |[ $v = $val : $env' ]|
+eval |[ lambda $v. Exp$e ]| env =
+  |[ (lambda $v. Exp$e, $env) ]| 
+
+
+
+reduce |[ ((lambda $v. $b) $e) ]|
+  | isVal e = subst v e b
+reduce |[ ($e1 $e2) ]|
+  | not $ isVal e1 = |[ ($(reduce e1) $e2) ]|
+  | not $ isVal e2 = |[ ($e1 $(reduce e2)) ]|
+reduce |[ Exp | Var$v ]| = error $ "free variable " ++ show v
+
+drive e 
+  | isVal e   = e
+  | otherwise = drive $ reduce e
+
+isVal |[ lambda $v. $e ]| = True
+isVal _ = False
+
+subst v e |[ Exp | Var$w ]|
+  | v == w    = e
+  | otherwise = |[ Exp | Var$w ]|
+subst v e |[ ($e1 $e2) ]|
+  = |[ ($(subst v e e1) $(subst v e e2)) ]|
+subst v e |[ lambda $w. $b ]|
+  | v == w    = |[ lambda $w.  $b ]|
+  | otherwise = |[ lambda $w'. $b' ]|
+      where w' = nextFreeVar w (freeVars e ++ freeVars b)
+            b' = subst v e $ subst w |[ Exp | Var$w' ]| b
+
+freeVars |[ Exp | Var$v ]| = [v]
+freeVars |[ lambda $v. $e ]| = freeVars e \\ [v]
+freeVars |[ ($e1 $e2) ]| = freeVars e1 ++ freeVars e2
+
+nextFreeVar :: Var -> [Var] -> Var
+nextFreeVar (Var v) vs
+  | not $ Var v `elem` vs = Var v
+  | otherwise         = next v 0
+      where next v n
+              | Var (v ++ show n) `elem` vs = next v (n + 1)
+              | otherwise                   = Var $ v ++ show n
+
+var = |[ Var | v ]|
+ident = |[ lambda x. x ]|
+zero = |[ lambda s. lambda z. z ]|
+succ = |[ lambda n. lambda s. lambda z. (s ((n s) z)) ]|
+
+const x = |[ lambda c. $x ]|
+
+app = |[ lambda f. lambda x. (f x) ]|
+
+identEta = |[ lambda x. ($ident x) ]|

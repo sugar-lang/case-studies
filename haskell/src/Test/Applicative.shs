@@ -1,0 +1,34 @@
+module Test.Applicative where
+
+import Prelude hiding (mapM)
+
+import Data.Foldable
+import Data.Monoid
+import Data.Traversable
+
+import Control.Applicative
+import Control.Applicative.IdiomBrackets
+
+
+
+data Tree a =
+  Leaf |
+  Node (Tree a) a (Tree a)
+
+instance Traversable Tree where
+  traverse f Leaf         = (| Leaf |)
+  traverse f (Node l x r) = (| Node (traverse f l) (f x) (traverse f r) |) 
+
+
+instance Functor Tree where
+  fmap f Leaf = Leaf
+  fmap f (Node l x r) = Node (fmap f l) (f x) (fmap f r) 
+
+instance Foldable Tree where
+  foldMap f Leaf = mempty
+  foldMap f (Node l x r) = foldMap f l `mappend` f x `mappend` foldMap f r 
+
+
+
+mytraverse f [] = (|[]|)
+mytraverse f (x : xs) = (|f x : mytraverse f xs|) 

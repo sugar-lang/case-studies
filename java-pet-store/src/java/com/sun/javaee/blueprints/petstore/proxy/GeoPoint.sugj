@@ -1,0 +1,53 @@
+/*
+ * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
+ * You may not modify, use, reproduce, or distribute this
+ * software except in compliance with the terms of the License at:
+ *
+ *   http://developer.sun.com/berkeley_license.html
+ *
+ * $Id: GeoPoint.java,v 1.1 2006-12-01 03:30:12 sean_brydon Exp $
+ */
+
+package com.sun.javaee.blueprints.petstore.proxy;
+
+import sugar.Accessors;
+
+/**
+ * <p>JavaBean describing a single result returned by the GeoCoding service.
+ * All of the properties are optional.</p>
+ */
+public class GeoPoint {
+    private double latitude, longitude {get; set};
+    private String address, city, state, zip, country {get; set};
+    
+    /**
+     * <p>Return a concise description of the location of this point (without
+     * including the latitude and longitude).</p>
+     */
+    public String toString() {
+
+        StringBuffer sb = new StringBuffer();
+        if (address != null) {
+            sb.append(address);
+        }
+        if (city != null) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(city);
+        }
+        if (state != null) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(state);
+        }
+        if (zip != null) {
+            if (sb.length() > 0) {
+                sb.append("  ");
+            }
+            sb.append(zip);
+        }
+        return sb.toString();
+    }
+}
