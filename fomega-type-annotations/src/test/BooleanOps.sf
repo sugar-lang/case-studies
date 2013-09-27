@@ -1,0 +1,11 @@
+module test.BooleanOps
+
+import extensions.BooleanOps
+
+import contextanalysis.ContextAnalysis
+
+
+val x = false || true
+val tmp = true 
+val y = false || tmp
+
