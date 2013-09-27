@@ -381,7 +381,7 @@ rules // Rules to hook in dynamic axioms into the judgment implementations
   
   annotate-type-defined = Dynamic-Annotate-Type-Defined
   par-reduce-type = Dynamic-Par-Reduce-Type
-  annotate-kind-defined = Dynamic-Annotate-Kind
+  annotate-kind-defined = rec x (Dynamic-Annotate-Kind <+ oncetd(\CtxBindVar(c,_,_) -> c\); x)
   lookup-expr-var = Dynamic-Lookup-Expr-Var
   annotate-signature-defined = Dynamic-Annotate-Signature
   not-in-dom = Dynamic-Not-In-Dom
