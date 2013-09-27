@@ -255,7 +255,7 @@ rules // Activate dynamic axioms in the order of appearance in the typing rule
           where <strip-annos> arg => (C-normed, e-stripped)
               ; !arg => (_, e-arg)
               ; <put-type> (T, e-arg) => res
-              ; debug-analysis(!"dyn typ judg ok: ")
+              ; where(<debug-analysis(!"dyn typ judg ok: ")> (C-normed, e-stripped))
       )
     // ; <debug-analysis(!"Activated typing judgment ")> (C-normed, e-stripped, T)
 
@@ -379,11 +379,11 @@ rules // Rules to hook in dynamic axioms into the judgment implementations
     : s      
     }
   
-  annotate-type-defined = rec x (Dynamic-Annotate-Type-Defined <+ strengthened-context(x))
-  par-reduce-type = rec x (Dynamic-Par-Reduce-Type <+ strengthened-context(x))
-  annotate-kind-defined = rec x (Dynamic-Annotate-Kind <+ strengthened-context(x))
+  annotate-type-defined = Dynamic-Annotate-Type-Defined
+  par-reduce-type = Dynamic-Par-Reduce-Type
+  annotate-kind-defined = Dynamic-Annotate-Kind
   lookup-expr-var = Dynamic-Lookup-Expr-Var
-  annotate-signature-defined = rec x (Dynamic-Annotate-Signature <+ strengthened-context(x))
+  annotate-signature-defined = Dynamic-Annotate-Signature
   not-in-dom = Dynamic-Not-In-Dom
   not-in-lab = Dynamic-Not-In-Lab
   kind-norm-internal = Dynamic-Kind-Norm
