@@ -30,16 +30,17 @@ typing {
   // ======================= T-Bool-Or
   // ~C |- ~e1 || ~e2 : Bool
 
-  // capture of 'tmp' in e2 and rejection of e2 if no 'tmp' in context
-  ~C |- ~e1 : Bool
-  (~C; tmp: Bool) |- ~e2 : Bool
-  ======================= T-Bool-Or
-  ~C |- ~e1 || ~e2 : Bool
-  
+  // capture of 'tmp' in e2, and e2 can use tmp in its body.
   // ~C |- ~e1 : Bool
-  // tmp notin dom(~C)
-  // ~C |- ~e2 : Bool
+  // (~C; tmp: Bool) |- ~e2 : Bool
   // ======================= T-Bool-Or
   // ~C |- ~e1 || ~e2 : Bool
+  
+  tmp notin dom(~C)
+  ~C |- ~e1 : Bool
+  ~C |- ~e2 : Bool
+  ======================= T-Bool-Or
+  ~C |- ~e1 || ~e2 : Bool
 
 }
+
