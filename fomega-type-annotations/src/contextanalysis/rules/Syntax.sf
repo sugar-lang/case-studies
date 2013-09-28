@@ -202,6 +202,7 @@ context-free syntax // *** Syntax for judgments ***
   InDeclJudgment        -> TypingRuleJudgment
   VarInContextJudgment  -> TypingRuleJudgment
   QVarInContextJudgment -> TypingRuleJudgment
+  NotinDomJudgment      -> TypingRuleJudgment
 
   // Judgments allowed as premises in kinding rules
   KindingJudgment        -> KindingRuleJudgment
