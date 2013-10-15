@@ -8,9 +8,7 @@ public extension Bnf {
 		(~[\"\\\n\r])* -> BnfLit
 
 	context-free syntax
-		"{" BnfBodyElem* "}" -> ExtensionBody {cons("BnfSugarBody")}
-		SugarDefElem -> BnfBodyElem
-		BnfGrammar   -> BnfBodyElem
+		BnfGrammar   -> ExtensionElem
 
 		"bnf" "syntax" BnfProduction* -> BnfGrammar {cons("BnfGrammar")}
 
@@ -39,10 +37,10 @@ public extension Bnf {
 //	rules desugar-bnfbody : BnfSugarBody(l) -> SugarBody([])
 
 	rules
-		desugar-bnfbody : BnfSugarBody(l)
+		desugar-bnfbody : ExtensionBody(l)
 			-> ExtensionBody(<conc> (<desugar-bnfs> bnfs, nonbnfs))
-				where <partition(?BnfGrammar(_))> l
-					=> (bnfs, nonbnfs)
+				where <partition(?BnfGrammar(_))> l => (bnfs, nonbnfs)
+				    ; <not(?[])> bnfs
 
 	strategies
 		capitalize = explode-string; one(to-upper); implode-string
