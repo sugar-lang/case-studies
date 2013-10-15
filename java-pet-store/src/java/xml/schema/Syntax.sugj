@@ -16,9 +16,9 @@ public sugar Syntax {
     XsdSugarDecHead XsdSugarBody
       -> XsdSugarDec {cons("XsdSugarDec")}
     
-    XsdSugarDec -> SugarDec
+    XsdSugarDec -> ExtensionDec
 
-    AnnoOrSugarMod* "xmlschema" JavaId 
+    AnnoOrExtensionMod* "xmlschema" JavaId 
       -> XsdSugarDecHead {cons("XsdSugarDecHead")}
 
     "{" XsdDefinition  "}" -> XsdSugarBody {cons("XsdSugarBody")}

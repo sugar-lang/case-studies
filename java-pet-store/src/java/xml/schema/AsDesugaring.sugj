@@ -50,8 +50,9 @@ public sugar AsDesugaring {
     xsdDec : 
       XsdSugarDec(XsdSugarDecHead(mods, name), doc) 
       ->
-      [SugarDec(SugarDecHead(mods, name), SugarBody(<xsdBody> doc)),
-       EditorServicesDec(EditorServicesDecHead(mods, name), EditorServicesBody(<schema-editor> doc))]
+      ExtensionDec(ExtensionDecHead(mods, name), ExtensionBody(<conc> (body, editor)))
+       where <schema-editor> doc => editor
+           ; <xsdBody> doc => body
       
     xsdBody :
       XsdSugarBody(XMLSchemaDoc(xsd))
