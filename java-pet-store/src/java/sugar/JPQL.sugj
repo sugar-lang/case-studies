@@ -3,7 +3,7 @@ package sugar;
 import sugar.Bnf;
 import org.sugarj.languages.Java;
 
-public sugar JPQL {
+public extension JPQL {
   lexical syntax
     [A-Z] [A-Z\_]* -> UppercaseString
     JavaID "." (JavaID ".")* JavaID -> PathExpressionLex

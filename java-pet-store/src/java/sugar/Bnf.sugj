@@ -2,13 +2,13 @@ package sugar;
 
 import org.sugarj.languages.Sdf2;
 
-public sugar Bnf {
+public extension Bnf {
 	lexical syntax
 		JavaID -> BnfSort
 		(~[\"\\\n\r])* -> BnfLit
 
 	context-free syntax
-		"{" BnfBodyElem* "}" -> SugarBody {cons("BnfSugarBody")}
+		"{" BnfBodyElem* "}" -> ExtensionBody {cons("BnfSugarBody")}
 		SugarDefElem -> BnfBodyElem
 		BnfGrammar   -> BnfBodyElem
 
@@ -40,7 +40,7 @@ public sugar Bnf {
 
 	rules
 		desugar-bnfbody : BnfSugarBody(l)
-			-> SugarBody(<conc> (<desugar-bnfs> bnfs, nonbnfs))
+			-> ExtensionBody(<conc> (<desugar-bnfs> bnfs, nonbnfs))
 				where <partition(?BnfGrammar(_))> l
 					=> (bnfs, nonbnfs)
 
