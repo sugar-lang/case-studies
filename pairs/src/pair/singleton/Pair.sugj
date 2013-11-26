@@ -1,0 +1,13 @@
+package pair.singleton;
+
+// import pair.Pair;
+
+public class Pair<A> extends pair.Pair<A,A>{
+  public Pair (A a) {
+    super(a,a);
+  }
+  
+  public static <A> Pair<A> create(A a) {
+    return new Pair(a);
+  }
+}
