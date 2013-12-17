@@ -1,0 +1,20 @@
+package pair.concrete;
+
+import concretesyntax.Java;
+import pair.concrete.Syntax;
+
+public extension Analysis {
+    analyses
+      pair-analysis-start
+    
+    rules
+      pair-analysis-start = bottomup(try(pair-analysis))
+      
+      pair-analysis =
+      	not(get-analysis-data(|"check")); 
+      	put-analysis-data(|"check", "ok")
+
+      pair-analysis =
+      	where(get-analysis-data(|"check") => "ok");
+      	put-analysis-data(|"check", "fully ok")
+}

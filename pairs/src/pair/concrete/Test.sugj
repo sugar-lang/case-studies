@@ -2,6 +2,7 @@ package pair.concrete;
 
 import pair.concrete.Syntax;
 import pair.concrete.Desugar;
+import pair.concrete.Analysis;
 
 public class Test {
   private static (String, Integer) p = ("12", 34);
