@@ -9,5 +9,4 @@ import quest.analysis.Naming;
 import quest.analysis.Typing;
 import quest.analysis.Determinism;
 
-public sugar Language { }
-public editor services Language { }
+public extension Language { }

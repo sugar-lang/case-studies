@@ -28,5 +28,5 @@ public questionnaire HouseOwning
       Boolean question spareADime = Can you spare some?
   if hasSoldHouse
     ask hasMoney
-    if hasMoney
+    if !hasMoney
       Boolean question spareADime = For a good cause?

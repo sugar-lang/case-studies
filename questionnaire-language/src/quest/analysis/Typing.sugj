@@ -12,10 +12,10 @@ public sugar Typing {
     analyze-types = QNil
     analyze-types = QCons(analyze-types, analyze-types)
     
-    analyze-types = ?Question(QuestType(type), _, _); put-type(|<strip-annos> type) 
+    analyze-types = ?Question(QuestType(type), _, _); put-type(|type) 
     analyze-types =
       DerivedValue(
-        QuestType(strip-annos => type), 
+        QuestType(?type), 
         id, 
         QuestExpr(analyze-expr-type; where(retrieve-type => etype)));
       if <equal> (type, etype)
@@ -24,7 +24,7 @@ public sugar Typing {
       end
     analyze-types = QuestGroup(id, analyze-types)
     analyze-types = ConditionalQuest(analyze-expr-type, analyze-types, ?None + Some(analyze-types))
-    analyze-types = ?LocalQuest(Question(QuestType(type), _, _)); put-type(|<strip-annos> type)
+    analyze-types = ?LocalQuest(Question(QuestType(type), _, _)); put-type(|type)
     analyze-types =
       ?QuestRef(_);
       where(get-ref-type => type);
@@ -88,26 +88,27 @@ public sugar Typing {
     is-bin-bool-comp = <elem> (<id>, <bin-bool-comps>)
 
   rules
-    hast-type = where(get-anno(|"type"))
+    hast-type = where(get-analysis-data(|"type"))
     has-type(|t) = where(retrieve-type; equal(|t)) 
-    retrieve-type = get-anno(|"type")
-    put-type(|t) = rm-anno(|"type-error"); put-anno(|"type", t)
+    retrieve-type = get-analysis-data(|"type")
+    put-type(|t) = try(remove-analysis-data(|"type-error"))
+                 ; put-analysis-data(|"type", t)
     
     unexpected-type-error(|expected) =
       if retrieve-type => was
         then put-type-error(|<conc-strings> ("Expected type: ", expected, ", found: ", was))
         else put-type-error(|<conc-strings> ("Expected type: ", expected, ", but no type found"))
       end
-    has-type-error = get-anno(|"type-error")
-    retrieve-type-error = get-anno(|"type-error")
-    put-type-error(|t) = has-name-error <+ put-anno(|"type-error", t)
+    has-type-error = get-analysis-data(|"type-error")
+    retrieve-type-error = get-analysis-data(|"type-error")
+    put-type-error(|t) = has-name-error <+ put-analysis-data(|"type-error", t)
     
  rules
     constraint-error =
       where(retrieve-type-error => err);
       !(<id>,<conc-strings>("Type error: ", err))
       
-    hover-type-info = ?(<conc-strings> ("Type: ", <find-annotation(retrieve-type)>),_,_,_,_)
+    hover-type-info = ?(<conc-strings> ("Type: ", <find-analysis-data(retrieve-type)>),_,_,_,_)
 
   references
     hover _ : hover-type-info
