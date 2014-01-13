@@ -14,11 +14,10 @@ public sugar Typing {
     
     analyze-types = ?Question(QuestType(type), _, _); put-type(|type) 
     analyze-types =
-      DerivedValue(
-        QuestType(?type), 
-        id, 
-        QuestExpr(analyze-expr-type; where(retrieve-type => etype)));
-      if <equal> (type, etype)
+      ?DerivedValue(QuestType(type), _, QuestExpr(body));
+      where(<analyze-expr-type> body);
+      if <retrieve-type> body => etype
+       ; <equal> (type, etype)
         then put-type(|type)
         else DerivedValue(id, id, QuestExpr(unexpected-type-error(|type)))
       end
@@ -91,7 +90,7 @@ public sugar Typing {
     hast-type = where(get-analysis-data(|"type"))
     has-type(|t) = where(retrieve-type; equal(|t)) 
     retrieve-type = get-analysis-data(|"type")
-    put-type(|t) = try(remove-analysis-data(|"type-error"))
+    put-type(|t) = where(try(remove-analysis-data(|"type-error")))
                  ; put-analysis-data(|"type", t)
     
     unexpected-type-error(|expected) =

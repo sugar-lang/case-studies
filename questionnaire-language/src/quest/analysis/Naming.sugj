@@ -7,7 +7,7 @@ public extension Naming {
     is-reference = where(get-analysis-data(|"reference"))
     is-reference-to(|t) = where(retrieve-reference; equal(|t)) 
     retrieve-reference = get-analysis-data(|"reference")
-    put-reference(|t) = try(remove-analysis-data(|"name-error"))
+    put-reference(|t) = where(try(remove-analysis-data(|"name-error")))
                       ; put-analysis-data(|"reference", t)
     
     has-name-error = where(get-analysis-data(|"name-error"))
@@ -24,8 +24,9 @@ public extension Naming {
     
     analyze-names = ?Question(_, QuestId(name), _); new-active-name(|name) 
     analyze-names =
-      ?val; DerivedValue(id, QuestId(?name), analyze-expr-names);
-      where(<new-active-name(|name)> val)
+      ?DerivedValue(_, QuestId(name), body);
+      where(<analyze-expr-names> body);
+      new-active-name(|name)
     analyze-names = QuestGroup(id, analyze-names)
     analyze-names = ConditionalQuest(analyze-expr-names, analyze-names-local-scope, ?None + Some(analyze-names-local-scope))
     analyze-names = ?LocalQuest(Question(_, QuestId(name), _)); new-local-name(|name)
@@ -49,8 +50,8 @@ public extension Naming {
       end
       
   rules
-    new-local-name(|name) = ?t; rules ( LocalQuest : name{t*} -> t) 
-    new-active-name(|name) = ?t; rules ( ActiveQuest : name{t*} -> t) 
+    new-local-name(|name) = ?t; rules ( LocalQuest : name -> t) 
+    new-active-name(|name) = ?t; rules ( ActiveQuest : name -> t) 
 
 
   rules
