@@ -23,7 +23,7 @@ rules
       result
     where <debug(!"*** Verify type rule ")> name
         ; <strip-annos; debug-analysis(<concat-strings> ["Original conclusion term  (", name, "): "])> e
-        ; if <strip-annos; desugar-extension-term; reinit-for-analysis> e => e-desugared then
+        ; if <strip-annos; desugar-extension-term> e => e-desugared then
               <debug-analysis(<concat-strings> ["Desugared conclusion term (", name, "): "])> e-desugared
             ; <premises-to-list> premises => premises-list
             ; with-scoped-axioms(
@@ -69,7 +69,7 @@ rules
       result
     where <debug-analysis(!"*** Verify kind rule ")> (name, <strip-annos> judge)
         ; <debug-analysis(<concat-strings> ["Original conclusion type  (", name, "): "])> T
-        ; if <desugar-extension-term; reinit-for-analysis> T => T-desugared then
+        ; if <desugar-extension-term> T => T-desugared then
               <debug-analysis(<concat-strings> ["Desugared conclusion type (", name, "): "])> T-desugared
             ; <premises-to-list> premises => premises-list
             ; with-scoped-axioms(
@@ -109,7 +109,7 @@ rules
       result
     where <debug-analysis(!"*** Verify signature rule ")> (name, judge)
         ; <debug-analysis(<concat-strings> ["Original conclusion defs  (", name, "): "])> Defs
-        ; if <desugar-extension-term; reinit-for-analysis> Defs => Defs-desugared then
+        ; if <desugar-extension-term> Defs => Defs-desugared then
               <debug-analysis(<concat-strings> ["Desugared conclusion defs (", name, "): "])> Defs-desugared
             ; <premises-to-list> premises => premises-list
             ; with-scoped-axioms(
@@ -149,7 +149,7 @@ rules
       result
     where <debug(!"*** Verify kind normalization rule ")> name
         ; <debug-analysis(<concat-strings> ["Original conclusion term  (", name, "): "])> T1
-        ; if <desugar-extension-term; reinit-for-analysis> T1 => T1-desugared then
+        ; if <desugar-extension-term> T1 => T1-desugared then
               <debug-analysis(<concat-strings> ["Desugared conclusion term (", name, "): "])> T1-desugared
             ; <premises-to-list> premises => premises-list
             ; with-scoped-axioms(
@@ -182,7 +182,7 @@ rules
       result
     where <debug(!"*** Verify kind normalization rule ")> name
         ; <debug-analysis(<concat-strings> ["Original conclusion term  (", name, "): "])> K1
-        ; if <desugar-extension-term; reinit-for-analysis> K1 => K1-desugared then
+        ; if <desugar-extension-term> K1 => K1-desugared then
               <debug-analysis(<concat-strings> ["Desugared conclusion term (", name, "): "])> K1-desugared
             ; <premises-to-list> premises => premises-list
             ; with-scoped-axioms(
@@ -214,7 +214,7 @@ rules
       result
     where <debug(!"*** Verify not-in-lab rule ")> name
         ; <debug-analysis(<concat-strings> ["Original conclusion term  (", name, "): "])> decls
-        ; if <desugar-extension-term; reinit-for-analysis> decls => decls-desugared then
+        ; if <desugar-extension-term> decls => decls-desugared then
               <debug-analysis(<concat-strings> ["Desugared conclusion term (", name, "): "])> decls-desugared
             ; <premises-to-list> premises => premises-list
             ; with-scoped-axioms(

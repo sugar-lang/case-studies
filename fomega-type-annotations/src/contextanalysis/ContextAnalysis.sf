@@ -12,9 +12,10 @@ analyses
 rules
   // TODO: Establish context from imports instead of empty context
   context-analysis =
-      ?FomegaBody(defs)
-    ; <debug-analysis(!"Before checking: "); where(annotate-signature)> (CtxEmpty(), defs)
-    ; debug-analysis(!"After checking: ")
+      where( ?FomegaBody(defs)
+           ; <debug-analysis(!"Before checking: "); where(annotate-signature)> (CtxEmpty(), defs)
+           ; debug-analysis(!"After checking: ")
+           )
 
 rules
   annotate-type =

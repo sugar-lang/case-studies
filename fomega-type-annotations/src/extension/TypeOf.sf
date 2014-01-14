@@ -40,9 +40,8 @@ rules
   resolve-type :
     (C, TypeOf(e)) -> T
     where  <get-context <+ !C> e => C'
-         ; <reinit-for-analysis> e => e'
-         ; <annotate-type> (C',e')
-         ; <get-type> e' => T
+         ; <annotate-type> (C',e)
+         ; <get-type> e => T
          ; <try(put-type)> (T, e)
 
 rules
