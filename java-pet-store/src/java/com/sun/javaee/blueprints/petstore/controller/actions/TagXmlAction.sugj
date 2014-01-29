@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import xml.Sugar;
+import xml.schema.TagXmlActionResponseSchema;
 
 /**
  * This action class serves up XML needed for user-created Tags.
@@ -35,10 +36,11 @@ public class TagXmlAction implements ControllerAction {
         } catch (Exception ee) {
             ee.printStackTrace();
         }
-        out.println(<response>
-        	          <itemId>${itemId}</itemId>
+        out.println(@Validate{TagXmlActionResponse}
+	            <response>
+        	      <itemId>${itemId}</itemId>
                       <tags>${cf.getItem(itemId).tagsAsString()}</tags>
-		            </response>);
+                    </response>);
         out.close();
     }
 }

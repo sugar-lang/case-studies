@@ -1,13 +1,13 @@
 package xml.schema;
 import xml.schema.XmlSchema;
 
-public xmlschema FileUploadResponseSchema {
-  <{http://www.w3.org/2001/XMLSchema}schema targetNamespace="FileUploadResponse">
+public xmlschema TagXmlActionResponseSchema {
+  <{http://www.w3.org/2001/XMLSchema}schema targetNamespace="TagXmlActionResponse">
     
-    <{http://www.w3.org/2001/XMLSchema}element name="response" type="FileUploadResponse">
+    <{http://www.w3.org/2001/XMLSchema}element name="response" type="TagXmlActionResponse">
     </{http://www.w3.org/2001/XMLSchema}element>
 
-    <{http://www.w3.org/2001/XMLSchema}complexType name="FileUploadResponse">
+    <{http://www.w3.org/2001/XMLSchema}complexType name="TagXmlActionResponse">
       <{http://www.w3.org/2001/XMLSchema}sequence>
         <{http://www.w3.org/2001/XMLSchema}element name="message" type="string">
         </{http://www.w3.org/2001/XMLSchema}element>

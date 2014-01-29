@@ -36,6 +36,7 @@ import java.util.StringTokenizer;
 
 import xml.Sugar;
 import xml.schema.FileUploadResponseSchema;
+import xml.schema.ErrorResponseSchema;
 
 public class FileUploadBean {
     private boolean bDebug=true;
@@ -313,7 +314,7 @@ public class FileUploadBean {
             response.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
             response.setDateHeader("Expires", 1);
             String xml =
-              @Validate{jpsfur}
+              @Validate{FileUploadResponseSchema}
               <response>
                 <message>${responseMessage}</message>
                 <status>${status.getStatus()}</status>
@@ -375,6 +376,7 @@ public class FileUploadBean {
         response.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
         response.setDateHeader("Expires", 1);
         writer.write(
+	  @Validate{ErrorResponse}
           <response>
             <message>Validation Error</message>
             <detail>${mess}</detail>
