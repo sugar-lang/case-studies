@@ -1,0 +1,242 @@
+CompilationUnit(
+  [ PackageDec([], PackageName([Id("entity")]))
+  , TypeImportOnDemandDec(PackageName([Id("java"), Id("sql")]))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("sql")), Id("Commands")))
+  , ClassDec(
+      ClassDecHead([Public()], Id("AccountSQLJava"), None(), None(), None())
+    , ClassBody(
+        [ FieldDec(
+            [Private(), Static()]
+          , ClassOrInterfaceType(TypeName(Id("Connection")), None())
+          , [ VarDec(
+                Id("connection")
+              , Invoke(
+                  Method(MethodName(AmbName(Id("Commands")), Id("connect")))
+                , [Lit(String([Chars("jdbc:mysql://localhost:3306/entities")]))]
+                )
+              )
+            ]
+          )
+        , FieldDec(
+            [Private(), Static()]
+          , ClassOrInterfaceType(TypeName(Id("Statement")), None())
+          , [ VarDec(
+                Id("stmt")
+              , Invoke(
+                  Method(MethodName(AmbName(Id("Commands")), Id("createStatement")))
+                , [ExprName(Id("connection"))]
+                )
+              )
+            ]
+          )
+        , StaticInit(
+            Block(
+              [ ExprStm(
+                  Invoke(
+                    Method(MethodName(AmbName(Id("Commands")), Id("createTable")))
+                  , [ ExprName(Id("stmt"))
+                    , Lit(String([Chars("account")]))
+                    , Lit(String([Chars("uid int")]))
+                    , Lit(String([Chars("balance int")]))
+                    , Lit(String([Chars("pin varchar(64)")]))
+                    ]
+                  )
+                )
+              ]
+            )
+          )
+        , FieldDec([Private()], Long(), [VarDec(Id("key"))])
+        , ConstrDec(
+            ConstrDecHead(
+              [Public()]
+            , None()
+            , Id("AccountSQLJava")
+            , [ Param([], Int(), Id("uid"))
+              , Param([], Int(), Id("balance"))
+              , Param(
+                  []
+                , ClassOrInterfaceType(TypeName(Id("String")), None())
+                , Id("pin")
+                )
+              ]
+            , None()
+            )
+          , ConstrBody(
+              None()
+            , [ ExprStm(
+                  Assign(
+                    ExprName(Id("key"))
+                  , Invoke(
+                      Method(MethodName(AmbName(Id("Commands")), Id("insertInto")))
+                    , [ ExprName(Id("stmt"))
+                      , Lit(String([Chars("account")]))
+                      , Lit(String([Chars("uid, balance, pin")]))
+                      , ExprName(Id("uid"))
+                      , ExprName(Id("balance"))
+                      , ExprName(Id("pin"))
+                      ]
+                    )
+                  )
+                )
+              ]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [Public()]
+            , None()
+            , Int()
+            , Id("getUid")
+            , []
+            , None()
+            )
+          , Block(
+              [ Return(
+                  Some(
+                    Invoke(
+                      Method(MethodName(AmbName(Id("Commands")), Id("selectIntCol")))
+                    , [ ExprName(Id("stmt"))
+                      , Lit(String([Chars("account")]))
+                      , ExprName(Id("key"))
+                      , Lit(String([Chars("uid")]))
+                      ]
+                    )
+                  )
+                )
+              ]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [Public()]
+            , None()
+            , ClassOrInterfaceType(TypeName(Id("AccountSQLJava")), None())
+            , Id("setUid")
+            , [Param([], Int(), Id("uid"))]
+            , None()
+            )
+          , Block(
+              [ ExprStm(
+                  Invoke(
+                    Method(MethodName(AmbName(Id("Commands")), Id("update")))
+                  , [ ExprName(Id("stmt"))
+                    , Lit(String([Chars("account")]))
+                    , ExprName(Id("key"))
+                    , Lit(String([Chars("uid")]))
+                    , ExprName(Id("uid"))
+                    ]
+                  )
+                )
+              , Return(Some(This()))
+              ]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [Public()]
+            , None()
+            , Int()
+            , Id("getBalance")
+            , []
+            , None()
+            )
+          , Block(
+              [ Return(
+                  Some(
+                    Invoke(
+                      Method(MethodName(AmbName(Id("Commands")), Id("selectIntCol")))
+                    , [ ExprName(Id("stmt"))
+                      , Lit(String([Chars("account")]))
+                      , ExprName(Id("key"))
+                      , Lit(String([Chars("balance")]))
+                      ]
+                    )
+                  )
+                )
+              ]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [Public()]
+            , None()
+            , ClassOrInterfaceType(TypeName(Id("AccountSQLJava")), None())
+            , Id("setBalance")
+            , [Param([], Int(), Id("balance"))]
+            , None()
+            )
+          , Block(
+              [ ExprStm(
+                  Invoke(
+                    Method(MethodName(AmbName(Id("Commands")), Id("update")))
+                  , [ ExprName(Id("stmt"))
+                    , Lit(String([Chars("account")]))
+                    , ExprName(Id("key"))
+                    , Lit(String([Chars("balance")]))
+                    , ExprName(Id("balance"))
+                    ]
+                  )
+                )
+              , Return(Some(This()))
+              ]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [Public()]
+            , None()
+            , ClassOrInterfaceType(TypeName(Id("String")), None())
+            , Id("getPin")
+            , []
+            , None()
+            )
+          , Block(
+              [ Return(
+                  Some(
+                    Invoke(
+                      Method(MethodName(AmbName(Id("Commands")), Id("selectStringCol")))
+                    , [ ExprName(Id("stmt"))
+                      , Lit(String([Chars("account")]))
+                      , ExprName(Id("key"))
+                      , Lit(String([Chars("pin")]))
+                      ]
+                    )
+                  )
+                )
+              ]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [Public()]
+            , None()
+            , ClassOrInterfaceType(TypeName(Id("AccountSQLJava")), None())
+            , Id("setPin")
+            , [Param(
+                 []
+               , ClassOrInterfaceType(TypeName(Id("String")), None())
+               , Id("pin")
+               )]
+            , None()
+            )
+          , Block(
+              [ ExprStm(
+                  Invoke(
+                    Method(MethodName(AmbName(Id("Commands")), Id("update")))
+                  , [ ExprName(Id("stmt"))
+                    , Lit(String([Chars("account")]))
+                    , ExprName(Id("key"))
+                    , Lit(String([Chars("pin")]))
+                    , ExprName(Id("pin"))
+                    ]
+                  )
+                )
+              , Return(Some(This()))
+              ]
+            )
+          )
+        ]
+      )
+    )
+  ]
+)

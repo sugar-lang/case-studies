@@ -1,6 +1,6 @@
 package entity;
 
-import entity.AccountSQL;
+import entity.EntityToSQL(entity.Account);
 
 public class TestAccountSQL {
   public static void main(String[] args) {

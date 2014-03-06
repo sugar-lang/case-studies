@@ -1,10 +1,9 @@
 package entity;
 
 import java.sql.*;
-
 import sql.Commands;
 
-public class AccountSQL  
+public class AccountSQLJava 
 { 
   private static Connection connection = Commands.connect("jdbc:mysql://localhost:3306/entities");
   private static Statement stmt = Commands.createStatement(connection);
@@ -14,7 +13,7 @@ public class AccountSQL
   
   private long key;
   
-  public AccountSQL (int uid, int balance, String pin) {
+  public AccountSQLJava(int uid, int balance, String pin) {
     key = Commands.insertInto(stmt, "account", "uid, balance, pin", uid, balance, pin);
   }
 
@@ -23,7 +22,7 @@ public class AccountSQL
     return Commands.selectIntCol(stmt, "account", key, "uid");
   }
 
-  public AccountSQL setUid(int uid)
+  public AccountSQLJava setUid(int uid)
   { 
     Commands.update(stmt, "account", key, "uid", uid);
     return this;
@@ -34,7 +33,7 @@ public class AccountSQL
     return Commands.selectIntCol(stmt, "account", key, "balance");
   }
 
-  public AccountSQL setBalance(int balance)
+  public AccountSQLJava setBalance(int balance)
   { 
     Commands.update(stmt, "account", key, "balance", balance);
     return this;
@@ -45,7 +44,7 @@ public class AccountSQL
     return Commands.selectStringCol(stmt, "account", key, "pin");
   }
 
-  public AccountSQL setPin(String pin)
+  public AccountSQLJava setPin(String pin)
   { 
     Commands.update(stmt, "account", key, "pin", pin);
     return this;

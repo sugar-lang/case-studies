@@ -8,7 +8,7 @@ public transformation EntityToRecord {
     -> ClassDec(ClassDecHead(mods, Id(name), None, None, None), ClassBody(decls))
   where constr := <make-java-constr(|name)> body
       ; fields := <map(make-java-fields)> body
-      ; accessors := <mapconcat(\t -> [<make-java-getters> t, <make-java-setters(|name, body)> t]\)> body
+      ; accessors := <mapconcat(\t -> [<make-java-getter> t, <make-java-setter(|name, body)> t]\)> body
       ; decls := <concat> [[constr], fields, accessors]
   
 
@@ -17,13 +17,13 @@ public transformation EntityToRecord {
     -> FieldDec([Private], <to-java-type> type, [VarDec(Id(name))])
   
 
-  make-java-getters :
+  make-java-getter :
        Tuple([name, type])
     -> MethodDec(MethodDecHead([Public], None, java-type, Id(get-name),[],None), Block([Return(Some(Field(This,Id(name))))]))
   where java-type := <to-java-type> type
       ; get-name := <concat-strings> ["get", <first-upper> name]
 
-  make-java-setters(|class-name, fields) :
+  make-java-setter(|class-name, fields) :
        Tuple([name, type])
     -> MethodDec(MethodDecHead([Public], None, this-class-type, Id(set-name),[java-param],None),Block([Return(Some(java-new-expr))]))
   where this-class-type := <to-java-type> class-name
