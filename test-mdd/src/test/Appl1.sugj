@@ -1,0 +1,16 @@
+package test;
+
+import test.Trafo1(test.Model1);
+
+
+
+public class Appl1 {
+
+
+
+}
+
+
+
+
+

@@ -1,0 +1,20 @@
+package test;
+
+public class Java {
+	public String a;
+	public int b;
+
+    public String getA() {
+	  return this.a;
+    }
+    
+    public void setA(String a) {
+	  new Java(a, b);
+    }
+
+
+    public Java(String a, int b) {
+    	this.a = a;
+    	this.b = b;
+    } 	
+}

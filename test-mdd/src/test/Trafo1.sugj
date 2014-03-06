@@ -1,0 +1,15 @@
+package test;
+
+public transformation Trafo1 {
+  main = oncetd(transform-to-class)
+  
+  transform-to-class :
+       ModelDec(ModelDecHead(mods,name,Id("TestModel")),ModelBody(body))
+    -> ClassDec(ClassDecHead(mods, name, None, None, None), ClassBody(java-body))
+  where <map(make-java-field)> body => java-body
+  
+  make-java-field :
+  	   Tuple([name, val])
+  	-> FieldDec([Public],Int(),[VarDec(Id(name), Lit(Deci(<int-to-string> val)))])
+}
+

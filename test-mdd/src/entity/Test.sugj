@@ -1,0 +1,27 @@
+package entity;
+
+import entity.EntityToRecord(entity.Account);
+
+public class Test {
+  public static void main(String[] args) {
+     Account acc1 = new Account(1, 30000, "xxxx");
+     Account acc2 = acc1.setBalance(20000);
+     testEqual(30000, acc1.getBalance());
+     testEqual(20000, acc2.getBalance());
+  }
+  
+  public static void testEqual(Object expected, Object actual) {
+  	boolean equal;
+  	if (expected == null && actual == null)
+  	  equal = true;
+  	else if (expected != null && expected.equals(actual))
+  	  equal = true;
+  	else
+  	  equal = false;
+  	
+  	if (equal)
+  	  System.out.println("Test ok: " + actual + " is " + expected);
+  	else
+  	  System.out.println("Test not ok: " +actual + " should have been " + expected);
+  }
+}
