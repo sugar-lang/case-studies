@@ -98,8 +98,8 @@ public transformation EntityToSQL {
                   )
                 )]))
   where java-params := <map(make-java-param)> fields
-      ; cols := <map(?Tuple([<id>, _])); debug(!"cols: ")> fields
-      ; cols-refs := <map(!ExprName(Id(<id>))); debug(!"cols-refs: ")> cols
+      ; cols := <map(?Tuple([<id>, _]))> fields
+      ; cols-refs := <map(!ExprName(Id(<id>)))> cols
       ; cols-concated := <intersperse(|", "); concat-strings> cols
   
   
