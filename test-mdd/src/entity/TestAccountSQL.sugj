@@ -4,8 +4,8 @@ import entity.EntityToSQL(entity.Account);
 
 public class TestAccountSQL {
   public static void main(String[] args) {
-     AccountSQL acc1 = new AccountSQL(1, 30000, "xxxx");
-     AccountSQL acc2 = acc1.setBalance(20000);
+     Account acc1 = new Account(1, 30000, "xxxx");
+     Account acc2 = acc1.setBalance(20000);
      testEqual(20000, acc1.getBalance());
      testEqual(20000, acc2.getBalance());
   }
