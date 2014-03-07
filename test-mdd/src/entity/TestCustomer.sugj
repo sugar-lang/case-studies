@@ -1,0 +1,15 @@
+package entity;
+
+import entity.TestUtil;
+
+import entity.EntityToRecord(entity.Account);
+import entity.EntityToRecord(entity.Customer);
+
+public class TestCustomer {
+  public static void main(String[] args) {
+     Account acc = new Account(1, 30000, "xxxx");
+     Customer jane = new Customer("Jane", "Springfield", acc);
+     
+     TestUtil.testEqual(30000, jane.getAccount().getBalance());
+  }
+}

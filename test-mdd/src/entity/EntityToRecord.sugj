@@ -1,7 +1,18 @@
 package entity;
 
 public transformation EntityToRecord {
-  main = oncetd(entity-to-record)
+  main = CompilationUnit(map(?ModelDec(_,_) < entity-to-record 
+                           + ?TypeImportDec(_) < trans-entity-import
+                           + id))
+  trans-entity-import :
+  	   imp@TypeImportDec(type)
+    -> transimp
+  where imodel := <resolve-model-import <+ ![]> imp
+      ; transimp := 
+          <if oncetd(?ModelDec(ModelDecHead(_,_,Id("Entity")),_))
+           then !TransImportDec(None, TransApp(Id("entity.EntityToRecord"), type))
+           else !imp
+           end> imodel
   
   entity-to-record :
        ModelDec(ModelDecHead(mods, Id(name), Id("Entity")), ModelBody(body))

@@ -1,5 +1,7 @@
 package entity;
 
+import entity.TestUtil;
+
 import AccountRecord = entity.EntityToRecord(entity.Account);
 import AccountSQL = entity.EntityToSQL(entity.Account);
 
@@ -9,22 +11,6 @@ public class TestRecordSQL {
      AccountSQL acc2 = new AccountSQL(1, 30000, "xxxx");
      acc1.setBalance(20000);
      acc2.setBalance(20000);
-     testNotEqual(acc1.getBalance(), acc2.getBalance());
-  }
-
-
-  public static void testNotEqual(Object expected, Object actual) {
-  	boolean equal;
-  	if (expected == null && actual == null)
-  	  equal = true;
-  	else if (expected != null && expected.equals(actual))
-  	  equal = true;
-  	else
-  	  equal = false;
-  	
-  	if (!equal)
-  	  System.out.println("Test ok: " + actual + " is not " + expected);
-  	else
-  	  System.out.println("Test not ok: " +actual + " should not have been " + expected);
+     TestUtil.testNotEqual(acc1.getBalance(), acc2.getBalance());
   }
 }

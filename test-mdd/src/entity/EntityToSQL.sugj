@@ -4,9 +4,22 @@ public transformation EntityToSQL {
   main : 
   	   CompilationUnit(decls)
   	-> CompilationUnit(all-decls)
-  where java-decls := <map(?ModelDec(_,_) < entity-to-sql + id)> decls
+  where java-decls := <map(?ModelDec(_,_) < entity-to-sql
+                         + ?TypeImportDec(_) < trans-entity-import 
+                         + id)> decls
       ; new-imports := [TypeImportDec(Id("java.sql.*")), TypeImportDec(Id("sql.Commands"))]
       ; all-decls := <insert-java-imports> (new-imports, java-decls)
+  
+  trans-entity-import :
+  	   imp@TypeImportDec(type)
+    -> transimp
+  where imodel := <resolve-model-import <+ ![]> imp
+      ; transimp := 
+          <if oncetd(?ModelDec(ModelDecHead(_,_,Id("Entity")),_))
+           then !TransImportDec(None, TransApp(Id("entity.EntityToSQL"), type))
+           else !imp
+           end> imodel
+
   
   insert-java-imports :
        (imports, [p@PackageDec(_,_)|decls]) -> <concat> [[p], imports, decls]
@@ -18,8 +31,9 @@ public transformation EntityToSQL {
     -> ClassDec(ClassDecHead(mods, Id(name), None, None, None), ClassBody(decls))
   where init := <make-sql-init(|name)> body
       ; constr := <make-java-constr(|name)> body
+      ; key-constr := <make-java-key-constr(|name)> body
       ; accessors := <mapconcat(\t -> [<make-java-getter(|name)> t, <make-java-setter(|name, body)> t]\)> body
-      ; decls := <concat> [init, [constr], accessors]
+      ; decls := <concat> [init, [constr, key-constr], accessors]
 
   make-sql-init(|table-name) :
        fields
@@ -38,22 +52,39 @@ public transformation EntityToSQL {
                  [ExprName(Id("stmt"))
                  , Lit(String([Chars(table-name)]))
                  | sql-cols]))]))
-       ,FieldDec([Private()], Long(), [VarDec(Id("key"))])
+       ,FieldDec([Protected()], Long(), [VarDec(Id("key"))])
        ]
-  where sql-cols := <map(\Tuple([name, type]) -> <conc-strings>(name, " ", <to-sql-type> type)\; !Lit(String([Chars(<id>)])))> fields
+  where sql-cols := <map(\Tuple([name, type]) -> <conc-strings>(name, " ", <to-sql-type> (name,type))\; !Lit(String([Chars(<id>)])))> fields
 
 
   make-java-getter(|table-name) :
        Tuple([name, type])
     -> MethodDec(MethodDecHead([Public], None, java-type, Id(get-name),[],None), Block([Return(Some(select-exp))]))
   where java-type := <to-java-type> type
+      ; <sql-selector-for-type> type => selector
       ; get-name := <concat-strings> ["get", <first-upper> name]
       ; select-exp :=
-          Invoke(Method(MethodName(AmbName(Id("Commands")), Id(<sql-selector-for-type> type))),
+          Invoke(Method(MethodName(AmbName(Id("Commands")), Id(selector))),
                  [ ExprName(Id("stmt"))
                  , Lit(String([Chars(table-name)]))
                  , ExprName(Id("key"))
                  , Lit(String([Chars(name)]))
+                 ])
+
+  make-java-getter(|table-name) :
+       Tuple([name, type])
+    -> MethodDec(MethodDecHead([Public], None, java-type, Id(get-name),[],None), Block([Return(Some(select-exp))]))
+  where java-type := <to-java-type> type
+      ; <not(sql-selector-for-type)> type
+      ; get-name := <concat-strings> ["get", <first-upper> name]
+      ; class-arg := Lit(Class(ClassOrInterfaceType(TypeName(Id(type)), None())))
+      ; select-exp :=
+          Invoke(Method(MethodName(AmbName(Id("Commands")), Id("selectForeignCol"))),
+                 [ ExprName(Id("stmt"))
+                 , Lit(String([Chars(table-name)]))
+                 , ExprName(Id("key"))
+                 , Lit(String([Chars(name)]))
+                 , class-arg
                  ])
 
   make-java-setter(|class-name, fields) :
@@ -99,9 +130,26 @@ public transformation EntityToSQL {
                 )]))
   where java-params := <map(make-java-param)> fields
       ; cols := <map(?Tuple([<id>, _]))> fields
-      ; cols-refs := <map(!ExprName(Id(<id>)))> cols
+      ; cols-refs := <map(make-java-col-val)> fields
       ; cols-concated := <intersperse(|", "); concat-strings> cols
+
+  make-java-key-constr(|table-name) :
+       fields
+    -> ConstrDec(
+         ConstrDecHead([Public], None, Id(table-name), [Param([], Long, Id("key"))], None),
+         ConstrBody(None, [
+         	ExprStm(Assign(Field(This(), Id("key")), ExprName(Id("key"))))
+         	]))
   
+  make-java-col-val :
+       Tuple([name, type])
+    -> ExprName(Id(name))
+  where <sql-selector-for-type> type
+  
+  make-java-col-val :
+       Tuple([name, type])
+    -> ExprName(AmbName(Id(name)), Id("key"))
+  where <not(sql-selector-for-type)> type
   
   make-java-param :
        Tuple([name1, type1])
@@ -116,9 +164,10 @@ public transformation EntityToSQL {
   to-java-type : "Integer" -> Int()
   to-java-type : type -> ClassOrInterfaceType(TypeName(Id(type)),None)
 
-  to-sql-type : "int" -> "int"
-  to-sql-type : "Integer" -> "int"
-  to-sql-type : "String" -> "varchar(64)"
+  to-sql-type : (_,"int") -> "int"
+  to-sql-type : (_,"Integer") -> "int"
+  to-sql-type : (_,"String") -> "varchar(64)"
+  to-sql-type : (name,type) -> "int" //<concat-strings> ["int, FOREIGN KEY (", name, ") REFERENCES ", type, "(primkey)"]
 
   sql-selector-for-type : "int" -> "selectIntCol"
   sql-selector-for-type : "Integer" -> "selectIntCol"
