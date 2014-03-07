@@ -1,7 +1,6 @@
 package entity;
 
 import entity.Account;
-import java.lang.String;
 
 public model Customer instantiates Entity {
   [Tuple(["name", "String"])
