@@ -1,5 +1,7 @@
 package entity;
 
+import sql.Commands;
+
 public transformation EntityToSQL {
   main : 
   	   CompilationUnit(decls)
