@@ -9,6 +9,10 @@ public class ATMTest {
     machine.step(machine.event_PinOK());
     machine.step(machine.event_MoneyTaken());
     machine.step(machine.event_CardTaken());
-    assert machine.currentState() == machine.state_Init();
+    
+    if (machine.currentState() == machine.state_Init())
+      System.out.println("success");
+    else
+      System.out.println("failure");
   }
 }
