@@ -7,11 +7,11 @@ public sugar Metamodel {
   rules
     statemachine-model :
       model@Statemachine(mods, name, body) -> 
-      ModelDec(ModelDecHead(mods, name, "statemachine.Metamodel"), ModelBody(body))
+      ModelDec(ModelDecHead(mods, name, Id("statemachine.Metamodel")), ModelBody(body))
 
   context-free syntax
     Statemachine -> ToplevelDeclaration
-    AnnoOrSugarMod* "statemachine" JavaId "{" StatemachineBody "}" -> Statemachine {cons("Statemachine")}
+    AnnoOrExtensionMod* "statemachine" JavaId "{" StatemachineBody "}" -> Statemachine {cons("Statemachine")}
 
     InitialState EventsDec* StateDec* -> StatemachineBody {cons("StatemachineBody")}
 
