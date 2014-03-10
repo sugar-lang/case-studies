@@ -12,12 +12,17 @@ public template ToJava {
                    ClassOrInterfaceType(TypeName(tyop),
                                         Some(TypeArgs(<map(sort-to-type)> tyargs)))
   
+  $$transform-model-import(|metamodel, trans) : imp@TypeImportDec(type) -> transimp
+    where transimp := <try( resolve-model-import
+                          ; oncetd(?ModelDec(ModelDecHead(_,_,Id(metamodel)),_))
+                          ; !TransImportDec(None, TransApp(Id(trans), type)))> imp
+
   $pkg = collect-one(?PackageDec(_,<id>))
   $classname = collect-one(?ModelDecHead(_,<id>,_))
 
   package $pkg;
 
-  $*{?CompilationUnit(_,<id>,_)}
+  $*{?CompilationUnit(<filter(transform-model-import(|"entity.Metamodel", "entity.ToJava"))>)}
 
   public class $classname {
     $for(Property(name, sort) in collect-all(?Property(_,_))) {

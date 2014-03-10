@@ -43,7 +43,7 @@ public sugar Shorthands {
 
 
   context-free syntax
-    ShorthandDef -> JavaImportDec {cons("InlineShorthand")}
+    // ShorthandDef -> JavaImportDec {cons("InlineShorthand")}
     ShorthandDef -> JavaClassBodyDec {cons("InlineShorthand")}
     ShorthandDef -> JavaBlockStm {cons("InlineShorthand")}
     ShorthandDef -> FormalParam {cons("InlineShorthand")}

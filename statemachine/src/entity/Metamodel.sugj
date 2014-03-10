@@ -10,11 +10,11 @@ public sugar Metamodel {
   rules
     entity-model :
       entity@EntityDec(mods, name, super, body) -> 
-      ModelDec(ModelDecHead(mods, name, "entity.Metamodel"), ModelBody((super, body)))
+      ModelDec(ModelDecHead(mods, name, Id("entity.Metamodel")), ModelBody((super, body)))
 
   context-free syntax
     Entity -> ToplevelDeclaration
-    AnnoOrSugarMod* "entity" JavaId SuperEntity? "{" EntityBodyDeclaration* "}" -> Entity {cons("EntityDec")}
+    AnnoOrExtensionMod* "entity" JavaId SuperEntity? "{" EntityBodyDeclaration* "}" -> Entity {cons("EntityDec")}
     "extends" JavaId -> SuperEntity {cons("SuperDec")}
     
     Property -> EntityBodyDeclaration
