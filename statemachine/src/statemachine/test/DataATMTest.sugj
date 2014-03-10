@@ -1,7 +1,7 @@
 package statemachine.test;
 
-import statemachine.data.ToJava(entity.test.Account);
-import statemachine.data.ToJava(entity.test.Customer);
+import entity.ToJava(entity.test.Account);
+import entity.ToJava(entity.test.Customer);
 import statemachine.data.ToJava(statemachine.test.DataATM);
 
 import java.util.HashSet;

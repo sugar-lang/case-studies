@@ -8,5 +8,5 @@ import statemachine.data.TransitionEffect;
 
 public sugar Metamodel {
   desugarings
-    \ ModelDecHead(mods,name,"statemachine.Metamodel") -> ModelDecHead(mods,name,"statemachine.data.Metamodel") \
+    \ ModelDecHead(mods,name,Id("statemachine.Metamodel")) -> ModelDecHead(mods,name,Id("statemachine.data.Metamodel")) \
 }

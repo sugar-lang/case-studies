@@ -10,28 +10,21 @@ import statemachine.data.ParametricEvent;
 import statemachine.data.TransitionCondition;
 import statemachine.data.TransitionEffect;
 
-import transformation.Recursive;
-
 import template.Language;
 
 public transformation ToJava {
   rules
-    main =
-      recursively-transform(
-        id,
-        conforms-to-metamodel(|"statemachine.data.Metamodel")
-          < {orig:
-              ?orig;
-              main-statemachine_ToJava;
-              copy-imports(|orig);
-              add-internal-data-decls(|orig)}
-          + conforms-to-metamodel(|"entity.Metamodel"); main-entity_ToJava)
-
+    main = ?orig;
+           main-statemachine_ToJava;
+           transform-entity-imports(|orig);
+           add-internal-data-decls(|orig)
+  
   rules
-    copy-imports(|orig) =
-      where(<?CompilationUnit(_,imps,_)> orig);
-      CompilationUnit(id, !(<id>,imps);conc, id)
-
+    transform-entity-imports(|orig) :
+         CompilationUnit([decl|decls])
+      -> CompilationUnit([decl| <conc> (imps, decls)])
+    where imps := <?CompilationUnit(<filter(transform-model-import(|"entity.Metamodel", "entity.ToJava"))>)> orig
+    
     add-internal-data-decls(|orig) =
       where(<collect-all(?PropertyData(_,_))> orig => decls;
             <map(prop-data-java)> decls => jdecls);
