@@ -6,5 +6,5 @@ import variability.Java;
 public variable class AnotherTest {
 
 #ifdef(A)
-   public int someInt;
+   public String someInt;
 }

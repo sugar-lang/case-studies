@@ -3,23 +3,18 @@ package variability;
 import variability.FeatureExpressions;
 import concretesyntax.MetaExplode;
 
-public editor services Java {
-  folding
-    VariableClass._
-}
-
-public sugar Java {
+public extension Java {
 
   context-free syntax
     JavaVariableType -> ToplevelDeclaration
 
     VariableClass -> JavaVariableType
     VariableClassDecHead JavaClassBody -> VariableClass {cons("VariableClassDec")}
-    AnnoOrSugarMod* "variable" "class" JavaId JavaTypeParams? JavaSuper? JavaInterfaces? -> VariableClassDecHead {cons("VariableClassDecHead")}
+    AnnoOrExtensionMod* "variable" "class" JavaId JavaTypeParams? JavaSuper? JavaInterfaces? -> VariableClassDecHead {cons("VariableClassDecHead")}
     
     VariableInterface -> JavaVariableType
     VariableInterfaceDecHead "{" JavaInterfaceMemberDec* "}" -> VariableInterface {cons("VariableInterfaceDec")}
-    AnnoOrSugarMod* "variable" "interface" JavaId JavaTypeParams? JavaExtendsInterfaces? -> VariableInterfaceDecHead  {cons("VariableInterfaceDecHead")}
+    AnnoOrExtensionMod* "variable" "interface" JavaId JavaTypeParams? JavaExtendsInterfaces? -> VariableInterfaceDecHead  {cons("VariableInterfaceDecHead")}
 
   //conditional elements   
    //"#" "ifdef" "(" FeatureExpr ")" JavaImportDec -> JavaImportDec {cons("OptionalNode")}
@@ -63,19 +58,20 @@ public sugar Java {
   rules         
     desugar-variable-type :
       VariableClassDec(VariableClassDecHead(mods, name, params, super, interfaces), body) -> 
-      ModelDec(ModelDecHead(mods, name, "VariableStructure"), ModelBody(ClassDec(ClassDecHead(mods, name, params, super, interfaces), body)))
+      ModelDec(ModelDecHead(mods, name, Id("VariableStructure")), ModelBody(ClassDec(ClassDecHead(mods, name, params, super, interfaces), body)))
       
     desugar-variable-type :
       VariableInterfaceDec(VariableInterfaceDecHead(mods,name,params,extendsifc),body) ->
-      ModelDec(ModelDecHead(mods, name, "VariableStructure"), ModelBody(InterfaceDec(InterfaceDecHead(mods,name,params,extendsifc),body)))
+      ModelDec(ModelDecHead(mods, name, Id("VariableStructure")), ModelBody(InterfaceDec(InterfaceDecHead(mods,name,params,extendsifc),body)))
 
     variable-type-declaration : 
-      OptionalNode(exp, ModelDec(head@ModelDecHead(mods, name, "VariableStructure"), ModelBody(vartypedec))) ->
+      OptionalNode(exp, ModelDec(head@ModelDecHead(mods, name, Id("VariableStructure")), ModelBody(vartypedec))) ->
       ModelDec(head, ModelBody(OptionalNode(exp, vartypedec)))
      
-}
 
-public editor services Java {
+  folding
+    VariableClass._
+
   //TODO coloring
   //TODO configuration-aware folding
   //TODO configuration-specific preview builder or with input dialog

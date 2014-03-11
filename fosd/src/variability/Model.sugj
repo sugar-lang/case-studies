@@ -6,7 +6,7 @@ public sugar Model {
 
  context-free syntax
    //feature model
-   AnnoOrSugarMod* "featuremodel" JavaId FeatureModelBody -> ToplevelDeclaration{cons("FMDecl")}
+   AnnoOrExtensionMod* "featuremodel" JavaId FeatureModelBody -> ToplevelDeclaration{cons("FMDecl")}
    "{" FeatureDeclaration* FeatureRequirement* "}" -> FeatureModelBody {cons("FMBody")}
    "features" {FeatureName ","}* -> FeatureDeclaration {cons("FeatureDecl")}
    "constraint" FeatureExpr -> FeatureRequirement {cons("FeatureRequirement")}
@@ -18,5 +18,5 @@ public sugar Model {
    featuremodel : 
      FMDecl(mods, name, FMBody(features, requirements))
      -> 
-     ModelDec(ModelDecHead(mods, name, "variability.Model"), ModelBody((features, requirements)))
+     ModelDec(ModelDecHead(mods, name, Id("variability.Model")), ModelBody((features, requirements)))
 }

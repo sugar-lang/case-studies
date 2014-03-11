@@ -7,15 +7,24 @@ import variability.FeatureExpressions;
 
 public transformation ConfigTransAux {
   rules 
-    eliminate-variability = downup(empty-variable-type <+ configure-node <+ id,
+    eliminate-variability =
+    	                    downup(empty-variable-type <+ configure-node <+ id,
                                    try(filter(not(?VariabilityHole))));
-                            CompilationUnit(id,id,map(try(no-variability)));
-                            topdown(try(empty-interface-list))
+                            CompilationUnit(map(try(no-variability)));
+                            topdown(try(empty-interface-list));
+                            where(current-transformation-name => trans-name);
+                            CompilationUnit(map(try(transform-variability-import(|"VariableStructure",Id(trans-name)))))
 
     no-variability :
-      ModelDec(ModelDecHead(mods, name, "VariableStructure"), ModelBody(structure))
+      ModelDec(ModelDecHead(mods, name, Id("VariableStructure")), ModelBody(structure))
       -> structure
       where <not(oncetd(?OptionalNode(_,_) + ?VariableNode(_,_,_)))> structure
+
+    transform-variability-import(|metamodel, trans) : imp@TypeImportDec(type) -> transimp
+      where transimp := <try( resolve-model-import
+                            ; oncetd(?ModelDec(ModelDecHead(_,_,Id(metamodel)),_))
+                            ; !TransImportDec(None, TransApp(trans, type)))> imp
+
                            
   rules
     empty-interface-list :
