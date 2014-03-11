@@ -27,7 +27,15 @@ public sugar FeatureExpressions {
     \ FeatureExprBiImplies(a,b) -> FeatureExprAnd(FeatureExprImplies(a,b), FeatureExprImplies(b,a)) \
 
 
-
+  rules
+    pp-fe : FeatureName(Id(name)) -> name
+    pp-fe : FeatureExprAnd(fe1, fe2) -> <concat-strings> ["(", <pp-fe> fe1, " && ", <pp-fe> fe2, ")"]
+    pp-fe : FeatureExprOr(fe1, fe2) -> <concat-strings> ["(", <pp-fe> fe1, " || ", <pp-fe> fe2, ")"]
+    pp-fe : FeatureExprXor(fe1, fe2) -> <concat-strings> ["(", <pp-fe> fe1, " ^ ", <pp-fe> fe2, ")"]
+    pp-fe : FeatureExprImplies(fe1, fe2) -> <concat-strings> ["(", <pp-fe> fe1, " -> ", <pp-fe> fe2, ")"]
+    pp-fe : FeatureExprBiImplies(fe1, fe2) -> <concat-strings> ["(", <pp-fe> fe1, " <-> ", <pp-fe> fe2, ")"]
+    pp-fe : FeatureExprNot(fe) -> <concat-strings> ["!", <pp-fe> fe]
+    
   signature
     constructors 
        VariabilityHole : VariabilityHole

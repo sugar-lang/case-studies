@@ -23,13 +23,13 @@ public transformation CheckConfigAux {
     conflicting-features =
       get-feature-config;
       isect;
-      map(!(<id>, <conc-strings> ("Configuration conflict for feature ",<id>, ".")))
+      map(!(<id>, <conc-strings> ("Configuration conflict for feature ",<pp-fe>, ".")))
 
     check-model-requirements(|fm) =
       get-feature-config => config;
       <model-requirements> fm;
       filter(is-condition-disabled(|config));
-      map(!(fm, ["Model requirement vilolated: ",<id>,"."]))
+      map(!(fm, ["Model requirement vilolated: ",<pp-fe>,"."]))
 
 
 /*
