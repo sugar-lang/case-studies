@@ -13,7 +13,7 @@ public transformation ModelEditorServices {
     to-editor-service :
       ModelDec(ModelDecHead(mods, Id(n), Id("variability.Model")), ModelBody((features, requirements)))
       ->
-      EditorServicesDec(EditorServicesDecHead(mods, Id(n)), EditorServicesBody(services))
+      ExtensionDec(ExtensionDecHead(mods, Id(n)), ExtensionBody(services))
     where <featuredecl2service> features => services
 
     featuredecl2service =
