@@ -7,6 +7,6 @@ public sugar TransitionEffect {
   context-free syntax
     StateName Effect -> TransitionTo {cons("WithEffect")}
 
-    "{" Assignment* "}" -> Effect {bracket}
+    "{" {Assignment ";"}* "}" -> Effect {bracket}
     EntityExp ":=" EntityExp -> Assignment {cons("Assignment")}
 }

@@ -9,6 +9,6 @@ public sugar InternalData {
   context-free syntax
     InitialState DataDec+ EventsDec StateDec* -> StatemachineBody {cons("StatemachineBody")}
 
-    "data" Property Initializer? -> DataDec {cons("PropertyData")}
-    "=" EntityExp -> Initializer {cons("DataInit")}
+    "data" {Property ","}+ Initializer? -> DataDec {cons("PropertyData")}
+    "=" {EntityExp ","}+ -> Initializer {cons("DataInit")}
 }

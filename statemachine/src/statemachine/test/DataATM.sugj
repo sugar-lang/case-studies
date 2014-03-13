@@ -14,7 +14,7 @@ public statemachine DataATM {
 
   state Init {
     InsertCard(clientAcc) => Withdraw {
-      acc := clientAcc
+      acc := clientAcc;
       pinCount := 0
     },
 

@@ -5,10 +5,10 @@ import statemachine.Metamodel;
 public statemachine ATM {
   initial state Init 
 
-  events DoWithdraw, Cancel, PinOK, PinNOK, MoneyTaken, CardTaken, CardRevoked
+  events InsertCard, Cancel, PinOK, PinNOK, MoneyTaken, CardTaken, CardRevoked
 
   state Init {
-    DoWithdraw => Withdraw,
+    InsertCard => Withdraw,
     Cancel => Init
   }
   state Withdraw {
