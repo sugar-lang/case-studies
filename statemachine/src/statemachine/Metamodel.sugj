@@ -22,7 +22,7 @@ public sugar Metamodel {
 
     "events" {EventDec ","}+ -> EventsDec {cons("Events")}
     EventName -> EventDec {cons("EventName")}
-    "state" StateName "{" Transition* "}" -> StateDec {cons("State")}
+    "state" StateName "{" {Transition ","}* "}" -> StateDec {cons("State")}
 
     TransitionFrom "=>" TransitionTo -> Transition {cons("Transition")}
     

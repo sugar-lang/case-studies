@@ -9,13 +9,14 @@ public sugar Requote {
 
     JavaClassBodyDec -> Requoted
     JavaClassBodyDec* -> Requoted {avoid}
+    JavaImportDec -> Requoted
 
     JavaExpr -> Requoted
     JavaBlockStm -> Requoted
 
     JavaFormalParam -> Requoted
     JavaType -> Requoted
-
+    
   context-free priorities
     JavaBlockStm -> Requoted
   > JavaClassDec -> JavaBlockStm

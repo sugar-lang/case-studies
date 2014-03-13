@@ -8,12 +8,12 @@ public statemachine ATM {
   events DoWithdraw, Cancel, PinOK, PinNOK, MoneyTaken, CardTaken, CardRevoked
 
   state Init {
-    DoWithdraw => Withdraw
+    DoWithdraw => Withdraw,
     Cancel => Init
   }
   state Withdraw {
-    PinOK => GiveMoney
-    PinNOK => RevokeCard
+    PinOK => GiveMoney,
+    PinNOK => RevokeCard,
     Cancel => Init
   }
   state GiveMoney {
