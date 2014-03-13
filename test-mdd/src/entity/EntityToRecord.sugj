@@ -10,7 +10,7 @@ public transformation EntityToRecord {
   where imodel := <resolve-model-import <+ ![]> imp
       ; transimp := 
           <if oncetd(?ModelDec(ModelDecHead(_,_,Id("Entity")),_))
-           then !TransImportDec(None, TransApp(Id("entity.EntityToRecord"), type))
+           then !TransImportDec(None, TransApp(Id(<current-transformation-name>), type))
            else !imp
            end> imodel
   
