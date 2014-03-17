@@ -23,7 +23,7 @@ public transformation ToJavaAux {
     transform-entity-imports(|orig, trans-name) :
          CompilationUnit([decl|decls])
       -> CompilationUnit([decl| <conc> (imps, decls)])
-    where imps := <?CompilationUnit(<filter(transform-model-import(|"entity.Metamodel", trans-name))>)> orig
+    where imps := <?CompilationUnit(<filter(try-transform-model-import(|"entity.Metamodel", trans-name))>)> orig
     
     add-internal-data-decls(|orig) =
       where(<collect-all(?PropertyData(_,_))> orig => decls;
