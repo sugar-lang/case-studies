@@ -2,7 +2,7 @@ package statemachine.data;
 
 import statemachine.data.Metamodel;
 
-import entity.ToJava;
+import entity.ToRecordTemp;
 import statemachine.ToJava;
 
 import statemachine.data.InternalData;
@@ -26,16 +26,16 @@ public transformation ToJavaAux {
     where imps := <?CompilationUnit(<filter(try-transform-model-import(|"entity.Metamodel", trans-name))>)> orig
     
     add-internal-data-decls(|orig) =
-      where(<collect-all(?PropertyData(_,_))> orig => decls;
+      where(<collect-all(?PropertyData(<id>)); concat> orig => decls;
             <map(prop-data-java)> decls => jdecls);
       oncetd(\ClassBody(xs) -> ClassBody(<conc> (xs, jdecls))\)
   
     prop-data-java :
-      PropertyData(Property(name, sort), None) ->
+      (Property(name, sort), None) ->
       > private ${<sort-to-type> sort} $name; <
 
     prop-data-java :
-      PropertyData(Property(name, sort), Some(exp)) ->
+      (Property(name, sort), Some(exp)) ->
       > private ${<sort-to-type> sort} $name = ${<ee-java(|[])> exp}; <
 
   rules

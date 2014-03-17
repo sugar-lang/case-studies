@@ -1,16 +1,16 @@
 package statemachine.test;
 
-import entity.ToJava(entity.test.Account);
-import entity.ToJava(entity.test.Customer);
-import (statemachine.data.ToJava(entity.ToJava))(statemachine.test.DataATM);
+import entity.ToRecord(entity.test.Account);
+import entity.ToRecord(entity.test.Customer);
+import (statemachine.data.ToJava(entity.ToRecord))(statemachine.test.DataATM);
 
 import java.util.HashSet;
 
 public class DataATMTest {    
   public static void main(String[] args) {
-    Customer alice = new Customer("Alice", "Marburg", new HashSet<Account>());
+    Customer alice = new Customer("Alice", "Marburg", null);
     Account alicesPublicAccount = new Account(17, alice, 3000, "xxxx");
-    alice.getAccounts().add(alicesPublicAccount);
+    alice.setAccount(alicesPublicAccount);
 
     printAccountInfo(alice); 
     
@@ -36,9 +36,7 @@ public class DataATMTest {
   }
 
   private static void printAccountInfo(Customer c) {
-    System.out.println("Accounts of " + c.getName() + ": ");
-    for (Account a : c.getAccounts())
-      System.out.println(" *  uid=" + a.getUid() + ":\t balance=" + a.getBalance());
+    System.out.println("Account of " + c.getName() + ": " + "  uid=" + c.getAccount().getUid() + ":\t balance=" + c.getAccount().getBalance());
   }
 
   private static void report(DataATM.State state) {

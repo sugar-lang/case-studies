@@ -5,7 +5,7 @@ import template.Language;
 import entity.Metamodel;
 import org.sugarj.languages.Java;
 
-public template ToJava {
+public template ToRecordTemp {
   $$first-upper = string-as-chars([to-upper|id])
   $$sort-to-type : SimpleSort(name) -> ClassOrInterfaceType(TypeName(name), None)
   $$sort-to-type : GenericSort(tyop, tyargs) ->
@@ -30,15 +30,9 @@ public template ToJava {
       $type = <sort-to-type> sort
       $uppername = <Id(first-upper)> name
       
-      private $type $name; 
-
-      public $type get#$uppername() {
-        return $name;
-      }
-
-      public void set#$uppername($type $name) {
-        this.$name = $name;
-      }
+      private $type $name;
+      public $type get#$uppername() { return $name; }
+      public void set#$uppername($type $name) { this.$name = $name; }
     }
 
     public $classname($for(Property(name, sort) in collect-all(?Property(_,_))) {

@@ -1,0 +1,3 @@
+package entity.test;
+
+export AccountRecord = entity.ToRecord(entity.test.Account);

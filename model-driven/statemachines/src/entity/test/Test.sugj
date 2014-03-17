@@ -1,0 +1,37 @@
+package entity.test;
+
+import entity.ToRecord(entity.test.Account);
+import entity.ToRecord(entity.test.Customer);
+
+import java.util.HashSet;
+
+public class Test {
+  public static void main(String[] args) {
+    Customer alice = new Customer("Alice", "Marburg", null);
+    Customer bob = new Customer("Bob", "Marburg", null);
+
+    Account alicesPublicAccount = new Account(17, alice, 100, "0000");
+    alice.setAccount(alicesPublicAccount);
+
+    Account bobsExpenses = new Account(35, bob, 300000, "0000");
+    bob.setAccount(bobsExpenses);
+
+    // Bob corrects Alice's trust issues once and for all
+    transfer(bob.getAccount(), alice.getAccount(), 250000);
+
+    assert alice.getAccount().getBalance() == 250100;
+    assert bob.getAccount().getBalance() == 50000;
+
+    printAccountInfo(alice);
+    printAccountInfo(bob);
+  }
+
+  private static void transfer(Account from, Account to, int amount) {
+    from.setBalance(from.getBalance() - amount);
+    to.setBalance(to.getBalance() + amount);
+  }
+
+  private static void printAccountInfo(Customer c) {
+    System.out.println("Account of " + c.getName() + ": " + "  uid=" + c.getAccount().getUid() + ":\t balance=" + c.getAccount().getBalance());
+  }
+}
