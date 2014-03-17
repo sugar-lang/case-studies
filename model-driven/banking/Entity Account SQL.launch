@@ -7,7 +7,7 @@
 <listEntry value="4"/>
 </listAttribute>
 <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="banking.test.TransferMoneySQL"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="banking.test.TransferMoney"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="banking"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea"/>
 </launchConfiguration>
