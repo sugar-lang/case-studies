@@ -1,11 +1,11 @@
-package entity.test;
+package banking.test;
 
-import entity.ToRecord(entity.test.Account);
-import entity.ToRecord(entity.test.Customer);
+import entity.ToRecord(banking.data.Account);
+import entity.ToRecord(banking.data.Customer);
 
 import java.util.HashSet;
 
-public class Test {
+public class TransferMoney {
   public static void main(String[] args) {
     Customer alice = new Customer("Alice", "Marburg", null);
     Customer bob = new Customer("Bob", "Marburg", null);

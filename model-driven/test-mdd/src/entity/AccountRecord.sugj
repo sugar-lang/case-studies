@@ -1,3 +1,0 @@
-package entity;
-
-export AccountRecord = entity.EntityToRecord(entity.Account);

@@ -1,6 +1,6 @@
-package statemachine.test;
+package banking.test;
 
-import statemachine.ToJava(statemachine.test.ATM);
+import statemachine.ToJava(banking.atm.ATM);
 
 public class ATMTest { 
   public static void main(String[] args) {

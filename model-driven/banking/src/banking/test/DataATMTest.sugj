@@ -1,8 +1,8 @@
-package statemachine.test;
+package banking.test;
 
-import entity.ToRecord(entity.test.Account);
-import entity.ToRecord(entity.test.Customer);
-import (statemachine.data.ToJava(entity.ToRecord))(statemachine.test.DataATM);
+import entity.ToRecord(banking.data.Account);
+import entity.ToRecord(banking.data.Customer);
+import statemachine.data.ToJava(entity.ToRecord)(banking.atm.DataATM);
 
 import java.util.HashSet;
 

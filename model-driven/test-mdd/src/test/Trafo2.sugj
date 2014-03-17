@@ -1,0 +1,15 @@
+package test;
+
+public transformation Trafo2 {
+  main = oncetd(transform-to-class)
+  
+  transform-to-class :
+       ClassDec(ClassDecHead(mods, name, a, b, c), ClassBody(java-body))
+    -> ClassDec(ClassDecHead(mods, name, a, b, c), ClassBody([field|java-body]))
+  where make-java-field => field
+  
+  make-java-field :
+  	   _
+  	-> FieldDec([Public],Int(),[VarDec(Id("TAG"), Lit(Deci("42")))])
+}
+

@@ -1,10 +1,10 @@
-package entity.test;
+package banking.data;
 
 import entity.Metamodel;
 
 import java.util.Set;
 
-import entity.test.Account;
+import banking.data.Account;
 
 public entity Customer {
   name     :: String

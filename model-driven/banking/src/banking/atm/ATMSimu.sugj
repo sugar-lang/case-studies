@@ -1,7 +1,7 @@
-package statemachine.test;
+package banking.atm;
 
-import statemachine.ToJava(statemachine.test.ATM);
-import ATM_IO = statemachine.ToJavaIO(statemachine.test.ATM);
+import statemachine.ToJava(banking.atm.ATM);
+import ATM_IO = statemachine.ToJavaIO(banking.atm.ATM);
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

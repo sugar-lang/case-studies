@@ -1,9 +1,0 @@
-package entity;
-
-import entity.Account;
-
-public model Customer instantiates Entity {
-  [Tuple(["name", "String"])
-  ,Tuple(["address", "String"])
-  ,Tuple(["account", "Account"])] 
-}

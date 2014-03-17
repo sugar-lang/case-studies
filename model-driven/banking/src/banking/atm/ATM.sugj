@@ -1,4 +1,4 @@
-package statemachine.test;
+package banking.atm;
 
 import statemachine.Metamodel;
 

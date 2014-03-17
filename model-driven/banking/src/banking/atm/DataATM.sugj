@@ -1,12 +1,12 @@
-package statemachine.test;
+package banking.atm;
 
 import statemachine.data.Metamodel;
 
-import entity.test.Account;
+import banking.data.Account;
 
 public statemachine DataATM {
-  initial state Init 
-
+  initial state Init
+  
   data acc :: Account
   data pinCount :: Integer
 

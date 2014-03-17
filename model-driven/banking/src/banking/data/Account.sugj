@@ -1,8 +1,8 @@
-package entity.test;
+package banking.data;
 
 import entity.Metamodel;
 
-import entity.test.Customer;
+import banking.data.Customer;
 
 public entity Account {
   uid     :: Integer

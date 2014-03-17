@@ -1,7 +1,0 @@
-package entity;
-
-public model Account instantiates Entity {
-  [Tuple(["uid", "Integer"])
-  ,Tuple(["balance", "Integer"])
-  ,Tuple(["pin", "String"])] 
-}
