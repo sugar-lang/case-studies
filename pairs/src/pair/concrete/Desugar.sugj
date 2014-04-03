@@ -3,6 +3,7 @@ package pair.concrete;
 import concretesyntax.Java;
 
 import pair.concrete.Syntax;
+import pair.Pair;
 
 public sugar Desugar {
   desugarings

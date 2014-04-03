@@ -1,0 +1,24 @@
+package tuples;
+
+import tuples.Sugar;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+public class TupleTest {
+  private (String, Integer, Boolean) p = ("12", 34, false);
+  
+  @Test
+  public void test() {
+	  Assert.assertEquals("12", p.a);
+	  Assert.assertEquals(34, (int) p.b.a);
+	  Assert.assertEquals(false, (boolean) p.b.b);
+	  
+	  p = ("Hello", -23, true);
+	  Assert.assertEquals("Hello", p.a);
+	  Assert.assertEquals(-23, (int) p.b.a);
+	  Assert.assertEquals(true, (boolean) p.b.b);
+  }
+}
+
+

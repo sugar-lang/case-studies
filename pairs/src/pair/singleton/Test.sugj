@@ -1,8 +1,0 @@
-package pair.singleton;
-
-import pair.singleton.Sugar;
-
-public class Test {
-  private (String, String) p1 = ("xx", "xx");
-  private (String, Integer) p2 = ("12", 34);
-}

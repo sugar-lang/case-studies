@@ -1,0 +1,25 @@
+package pair;
+
+import pair.Sugar;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+public class PairTest {
+  private (String, Integer) p = ("12", 34);
+  
+  @Test
+  public void test () {
+	Assert.assertEquals("12", p.a);
+	Assert.assertEquals((Integer)34,  p.b);
+	p = ("13", 5);
+	Assert.assertEquals("13", p.a);
+	Assert.assertEquals((Integer)5,  p.b);
+  }
+  
+  @Test
+  public void testToString() {
+	  Assert.assertEquals("(12, 34)", p.toString());
+  }
+  
+}

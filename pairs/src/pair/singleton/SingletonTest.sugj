@@ -1,0 +1,42 @@
+package pair.singleton;
+
+import pair.singleton.Sugar;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+public class SingletonTest {
+	
+  private (String, String) p1 = ("xx", "xx");
+  private (String, Integer) p2 = ("12", 34);
+  private (Integer, Integer) p3 = (-5, 34);
+  
+  @Test
+  public void testInitialValues() {
+	  Assert.assertEquals("xx", p1.a);
+	  Assert.assertEquals("xx", p1.b);
+	  Assert.assertEquals("12", p2.a);
+	  Assert.assertEquals(34, (int)p2.b);
+	  Assert.assertEquals(-5, (int)p3.a);
+	  Assert.assertEquals(34, (int)p3.b);
+  }
+  
+  @Test
+  public void testClasses() {
+	  Assert.assertTrue(p1 instanceof pair.singleton.Pair);
+	  Assert.assertTrue(p2 instanceof pair.Pair);
+	  Assert.assertTrue(p3 instanceof pair.Pair);
+  }
+  
+  @Test
+  public void testAssigns() {
+	  p1 = ("yy", "yy");
+	  Assert.assertTrue(p1 instanceof pair.singleton.Pair);
+	  Assert.assertEquals("yy", p1.a);
+	  Assert.assertEquals("yy", p1.b);
+	  p1 = ("x", "a");
+	  Assert.assertTrue(p1 instanceof pair.Pair);
+	  Assert.assertEquals("x", p1.a);
+	  Assert.assertEquals("a", p1.b);
+  }
+}
