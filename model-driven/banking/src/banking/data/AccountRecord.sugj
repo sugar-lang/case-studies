@@ -1,0 +1,3 @@
+package banking.data;
+
+export AccountRecord = entity.ToRecord(banking.data.Account);

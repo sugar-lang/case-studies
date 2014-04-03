@@ -1,0 +1,28 @@
+package banking.atm;
+
+import statemachine.Metamodel;
+
+public statemachine ATM {
+  initial state Init 
+
+  events InsertCard, Cancel, PinOK, PinNOK, MoneyTaken, CardTaken, CardRevoked
+
+  state Init {
+    InsertCard => Withdraw,
+    Cancel => Init
+  }
+  state Withdraw {
+    PinOK => GiveMoney,
+    PinNOK => RevokeCard,
+    Cancel => Init
+  }
+  state GiveMoney {
+    MoneyTaken => ReturnCard
+  }
+  state ReturnCard {
+    CardTaken => Init
+  }
+  state RevokeCard {
+    CardRevoked => Init
+  }
+}

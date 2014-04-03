@@ -1,0 +1,40 @@
+package variability;
+
+import org.sugarj.languages.SugarJ;
+
+import concretesyntax.Java;
+import concretesyntax.Stratego;
+
+import variability.Model;
+import variability.CheckConfigAux;
+
+public transformation CheckConfig {
+  rules
+    main :
+         CompilationUnit([pkg | decls])
+      -> CompilationUnit([pkg, |[ import variability.CheckConfigAux; ]|
+                         |ext-decls])
+    where rules ( Input := <id> )
+        ; ext-decls := <map(try(featuremodel-to-extension))> decls
+
+    featuremodel-to-extension :
+      ModelDec(ModelDecHead(mods, Id(n), Id("variability.Model")), ModelBody((features, requirements)))
+      ->
+      ExtensionDec(ExtensionDecHead(mods, Id(n)), ExtensionBody([transformation-elem(rulesblock1), transformation-elem(rulesblock2)]))
+     where 
+       <featuredecl2extension(|n)> features => rulesblock1;
+       <feature-requirements2rules(|n)> requirements => rulesblock2
+
+    featuredecl2extension(|n) =
+      get-decl-names;
+      map(!NoAnnoList(Str(<id>))); !NoAnnoList(List(<id>));
+      ?names;
+      !|[ rules featuremodel-names : string~n -> term~names ]|
+
+    feature-requirements2rules(|n) =
+      map(?FeatureRequirement(<id>));
+      ?requirements;
+      !|[ rules model-requirements : string~n -> term~(<trm-explode> requirements) ]|
+
+    get-decl-names = mapconcat(?FeatureDecl(<map(?FeatureName(Id(<id>)))>))
+}

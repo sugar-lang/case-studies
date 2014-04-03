@@ -1,0 +1,28 @@
+package statemachine.data;
+
+import statemachine.data.Metamodel;
+
+import statemachine.ToJava;
+import statemachine.data.ToJavaAux;
+
+import statemachine.data.InternalData;
+import statemachine.data.ParametricEvent;
+import statemachine.data.TransitionCondition;
+import statemachine.data.TransitionEffect;
+
+import template.Language;
+
+public transformation ToJava {
+  rules
+    main :
+         CompilationUnit([pkg | decls])
+      -> CompilationUnit([pkg, > import statemachine.data.ToJavaAux; <
+                         |trans-decls])
+    where trans-name := <current-model-name>
+        ; trans-decls := <map(?TypeImportDec(_) <+ make-data-statemachine-trans(|trans-name))> decls
+
+    make-data-statemachine-trans(|trans-name) :
+         TransDec(TransDecHead(mods, name), body)
+      -> TransDec(TransDecHead(mods, name), TransBody([Rules([main])]))
+    where main := SDefNoArgs("main", CallT(SVar("data-statemachine-to-java"), [], [NoAnnoList(Str(trans-name))]))
+} 

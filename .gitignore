@@ -1,7 +1,7 @@
 # Eclipse-generated stuff
-/*/bin/
+bin/
 /.metadata/
 /*/.cache/
 
 # SugarLang-generated stuff
-/*/.sugarjcache
+.sugarjcache/

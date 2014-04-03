@@ -1,0 +1,43 @@
+package variability;
+
+import org.sugarj.languages.Java;
+import org.sugarj.languages.Model;
+
+import variability.FeatureExpressions;
+
+public transformation ConfigTransAux {
+  rules 
+    eliminate-variability =
+    	                    downup(empty-variable-type <+ configure-node <+ id,
+                                   try(filter(not(?VariabilityHole))));
+                            CompilationUnit(map(try(no-variability)));
+                            topdown(try(empty-interface-list));
+                            where(current-transformation-name => trans-name);
+                            CompilationUnit(map(try(transform-variability-import(|"VariableStructure",Id(trans-name)))))
+
+    no-variability :
+      ModelDec(ModelDecHead(mods, name, Id("VariableStructure")), ModelBody(structure))
+      -> structure
+      where <not(oncetd(?OptionalNode(_,_) + ?VariableNode(_,_,_)))> structure
+
+    transform-variability-import(|metamodel, trans) : imp@TypeImportDec(type) -> transimp
+      where transimp := <try( resolve-model-import
+                            ; oncetd(?ModelDec(ModelDecHead(_,_,Id(metamodel)),_))
+                            ; !TransImportDec(None, TransApp(trans, type)))> imp
+
+                           
+  rules
+    empty-interface-list :
+      Some(ImplementsDec([])) -> None
+
+  rules 
+    empty-variable-type : 
+     ModelDec(mhead, ModelBody( OptionalNode(e,ClassDec(ClassDecHead(mods, name, _, _, _), ClassBody(elems)))))
+     -> ModelDec(mhead, ModelBody(ClassDec(ClassDecHead(mods, name, None, None, None), ClassBody([]))))
+      where <is-condition-disabled> e 
+
+    empty-variable-type : 
+     ModelDec(mhead, ModelBody(OptionalNode(e,InterfaceDec(head, ibody))))
+     -> ModelDec(mhead, ModelBody(InterfaceDec(head, [])))
+      where <is-condition-disabled> e
+}

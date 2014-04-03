@@ -1,0 +1,49 @@
+package variability;
+
+import org.sugarj.languages.Stratego;
+import org.sugarj.languages.SugarJ;
+
+import concretesyntax.Java;
+
+import variability.Config;
+import variability.ConfigTransAux;
+import variability.FeatureExpressions;
+
+public transformation ConfigTrans {
+  rules
+    main :
+         CompilationUnit([pkg | decls])
+      -> CompilationUnit([pkg, |[ import variability.ConfigTransAux; ]|
+                         |trans-decls])
+    where trans-decls := <map(is-feature-config < featureconfig-to-trans(|pkg) + id)> decls
+    
+    is-feature-config = is-of-metamodel(|"variability.Config")
+    is-of-metamodel(|mm) = ?ModelDec(ModelDecHead(_, _, Id(mm)), _)
+    
+    featureconfig-to-trans(|pkg) :
+      ModelDec(ModelDecHead(mods, Id(name), Id("variability.Config")), ModelBody((model, configs)))
+      ->
+      TransDec(TransDecHead(mods, Id(name)), TransBody([body]))
+    where
+      <get-feature-config> configs => (enabled, disabled);
+      <(map(feature-enabled2rule), map(feature-disabled2rule)); conc> (enabled, disabled) => rulez;
+      main-rule := SDefNoArgs("main", CallNoArgs(SVar("eliminate-variability")));
+      // CallT(SVar("eliminate-variability"), [], [NoAnnoList(Str(trans-name))]));
+
+      !Rules([main-rule | rulez]) => body
+
+    feature-enabled2rule = !SDefNoArgs("feature-enabled", Match(NoAnnoList(Str(<id>))))
+    feature-disabled2rule = !SDefNoArgs("feature-disabled", Match(NoAnnoList(Str(<id>))))
+    
+    ignore-featuremodel =
+      CompilationUnit(map(try(
+        \  ModelDec(ModelDecHead(mods, name, Id("variability.Model")), _)
+        -> ClassDec(ClassDecHead(mods, name, None, None, None), ClassBody([])) \)))
+
+    pkg-name : [] -> []
+    pkg-name : [Id(x)] -> [x]
+    pkg-name : [Id(x) | ys] -> [x | <pkg-name>ys]
+    pkg-name = ?Some(<pkg-name>)
+    pkg-name = ?PackageDec(_,<pkg-name>)
+    pkg-name = ?PackageName(<pkg-name; concat-strings>)
+}

@@ -1,0 +1,12 @@
+package banking.data;
+
+import entity.Metamodel;
+
+import banking.data.Customer;
+
+public entity Account {
+  uid     :: Integer
+  owner   :: Customer
+  balance :: Integer
+  pin     :: String
+}

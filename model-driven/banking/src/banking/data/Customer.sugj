@@ -1,0 +1,13 @@
+package banking.data;
+
+import entity.Metamodel;
+
+import java.util.Set;
+
+import banking.data.Account;
+
+public entity Customer {
+  name     :: String
+  address  :: String
+  account :: Account
+}

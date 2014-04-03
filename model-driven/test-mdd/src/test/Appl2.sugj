@@ -1,0 +1,16 @@
+package test;
+
+import test.Trafo2(test.Java);
+
+
+
+public class Appl2 {
+	Java java = new Java("", 0);
+	int x = java.TAG;
+
+
+}
+
+
+
+

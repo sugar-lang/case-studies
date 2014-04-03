@@ -1,0 +1,12 @@
+package statemachine.data;
+
+import statemachine.Metamodel;
+import statemachine.data.InternalData;
+import statemachine.data.ParametricEvent;
+import statemachine.data.TransitionCondition;
+import statemachine.data.TransitionEffect;
+
+public sugar Metamodel {
+  desugarings
+    \ ModelDecHead(mods,name,Id("statemachine.Metamodel")) -> ModelDecHead(mods,name,Id("statemachine.data.Metamodel")) \
+}

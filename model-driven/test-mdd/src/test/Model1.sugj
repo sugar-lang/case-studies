@@ -1,0 +1,6 @@
+package test;
+
+public model Model1 instantiates TestModel {
+  [Tuple(["a", 1])
+  ,Tuple(["b", 2])]
+}
