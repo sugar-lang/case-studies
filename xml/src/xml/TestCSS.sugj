@@ -15,7 +15,7 @@ import xml.CSSEditor;
  */
 public class TestCSS extends DefaultHandler {
   public static void main(String[] args) throws SAXException {
-    ContentHandler ch = new Test();
+    ContentHandler ch = new TestCSS();
     
     String title = "Sweetness and Power: The Place of Sugar in Modern History";
     
