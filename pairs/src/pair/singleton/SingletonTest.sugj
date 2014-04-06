@@ -30,7 +30,7 @@ public class SingletonTest {
   
   @Test
   public void testAssigns() {
-	  p1 = ("yy", "yy");
+	  (String, String) p1 = ("yy", "yy");
 	  Assert.assertTrue(p1 instanceof pair.singleton.Pair);
 	  Assert.assertEquals("yy", p1.a);
 	  Assert.assertEquals("yy", p1.b);
