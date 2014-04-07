@@ -2,6 +2,7 @@ package javaclosure;
 
 import javaclosure.Syntax;
 import javaclosure.ToRefType;
+import javaclosure.Closure; // Import forces the Closure class to be compiled
 
 import org.sugarj.languages.Java;
 

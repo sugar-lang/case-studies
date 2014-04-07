@@ -5,3 +5,5 @@ bin/
 
 # SugarLang-generated stuff
 .sugarjcache/
+pairs/target
+closures/target

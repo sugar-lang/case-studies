@@ -1,15 +1,15 @@
-package javaclosure.alternative;
+package javaclosure;
 
 import java.util.List;
 import java.util.ArrayList;
 
-import javaclosure.alternative.Arrows;
+import javaclosure.Syntax;
 import javaclosure.Transformation;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ArrowTest {
+public class ClosureTest {
 
 	public static class TestList<T>{
 	
@@ -48,7 +48,7 @@ public class ArrowTest {
 			return true;
 		}
   
-		public <U> TestList<U> map((T -> U) f) {
+		public <U> TestList<U> map(#U(T) f) {
 			TestList<U> test = new TestList<U>();
 		
 			for (T t : list)
@@ -69,9 +69,9 @@ public class ArrowTest {
 		return t;
 	}
 	
-    public static <A,B,C> (A -> C) compose(final (A -> B) f, final (B -> C) g) {
-    	return fun (A a) -> C { return g.invoke(f.invoke(a)); };
-    }
+	public static <A,B,C> #C(A) compose(final #B(A) f, final #C(B) g) {
+		return #C(A a) { return g.invoke(f.invoke(a)); };
+	}
   
 	@Test
 	public void testList() {
@@ -82,7 +82,7 @@ public class ArrowTest {
 	@Test
 	public void testMap() {
 		TestList<Integer> t = createIntegerList();
-		(Integer -> Integer) inc = fun (Integer i) -> Integer { return i + 1; };
+		#Integer(Integer) inc = #Integer(Integer i) { return i + 1; };
 		TestList<Integer> tInc = t.map(inc);
 		Assert.assertEquals("2, 3, 4, 5, 6", tInc.toString());
 	}
@@ -90,8 +90,8 @@ public class ArrowTest {
 	@Test
 	public void testCompose() {
 		TestList<Integer> t = createIntegerList();
-		(Integer -> Integer) inc = fun (Integer i) -> Integer { return i + 1; };
-		(Integer -> Double) toDouble = fun (Integer i) -> Double { return i.doubleValue(); };
+		#Integer(Integer) inc = #Integer(Integer i) { return i + 1; };
+		#Double(Integer) toDouble = #Double(Integer i) { return i.doubleValue(); };
 		TestList<Double> tIncDouble1 = t.map(inc).map(toDouble);
 		TestList<Double> tIncDouble2 = t.map(compose(inc, toDouble));
 		Assert.assertEquals("2.0, 3.0, 4.0, 5.0, 6.0", tIncDouble1.toString());
