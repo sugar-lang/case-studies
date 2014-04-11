@@ -6,10 +6,10 @@ import xml.XmlSyntax;
 
 public editor services Editor {
   colorer
-    ElemName : blue       (recursive)
-    AttrName : darkorange (recursive)
-    AttValue : darkred    (recursive)
-    CharData : black      (recursive)
+    ElemName : blue      
+    AttrName : darkorange
+    AttValue : darkred   
+    CharData : black     
 
   folding
     Element
