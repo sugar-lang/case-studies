@@ -9,12 +9,15 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import xml.Sugar;
 import xml.CSSEditor;
+import org.junit.Test;
 
 /*
  * code for printing based on http://www.informit.com/articles/article.aspx?p=26351&seqNum=5
  */
 public class TestCSS extends DefaultHandler {
-  public static void main(String[] args) throws SAXException {
+	
+	@Test
+  public void test() throws SAXException {
     ContentHandler ch = new TestCSS();
     
     String title = "Sweetness and Power: The Place of Sugar in Modern History";

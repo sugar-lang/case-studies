@@ -7,3 +7,5 @@ bin/
 .sugarjcache/
 pairs/target
 closures/target
+xml/target
+questionnaire-language/target

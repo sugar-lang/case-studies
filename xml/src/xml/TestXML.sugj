@@ -10,12 +10,16 @@ import org.xml.sax.helpers.DefaultHandler;
 import xml.Sugar;
 import xml.Editor;
 
+import org.junit.Test;
+
 /*
  * code for printing based on http://www.informit.com/articles/article.aspx?p=26351&seqNum=5
  */
-public class Test extends DefaultHandler {
-  public static void main(String[] args) throws SAXException {
-    ContentHandler ch = new Test();
+public class TestXML extends DefaultHandler {
+	
+  @Test
+  public void test() throws SAXException {
+    ContentHandler ch = new TestXML();
     
     ch.<xsd:schema
 		     targetNamespace="http://www.w3.org/2001/XMLSchema"
