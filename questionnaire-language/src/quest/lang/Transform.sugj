@@ -5,6 +5,16 @@ import concretesyntax.Java;
 import quest.lang.Syntax;
 import quest.analysis.Typing;
 
+import quest.lang.var.Variable;
+import quest.lang.var.VariableBooleanRadioButtons;
+import quest.lang.var.VariableBooleanTextField;
+import quest.lang.var.VariableCheckBox;
+import quest.lang.var.VariableIntegerTextField;
+import quest.lang.var.VariablePanel;
+import quest.lang.var.VariableStringTextField;
+import quest.lang.var.VariableTextField;
+
+
 public extension Transform {
   desugarings
     desugar-questionnaire
