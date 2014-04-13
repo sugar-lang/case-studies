@@ -38,6 +38,8 @@
 								<classpath/>
 								<argument>org.sugarj.test.java.CaseStudyCompiler</argument>
 								<argument>xml</argument>
+								<argument>xml/schema/BookSchemaTest.sugj</argument>
+								<argument>2</argument>
 							</arguments>
 						</configuration>
 					</execution>
