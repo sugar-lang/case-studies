@@ -35,7 +35,7 @@ public sugar Determinism {
     inline-derived-values =
       repeat(changed-tree(
         topdown(try(
-          ?ExprName(_); 
+          ?ExprName(Id(<id>)); 
           retrieve-reference; 
           ?DerivedValue(_, _, QuestExpr(<id>))))))
 

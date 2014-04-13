@@ -196,7 +196,7 @@ public extension Transform {
     desugar-local-quest :
       QCons(LocalQuest(_), rest) -> rest
     desugar-quest-ref :
-      q@QuestRef(_) -> <retrieve-reference; ?LocalQuest(<id>)> q
+      QuestRef(QuestId(name)) -> <retrieve-reference; ?LocalQuest(<id>)> name
 
   rules
     component-type : "Boolean" -> java_type |[ quest.lang.var.VariableCheckBox ]|
@@ -207,9 +207,9 @@ public extension Transform {
     derived-component-type : "String" -> java_type |[ quest.lang.var.VariableStringTextField ]|
     derived-component-type : "Integer" -> java_type |[ quest.lang.var.VariableIntegerTextField ]|
     
-    make-variable-listener(|java_x_obj) = 
+    make-variable-listener(|java_x_obj) =
       where(retrieve-type => java_x_type);
-      ?ExprName(Id(java_x_var));
+      ?ExprName(Id(java_x_var)); 
       !|[ 
         java_x_var.addChangeListener(new quest.lang.var.Variable.ChangeListener<java_x_type>() {
           public void changed(java_x_type old, java_x_type now) {
