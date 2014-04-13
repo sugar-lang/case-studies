@@ -5,12 +5,13 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import xml.TestXML;
 import xml.AsSax;
 import xml.XmlJavaSyntax;
 
 import xml.schema.TestSchema;
 
-public class Test extends xml.Test {
+public class Test extends TestXML {
 	public static void main(String[] args) throws SAXException {
     ContentHandler ch = new Test();
     
