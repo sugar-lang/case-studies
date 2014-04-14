@@ -167,7 +167,7 @@ public sugar AsDesugaring {
     ValWriteDoc(ch, doc) -> warns
     where
       !"skipping validation of quoted attribute value" => msg;
-      <collect-all(\ Attribute(_, e@FromMetaExpr(_)) -> [(e, msg)] \)> doc => warns
+      <collect-all(\ Attribute(_, e@FromMetaExpr(_)) -> (e, msg) \)> doc => warns
     
     
    

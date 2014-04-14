@@ -38,6 +38,8 @@
 								<classpath/>
 								<argument>org.sugarj.test.java.CaseStudyCompiler</argument>
 								<argument>questionnaire-language</argument>
+								<argument>test/HouseOwningTest.sugj</argument>
+								<argument>2</argument>
 							</arguments>
 						</configuration>
 					</execution>

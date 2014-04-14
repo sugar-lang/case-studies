@@ -2,7 +2,7 @@ package test;
 
 import quest.Language;
 
-public questionnaire HouseOwning
+public questionnaire HouseOwningTest
 
   Boolean question hasSoldHouse =
     Did you sell a house in 2010?

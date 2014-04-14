@@ -2,7 +2,7 @@ package test;
 
 import quest.Language;
 
-public questionnaire MobileSecurity
+public questionnaire MobileSecurityTest
   define Boolean question securityRelevant =
     Is security an issue for you?
   
