@@ -61,9 +61,7 @@ public extension Naming {
       
     resolve-reference : (node, position, ast, path, project-path) -> definition
       where
-        <debug-analysis(!"find: ")> node;
-        <find-analysis-data(retrieve-reference)> node => definition;
-        <debug-analysis(!"found: ")> definition
+        <find-analysis-data(retrieve-reference)> node => definition
     
     find-analysis-data(s) = s <+ ?c#([<find-analysis-data(s)>])
     
