@@ -4,14 +4,19 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
 import xml.TestXML;
+import xml.MyDefaultHandler;
 import xml.AsSax;
 import xml.XmlJavaSyntax;
 
 import xml.schema.XmlSchema;
 
-public class TestXmlSchema extends TestXML {
-	public static void main(String[] args) throws SAXException {
-    ContentHandler ch = new TestXmlSchema();
+import org.junit.Test;
+
+public class TestXmlSchema  {
+	
+	@Test
+	public void testValidate() throws SAXException {
+    ContentHandler ch = new MyDefaultHandler();
     
     @Validate
     ch.<{http://www.w3.org/2001/XMLSchema}schema

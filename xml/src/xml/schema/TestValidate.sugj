@@ -6,14 +6,19 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import xml.TestXML;
+import xml.MyDefaultHandler;
 import xml.AsSax;
 import xml.XmlJavaSyntax;
 
 import xml.schema.TestSchema;
 
-public class Test extends TestXML {
-	public static void main(String[] args) throws SAXException {
-    ContentHandler ch = new Test();
+import org.junit.Test;
+
+public class TestValidate {
+	
+	@Test
+	public void testValidate() throws SAXException {
+    ContentHandler ch = new MyDefaultHandler();
     
     @Validate
     ch.<{http://www.informatik.uni-marburg.de/fb12/ps/students}students>
