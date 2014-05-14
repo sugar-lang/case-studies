@@ -1,0 +1,1308 @@
+package javascript;
+
+import org.sugarj.languages.Java;
+import concretesyntax.Java;
+import jsp.Desugar;
+import javascript.HtmlWithJavaScript;
+
+
+public sugar Desugar {
+	
+	rules
+        
+        html-attributes-to-Java :
+        [JSAttribute(HTMLEventAttr(name), prog)|attributes]
+        ->
+        <concat>[ [ |[ writer.println(~nameS + "=\""); ]| ],
+                  <javascript-to-java> prog,
+                  [ |[ writer.println("\""); ]| ],
+                  <html-attributes-to-Java> attributes ]
+        where <java-lit> name => nameS       
+ 
+        attributes-to-string :
+        [JSAttribute(HTMLEventAttr(name), prog)|attributes]
+        ->
+        Plus(        
+            Plus( 
+                Plus(
+                  <java-lit> name,
+                  <java-lit> "=\""
+                ),
+                <java-lit>"test"
+            ) ,
+            <attributes-to-string>attributes
+        )
+
+      		
+	html-to-Java :
+	  JavaScript(a)
+          ->
+          <try-concat-middle>(|[ writer.println("<script language=\"javascript\">"); ]|,
+          desugaredJS,
+          |[ writer.println("</script>"); ]|)   
+          where <javascript-to-java> a => desugaredJS
+
+        
+
+        javascript-to-java :
+        None()
+        ->
+        [ |[ writer.println(" "); ]| ]
+                
+        javascript-to-java :
+        Some(a)
+        ->
+        <javascript-to-java> a
+
+        %% TODO: Type should be Program -> List of JavaStm (currently: Program -> List of List of JavaStm)
+        javascript-to-java :
+        Program(a)
+        ->
+        <concat> desugaredJavaScript
+        where <map(desugar-javascript)> a => desugaredJavaScript
+                
+                
+        desugar-javascript :
+        FunctionDec(name, params, body)
+        ->
+        <concat>[ [|[ writer.println("function " + ~nameS + "(" + ~paramsS + "){"); ]|],
+        <concat> desugaredBody,
+        [|[ writer.println("}"); ]|] ]
+        where <map(desugar-javascript)> body => desugaredBody
+        ; <java-lit> name => nameS 
+        ; <map(java-lit)> params => paramsS-temp
+        ; <concat-java-strings> paramsS-temp => paramsS
+
+        desugar-javascript :
+        ExprStm(e)
+        ->
+        desugaredExpression
+        where <desugar-js-expression> e => desugaredExpression
+
+        desugar-javascript :
+          Block(blocklist)
+          ->
+          <concat> [ [ |[ writer.println("{"); ]| ],
+          desugared-blocklist,
+          [ |[ writer.println("}"); ]| ] ]
+          where <desugar-blocklist> blocklist => desugared-blocklist
+
+        desugar-blocklist :
+          None
+          ->
+          []
+
+        desugar-blocklist :
+          Some(stmList)
+          ->
+          <desugar-stmList> stmList
+
+        desugar-javascript :
+          EmptyStm
+          ->
+          [ |[ writer.println(";"); ]| ]
+
+        desugar-javascript :
+          If(cond, stm)
+          ->
+          <concat> [ [ |[ writer.println("if("); ]| ],
+          desugared-cond,
+          [ |[ writer.println(")"); ]| ],
+          desugared-stm ]
+          where <desugar-js-expression> cond => desugared-cond
+          ; <desugar-javascript> stm => desugared-stm
+        
+
+        %% TODO: Correctify concatenation 
+        desugar-javascript :
+          IfElse(cond, if, else)
+          ->
+          <concat> [ [ |[ writer.println("if("); ]| ],
+          desugared-cond,
+          [ |[ writer.println(")"); ]| ],
+          desugared-if,
+          [ |[ writer.println(" else "); ]| ],
+          desugared-else ]
+          where <desugar-js-expression> cond => desugared-cond
+          ; <desugar-javascript> if => desugared-if
+          ; <desugar-javascript> else => desugared-else
+
+     
+        %% TODO: Correct concatenation
+        desugar-javascript :
+          DoStmWithTerminator(doStm, Semicolon)
+          ->
+          [ desugared-doStm, 
+            |[ writer.println(";"); ]| ]
+          where <desugar-doStm> doStm => desugared-doStm
+
+        desugar-javascript :
+        DoStmWithTerminator(doStm, LineTerminator(lt))
+        ->
+        [ desugared-doStm,
+        |[ writer.println(~ltS); ]| ]
+        where <desugar-doStm> doStm => desugared-doStm
+        ; <java-lit> lt => ltS
+
+        %% TODO: Correct concatenation
+        desugar-javascript :
+          DoStm(doStm)
+          ->
+          <desugar-doStm> doStm
+
+          desugar-doStm :
+          DoStm(doStm, expr)
+          ->
+          <concat> [ [ |[ writer.println("do "); ]| ],
+          desugared-doStm,
+          [ |[ writer.println("while("); ]| ],
+          desugared-expr,
+          [ |[ writer.println(")"); ]| ] ]
+          where <desugar-javascript> doStm => desugared-doStm
+          ; <desugar-js-expression> expr => desugared-expr 
+
+
+  
+        %% TODO: Correct concatenation
+        desugar-javascript :
+          WhileStm(e, stm)
+          ->
+          <concat> [ [ |[ writer.println("while("); ]| ],
+          desugared-e,
+          [ |[ writer.println(")"); ]| ],
+          desugared-stm ]
+          where <desugar-js-expression> e => desugared-e
+          ; <desugar-javascript> stm => desugared-stm       
+ 
+        desugar-javascript :
+        ForInStm(forInBinding, expr, stm)
+        ->
+        <concat> [ [ |[ writer.println("for("); ]| ],
+        desugared-forInBinding,
+        [ |[ writer.println(" in "); ]| ],
+        desugared-expr,
+        [ |[ writer.println(")"); ]| ],
+        desugared-stm ]
+        where <desugar-forInBinding> forInBinding => desugared-forInBinding
+        ; <desugar-js-expression> expr => desugared-expr
+        ; <desugar-javascript> stm => desugared-stm
+
+        desugar-forInBinding :
+        (leftHandExpr)
+        ->
+        <desugar-leftHandExpr> leftHandExpr
+
+        desugar-forInBinding :
+        ForInVarDec(varDec)
+        ->
+        <concat> [ [ |[ writer.println("var "); ]| ],
+        desugared-varDec ]
+        where <desugar-varDec> varDec => desugared-varDec
+  
+
+        desugar-javascript :
+        ForStm(forInit, e1, e2, stm)
+        ->
+        <concat> [ [ |[ writer.println("for("); ]| ],
+        desugared-forInit,
+        [ |[ writer.println("; "); ]| ],
+        desugared-e1,
+        [ |[ writer.println("; "); ]| ],
+        desugared-e2,
+        [ |[ writer.println(")"); ]| ],
+        desugared-stm ]
+        where <desugar-forInit> forInit => desugared-forInit
+        ; <desugar-js-expression> e1 => desugared-e1
+        ; <desugar-js-expression> e2 => desugared-e2
+        ; <desugar-javascript> stm => desugared-stm
+  
+        desugar-forInit :
+        ForVarDec(vars)
+        ->
+        <concat> [ [ |[ writer.println("var "); ]| ],
+        desugared-vars ]
+        where <desugar-vars> vars => desugared-vars
+
+        desugar-forInit :
+        (expr)
+        ->
+        <desugar-js-expression> expr  
+
+        desugar-vars :
+        [var|vars]
+        ->
+        <concat> [ desugared-var,
+        <desugar-vars> vars]
+        where <desugar-varDec> var => desugared-var 
+
+        desugar-vars :
+        []
+        ->
+        []
+
+        desugar-varDec :
+        VarDec(name, None())
+        ->
+        [ |[ writer.println(~nameS); ]| ]
+        where <java-lit> name => nameS       
+  
+        desugar-varDec :
+        VarDec(name, Some(Init(assExpr)))
+        ->
+        <concat> [ [ |[ writer.println(~nameS + "="); ]| ],
+        desugared-assExpr ]
+        where <desugar-js-expression> assExpr => desugared-assExpr
+        ; <java-lit> name => nameS
+        ; <debug> assExpr
+        
+
+       
+        concat-java-strings :
+        strs
+        ->
+        result
+        where <foldr(<java-lit>" ", add-strings)> strs => result
+        
+        add-strings :
+        (a, Lit(String([Chars(" ")])))
+        ->
+        a
+  
+  
+ 
+        add-strings :
+        (a, b)
+        ->
+        Plus(a, Plus(<java-lit> ",", b))
+ 
+        js-vardec-to-string :
+          VarDec(Id(name), Init(ae))
+          ->
+          Plus( name,
+                Plus( <java-lit> "=",
+                      <js-expression-to-string> ae 
+                )
+          )
+           
+
+
+                %% TODO: Correct concatenation
+        desugar-javscript :
+          WithStm(e, stm)
+          ->
+          <concat> [ [ |[ writer.println("with("); ]| ],
+          desugared-e,
+          [ |[ writer.println(")"); ]| ],
+          desugared-stm ]
+          where <desugar-js-expression> e => desugared-e
+          ; <desugar-javascript> stm => desugared-stm
+  
+        desugar-javascript :
+          LabelledStm (name, stm)
+          ->
+          [ |[ writer.println(~nameS + ":"); ]|,
+            desugared-stm ]
+          where <desugar-javascript> stm => desugared-stm 
+          ; <java-lit> name => nameS
+
+
+        desugar-javascript :
+          SwitchStm(e, ccs)
+          ->
+          <concat> [ [ |[ writer.println("switch("); ]| ],
+          desugared-e,
+          [ |[ writer.println("){"); ]| ],
+          desugared-ccs,
+          [ |[ writer.println("}") ]| ] ]
+          where <desugar-js-expression> e => desugared-e
+          ; <desugar-caseClauses> ccs => desugared-ccs
+        
+        desugar-caseClauses :
+        [cc|ccs]
+        ->
+        <concat>[ <desugar-caseClause>cc,
+        <desugar-caseClauses> ccs ]
+  
+        desugar-caseClauses :
+        []
+        ->
+        []        
+
+        desugar-caseClause :
+        CaseCase(e, None)
+        ->
+        <concat> [ [ |[ writer.println("case "); ]| ],
+        desugared-e,
+        [ |[ writer.println(":"); ]| ]]
+        where <desugar-js-expression> e => desugared-e        
+
+        desugare-caseClause :
+        CaseCase(e, Some(stmList))
+        ->
+        <concat> [ [ |[ writer.println("case "); ]| ],
+        desugared-e,
+        [ |[ writer.println(":"); ]| ],
+        desugared-stmList ]
+        where <desugar-js-expression> e => desugared-e
+        ; <desugar-stmList> stmList => desugared-stmList
+
+        desugar-caseClause :
+        DefaultCase(None)
+        ->
+        [ |[ writer.println("default :"); ]| ]
+  
+        desugar-caseClause :
+        DefaultCase(Some(stmList))
+        ->
+        <concat> [ [ |[ writer.println("default :"); ]| ],
+        desugared-stmList ]
+        where <desugar-stmList> stmList => desugared-stmList
+
+        desugar-stmList :
+        StmList(stmListPrefix, notTerminatedStm, optional)
+        ->
+        <concat> [ desugared-stmListPrefix,
+        desugared-notTerminatedStm,
+        [ |[ writer.println(";"); ]| ] ]
+        where <concat><map(desugar-javascript)>stmListPrefix => desugared-stmListPrefix
+        ; <desugar-javascript> notTerminatedStm => desugared-notTerminatedStm 
+ 
+        %% TODO: Correct concatenation 
+        desugar-javascript :
+          TryCatch(block, catch)
+          ->
+          <concat>[ [ |[ writer.println("try "); ]| ],
+            desugared-block,
+            desugared-catch ]
+          where <desugar-javascript> block => desugared-block
+          ; <desugar-catch> catch => desugared-catch
+
+        %% TODO: Correct concatenation 
+        desugar-javascript :
+          TryFinally(block, finally)
+          ->
+          <concat> [ [ |[ writer.println("try"); ]| ],
+            desugared-block,
+            desugared-finally ]
+          where <desugar-javascript> block => desugared-block
+          ; <desugar-finally> finally => desugared-finally
+
+        desugar-javascript :
+        TryCatchFinally(try, catch, finally)
+        ->
+        <concat> [ [ |[ writer.println("try "); ]| ],
+        desugared-try,
+        desugared-catch,
+        desugared-finally ]
+        where <desugar-javascript> try => desugared-try
+        ; <desugar-catch> catch => desugared-catch
+        ; <desugar-finally> finally => desugared-finally
+      
+
+        %% TODO: Correct Concatenation
+        desugar-finally :
+          Finally(block)
+          ->
+          <concat>[ [ |[ writer.println("finally "); ]| ],
+            desugared-block ]
+          where <desugar-javascript> block => desugared-block
+
+        %% TODO: Correct Concatenation
+        desugar-catch :
+          Catch(name, block)
+          ->
+          <concat> [ [ |[ writer.println("catch(~nameS)"); ]| ],
+          desugared-block ]
+          where <desugar-javascript> block => desugared-block
+
+
+        /* desugar-javascript :
+          ContinueStm
+
+    
+        desugar-javascript :
+          BreakStm
+
+
+        desugar-javascript :
+          ReturnStm
+
+
+        desugar-javascript :
+          ThrowStm
+        */
+        desugar-javascript :
+          VarStm(vars)
+          ->
+          <concat> [ [ |[ writer.println("var "); ]| ],
+          desugared-vars ,
+          [ |[ writer.println(";"); ]| ] ]
+          where <desugar-vars> vars => desugared-vars 
+        
+        desugar-js-expression :
+        CompExpr(e1, e2)
+        ->
+        <concat>[ <desugar-js-expression>e1,
+        [ |[ writer.println(", "); ]| ],
+        <desugar-js-expression>e2 ] 
+        
+
+
+        desugar-js-expression :
+        MemberCall(me, Arguments(as))
+	    ->
+        <concat>[ desugar-me,
+          [|[ writer.println("("); ]|],
+          desugar-as,
+          [|[  writer.println(");"); ]|] ]
+        where <desugar-memberExpression> me => desugar-me
+        ; <desugar-arguments> as => desugar-as
+        %% ; <map(js-expression-to-string)> as => temp-as
+        %% ; <concat-java-lit> temp-as => desugar-as
+      
+        desugar-js-expression :
+          CallCall(ce, args)
+          ->
+          [ |[ writer.println( ~desugared-expr ); ]| ]
+          where <js-expression-to-string> CallCall(ce, args) => desugared-expr
+
+
+        desugar-js-expression :
+          ExpCall(ce, e)
+          ->
+          [ |[ writer.println( ~desugared-expr ); ]| ]
+          where <js-expression-to-string> ExpCall(ce, e) => desugared-expr
+        
+        desugar-js-expression :
+          IDCall(ce, js-id)
+          ->
+          [ |[ writer.println( ~desugared-expr ); ]| ]
+          where <js-expression-to-string> IDCall(ce, js-id) => desugared-expr 
+
+        desugar-js-expression :
+          PrimaryExpr(pe)
+          ->
+          <desugar-primary-expr> pe 
+
+
+
+        desugar-js-expression :
+          FunctionExpr(fe)
+          ->
+          [ |[ writer.println( ~desugared-expr ); ]| ]
+          where <js-expression-to-string> FunctionExpr(fe) => desugared-expr
+
+
+        desugar-js-expression :
+          MemberExprExpr(me, e)
+          ->
+          <concat>[ desugared-me,
+          [ |[ writer.println("["); ]| ],
+          desugared-e,
+          [ |[ writer.println("]"); ]| ] ]
+          where <desugar-js-expression> e => desugared-e
+          ; <desugar-js-expression> me => desugared-me
+
+        desugar-js-expression :
+          MemberExprId(me, js-id)
+          ->
+          [ |[ writer.println( ~desugared-expr ); ]| ]
+          where <js-expression-to-string> MemberExprId(me, js-id) => desugared-expr
+
+
+
+        desugar-js-expression :
+          newMemberExpr(me, args)
+          ->
+          [ |[ writer.println( ~desugared-expr ); ]| ]
+          where <js-expression-to-string> newMemberExpr(me, args) => desugared-expr
+
+        desugar-js-expression :
+        Assignment(leftHandExpr, assExpr) 
+        ->
+        <concat> [ desugared-leftHandExpr,
+        [ |[ writer.println("="); ]| ],
+        desugared-assExpr,
+        [ |[ writer.println(";"); ]| ] ]
+        where <desugar-leftHandExpr> leftHandExpr => desugared-leftHandExpr
+        ; <desugar-assignment-expr> assExpr => desugared-assExpr 
+   
+        desugar-js-expression :
+        (assExpr)
+        ->
+        <desugar-assignment-expr> assExpr
+
+        desugar-js-expression :
+        (leftHandExpr, compAss, assExpr)
+        ->
+        <concat> [ desugared-leftHandExpr,
+        desugared-compAss,
+        desugared-assExpr ]
+        where <desugar-leftHandExpr> leftHandExpr => desugared-leftHandExpr
+        ; <desugar-compAss> compAss => desugared-compAss
+        ; <desugar-assignment-expr> assExpr => desugared-assExpr  
+
+        desugar-compAss :
+        CompAssStarEq
+        ->
+        [ |[ writer.println("*="); ]| ]
+
+        desugar-compAss :
+        CompAssSlashEq
+        ->
+        [ |[ writer.println("/="); ]| ]
+
+
+       desugar-compAss :
+        CompAssPercEq
+        ->
+        [ |[ writer.println("%="); ]| ]
+
+
+       desugar-compAss :
+        CompAssPlusEq
+        ->
+        [ |[ writer.println("+="); ]| ]
+
+
+       desugar-compAss :
+        CompAssMinusEq
+        ->
+        [ |[ writer.println("-="); ]| ]
+
+
+       desugar-compAss :
+        CompAssSLEq
+        ->
+        [ |[ writer.println("<<="); ]| ]
+
+
+       desugar-compAss :
+        CompAssSREq
+        ->
+        [ |[ writer.println(">>="); ]| ]
+
+
+       desugar-compAss :
+        CompAssSRREq
+        ->
+        [ |[ writer.println(">>>="); ]| ]
+
+
+       desugar-compAss :
+        CompAssAndEq
+        ->
+        [ |[ writer.println("&="); ]| ]
+
+
+       desugar-compAss :
+        CompAssXorEq
+        ->
+        [ |[ writer.println("^="); ]| ]
+
+
+       desugar-compAss :
+        CompAssOrEq
+        ->
+        [ |[ writer.println("|="); ]| ]
+
+
+
+        
+        concat-java-lit :
+        []
+        ->
+        <java-lit> " " 
+
+        concat-java-lit :
+        [lit|lits]
+        ->
+        Plus( lit,
+              <concat-java-lit> lits )  
+
+        desugar-memberExpression :
+        PrimaryExpr(pe)
+        ->
+        <desugar-primary-expr> pe
+
+        desugar-js-primaryExpression :
+        Id(a)
+        ->
+        desugar-a
+        where <java-lit> a => desugar-a 
+
+        desugar-js-arguments :
+        [a|as]
+        ->
+        Plus(
+        	Plus(
+        		desugared-a,
+                <java-lit> ","  
+                ),
+			<desugar-js-arguments> as
+		) 
+        where <desugar-js-expression> a => desugared-a
+        
+        
+       /* desugar-js-arguments :
+        [a]
+        ->
+        desugared-a
+        where  <not(is-list)> a
+        ; <js-expression-to-string> a => desugared-a */
+                
+        desugar-js-arguments :
+        []
+        ->
+        <java-lit>" "
+        
+        desugar-primary-expr :
+        This
+        ->
+        [ |[ writer.println("this"); ]| ]
+
+        desugar-primary-expr :
+        Id(a)
+        ->
+        [ |[ writer.println(~aS); ]| ]
+        where <java-lit> a => aS
+
+        desugar-primary-expr :
+        Literal(String(a))
+        ->
+        [ |[ writer.println(~aS); ]| ]
+        where <java-lit> a => aS
+
+        desugar-primary-expr :
+        Literal(Num(Decimal(a)))
+        ->
+        [ |[ writer.println(~aS); ]| ]
+        where <java-lit> a => aS
+
+        desugar-primary-expr :
+        Literal(Num(HexInt(a)))
+        ->
+        [ |[ writer.println(~aS); ]| ]
+        where <java-lit> a => aS
+
+        desugar-primary-expr :
+        Literal(Null(nl))
+        ->
+        [ |[ writer.println("null"); ]| ]
+
+        desugar-primary-expr :
+        Literal(Bool(bl))
+        -> 
+        [ |[ writer.println(~blS); ]| ]
+        where <java-lit> bl => blS
+
+        desugar-primary-expr :
+        ArrayLiteral(al)
+        ->
+        <desugar-arrayLiteral> al
+
+        desugar-primary-expr :
+        ObjectLiteral(ol)
+        ->
+        <desugar-objectLiteral> ol
+
+        desugar-objectLiteral :
+        ObjectLiteral(pNamesAndValues)
+        ->
+        <concat> [ [ |[ writer.println("{"); ]| ],
+        desugared-pNamesAndValues,
+        [ |[ writer.println("}"); ]| ] ]
+        where <desugar-pNamesAndValues> pNamesAndValues => desugared-pNamesAndValues
+
+        desugar-pNamesAndValues :
+        [pNaV|pNaVs]
+        ->
+        <concat> [ <desugar-pNameAndValue> pNaV,
+        [ |[ writer.println(", "); ]| ],
+        <desugar-pNamesAndValues> pNaVs ]
+        where <geq> (<length> pNaVs, 1)
+
+        desugar-pNamesAndValues :
+        [pNaV|emptylist]
+        ->
+        <desugar-pNameAndValue> pNaV
+        where <eq> (<length> emptylist, 0)
+
+        desugar-pNamesAndValues :
+        []
+        ->
+        []
+
+        desugar-pNameAndValue :
+        PropertyNameAndValue(name, value)
+        ->
+        <concat> [ desugared-name,
+        [ |[ writer.println(":"); ]| ],
+        desugared-value ]
+        where <desugar-propertyName> name => desugared-name
+        ; <desugar-assignment-expr> value => desugared-value
+
+        desugar-propertyName :
+        PropertyId(identifier)
+        ->
+        [ |[ writer.println(~identifierS); ]| ]
+        where <java-lit> identifier => identifierS
+
+        desugar-propertyName :
+        PropertyString(name)
+        ->
+        [ |[ writer.println(~nameS); ]| ]
+        where <java-lit> name => nameS
+
+        desugar-propertyName :
+        PropertyNum(Decimal(numLit))
+        ->
+        [ |[ writer.println(~numLitS) ]| ]
+        where <java-lit> numLit => numLitS
+
+        desugar-propertyName :
+        PropertyNum(HexInt(numLit))
+        ->
+        [ |[ writer.println(~numLitS) ]| ]
+        where <java-lit> numLit => numLitS
+             
+
+        desugar-arrayLiteral :
+        ArrayLiteral1(None)
+        ->
+        [ |[ writer.println("[ ]"); ]| ]
+
+        desugar-arrayLiteral :
+        ArrayLiteral1(Some(elision))
+        ->
+        <concat> [ [ |[ writer.println("["); ]| ],
+        <desugar-elision> elision,
+        [ |[ writer.println("]"); ]| ] ]
+
+        desugar-arrayLiteral :
+        ArrayLiteral2(elementList) 
+        ->
+        <concat> [ [ |[ writer.println("["); ]| ],
+        <desugar-elemList> elementList,
+        [ |[ writer.println("]"); ]| ] ]
+
+
+        desugar-arrayLiteral :
+        ArrayLiteral3(elementList, None)
+        ->
+        <concat>[ [ |[ writer.println("["); ]| ],
+        <desugar-elemList> elementList,
+        [ |[ writer.println(",]"); ]| ] ] 
+      
+        desugar-arrayLiteral :
+        ArrayLiteral3(elementList, Some(elision))
+        ->
+        <concat>[ [ |[ writer.println("["); ]| ],
+        <desugar-elemList> elementList,
+        [ |[ writer.println(","); ]| ],
+        <desugar-elision> elision,
+        [ |[ writer.println("]"); ]| ] ] 
+
+
+        desugar-elemList :
+        ElementList1(None, LiteralElement(assExpr))
+        ->
+        <desugar-assignment-expr> assExpr        
+
+        desugar-elemList :
+        ElementList1(Some(elision), LiteralElement(assExpr))
+        ->
+        <concat> [ <desugar-elision> elision,
+        <desugar-assignment-expr> assExpr ]
+
+        desugar-elemList :
+        ElementList2(elementList, None, LiteralElement(assExpr))
+        ->
+        <concat>[ <desugar-elemList> elementList, <desugar-assignment-expr> assExpr ]
+
+        desugar-elemList :
+        ElementList2(elementList, Some(elision), LiteralElement(assExpr))
+        ->
+        <concat>[ <desugar-elemList> elementList, <desugar-elision> elision, <desugar-assignment-expr> assExpr ]
+
+        desugar-elision :
+        [e|es]
+        ->
+        <concat> [ [ |[ writer.println(","); ]| ],
+        <desugar-elision> es ]
+
+        desugar-elision :
+        []
+        ->
+        []  
+  
+        js-expression-to-string :
+       	PrimaryExpr(a)
+       	->
+       	aString
+       	where <primaryexpression-to-string> a => aString
+
+        primaryexpression-to-string :
+        This
+        ->
+        <java-lit> "this"
+
+        primaryexpression-to-string :
+        ArrayLiteral(ArrayLiteral1(optEl))
+        ->
+        optEl         
+
+       	
+       	primaryexpression-to-string :
+       	Id(a)
+       	->
+       	<java-lit> a
+       	
+       	primaryexpression-to-string :
+       	Literal(a)
+       	->
+       	<literal-to-string> a
+       	
+       	literal-to-string :
+       	String(a)
+       	->
+       	<java-lit> a
+       	
+       /*	literal-to-string :
+       	Num(a)
+       	->
+       	aString
+       	where <java-lit> a -> aString */
+
+        desugar-arguments :
+        [arg|noargs]
+        ->
+        <desugar-assignment-expr> arg
+        where <eq> (0, <length> noargs)
+	
+        desugar-arguments :
+        [arg|args]
+        ->
+        <concat>[ desugarArg,
+        [ |[ writer.println(", "); ]| ],
+        <desugar-arguments> args ]
+        where <desugar-assignment-expr> arg => desugarArg
+        ; <geq> (1, <length> args)
+
+        desugar-arguments :
+        []
+        ->
+        []	
+
+        desugar-assignment-expr :
+        (logicalOrExpr, assExpr1, assExpr2)
+        ->
+        <concat> [ desugared-logicalOrExpr,
+        [ |[ writer.println("?"); ]| ],
+        <desugar-assignment-expr> assExpr1,
+        [ |[ writer.println(":"); ]| ],
+        <desugar-assignment-expr> assExpr2 ]
+        where <desugar-logicalorexpr> logicalOrExpr => desugared-logicalOrExpr
+
+        desugar-assignment-expr :
+        (logicalOrExpr)
+        ->
+        <desugar-logicalorexpr> logicalOrExpr
+
+        desugar-logicalorexpr :
+        LogicalOrExpr(logicalOrExpr, logicalAndExpr)
+        ->
+        <concat> [ desugared-orExpr,
+        [ |[ writer.println("||"); ]| ],
+        desugared-logicalAndExpr ]
+        where <desugar-logicalorexpr> logicalOrExpr => desugared-orExpr
+        ; <desugar-logicalandexpr> logicalAndExpr => desugared-logicalAndExpr
+
+        desugar-logicalorexpr :
+        (logicalAndExpr)
+        ->
+        <desugar-logicalandexpr> logicalAndExpr
+
+        desugar-logicalandexpr :
+        LogicalAndExpr(logicalAndExpr, bitwiseOrExpr)
+        ->
+        <concat> [ desugared-andExpr,
+        [ |[ writer.println("&&"); ]| ],
+        desugared-bitwiseOrExpr ]
+        where <desugar-logicalandexpr> logicalAndExpr => desugared-andExpr
+        ; <desugar-bitwiseOrExpr> bitwiseOrExpr => desugared-bitwiseOrExpr
+
+        desugar-logicalandexpr :
+        (bitwiseOrExpr)
+        ->
+        <desugar-bitwiseOrExpr> bitwiseOrExpr
+
+        desugar-bitwiseOrExpr :
+        BitwiseOrExpr(bitwiseOrExpr, bitwiseXorExpr)
+        ->
+        <concat> [ desugared-bitwiseOrExpr,
+        [ |[ writer.println("|"); ]| ],
+        desugared-bitwiseXorExpr ]
+        where <desugar-bitwiseOrExpr> bitwiseOrExpr => desugared-bitwiseOrExpr
+        ; <desugar-bitwiseXorExpr> bitwiseXorExpr => desugared-bitwiseXorExpr
+
+        desugar-bitwiseOrExpr :
+        (bitwiseXorExpr)
+        ->
+        <desugar-bitwiseXorExpr> bitwiseXorExpr
+
+        desugar-bitwiseXorExpr :
+        BitwiseXorExpr(bitwiseXorExpr, bitwiseAndExpr)
+        ->
+        <concat> [ desugared-bitwiseXorExpr,
+        [ |[ writer.println("^"); ]| ],
+        desugared-bitwiseAndExpr ]
+        where <desugar-bitwiseXorExpr> bitwiseXorExpr => desugared-bitwiseXorExpr
+        ; <desugar-bitwiseAndExpr> bitwiseAndExpr => desugared-bitwiseAndExpr
+
+        desugar-bitwiseXorExpr :
+        (bitwiseAndExpr)
+        ->
+        <desugar-bitwiseAndExpr> bitwiseAndExpr 
+      
+        desugar-bitwiseAndExpr :
+        BitwiseAndExpr(bitwiseAndExpr, eqExpr)
+        ->
+        <concat> [ desugared-bitwiseAndExpr,
+        [ |[ writer.println("&"); ]| ],
+        desugared-eqExpr ]
+        where <desugar-bitwiseAndExpr> bitwiseAndExpr => desugared-bitwiseAndExpr
+        ; <desugar-eqExpr> eqExpr => desugared-eqExpr
+
+        desugar-bitwiseAndExpr :
+        (eqExpr)
+        ->
+        <desugar-eqExpr> eqExpr
+
+        desugar-eqExpr :
+        Equality1(eqExpr, relExpr)
+        ->
+        <concat> [ desugared-eqExpr,
+        [ |[ writer.println("=="); ]| ],
+        desugared-relExpr ]
+        where <desugar-eqExpr> eqExpr => desugared-eqExpr
+        ; <desugar-relExpr> relExpr => desugared-relExpr
+
+        desugar-eqExpr :
+        NotEquality1(eqExpr, relExpr)
+        ->
+        <concat> [ desugared-eqExpr,
+        [ |[ writer.println("!="); ]| ],
+        desugared-relExpr ]
+        where <desugar-eqExpr> eqExpr => desugared-eqExpr
+        ; <desugar-relExpr> relExpr => desugared-relExpr
+
+        desugar-eqExpr :
+        Equality2(eqExpr, relExpr)
+        ->
+        <concat> [ desugared-eqExpr,
+        [ |[ writer.println("==="); ]| ],
+        desugared-relExpr ]
+        where <desugar-eqExpr> eqExpr => desugared-eqExpr
+        ; <desugar-relExpr> relExpr => desugared-relExpr
+
+        desugar-eqExpr :
+        NotEquality2(eqExpr, relExpr)
+        ->
+        <concat> [ desugared-eqExpr,
+        [ |[ writer.println("!=="); ]| ],
+        desugared-relExpr ]
+        where <desugar-eqExpr> eqExpr => desugared-eqExpr
+        ; <desugar-relExpr> relExpr => desugared-relExpr
+
+        desugar-eqExpr :
+        (relExpr)
+        ->
+        <desugar-relExpr> relExpr
+
+        desugar-relExpr :
+        RelExprLT(relExpr, shiftExpr)
+        ->
+        <concat> [ desugared-relExpr,
+        [ |[ writer.println("<"); ]| ],
+        desugared-shiftExpr ]
+        where <desugar-relExpr> relExpr => desugared-relExpr
+        ; <desugar-shiftExpr> shiftExpr => desugared-shiftExpr
+
+        desugar-relExpr :
+        RelExprGT(relExpr, shiftExpr)
+        ->
+        <concat> [ desugared-relExpr,
+        [ |[ writer.println(">"); ]| ],
+        desugared-shiftExpr ]
+        where <desugar-relExpr> relExpr => desugared-relExpr
+        ; <desugar-shiftExpr> shiftExpr => desugared-shiftExpr
+
+        desugar-relExpr :
+        RelExprLEQ(relExpr, shiftExpr)
+        ->
+        <concat> [ desugared-relExpr,
+        [ |[ writer.println("<="); ]| ],
+        desugared-shiftExpr ]
+        where <desugar-relExpr> relExpr => desugared-relExpr
+        ; <desugar-shiftExpr> shiftExpr => desugared-shiftExpr
+
+        desugar-relExpr :
+        RelExprGEQ(relExpr, shiftExpr)
+        ->
+        <concat> [ desugared-relExpr,
+        [ |[ writer.println(">="); ]| ],
+        desugared-shiftExpr ]
+        where <desugar-relExpr> relExpr => desugared-relExpr
+        ; <desugar-shiftExpr> shiftExpr => desugared-shiftExpr
+
+        desugar-relExpr :
+        RelExprInstanceOf(relExpr, shiftExpr)
+        ->
+        <concat> [ desugared-relExpr,
+        [ |[ writer.println(" instanceof "); ]| ],
+        desugared-shiftExpr ]
+        where <desugar-relExpr> relExpr => desugared-relExpr
+        ; <desugar-shiftExpr> shiftExpr => desugared-shiftExpr
+
+        desugar-relExpr :
+        RelExprIn(relExpr, shiftExpr)
+        ->
+        <concat> [ desugared-relExpr,
+        [ |[ writer.println(" in "); ]| ],
+        desugared-shiftExpr ]
+        where <desugar-relExpr> relExpr => desugared-relExpr
+        ; <desugar-shiftExpr> shiftExpr => desugared-shiftExpr
+
+        desugar-relExpr :
+        (shiftExpr)
+        ->
+        <desugar-shiftExpr> shiftExpr
+
+        desugar-shiftExpr :
+        ShiftExprSL(shiftExpr, addExpr)
+        ->
+        <concat> [ desugared-shiftExpr,
+        [ |[ writer.println("<<"); ]| ],
+        desugared-addExpr ]
+        where <desugar-shiftExpr> shiftExpr => desugared-shiftExpr
+        ; <desugar-addExpr> addExpr => desugared-addExpr
+       
+        desugar-shiftExpr :
+        ShiftExprSR(shiftExpr, addExpr)
+        ->
+        <concat> [ desugared-shiftExpr,
+        [ |[ writer.println(">>"); ]| ],
+        desugared-addExpr ]
+        where <desugar-shiftExpr> shiftExpr => desugared-shiftExpr
+        ; <desugar-addExpr> addExpr => desugared-addExpr
+       
+        desugar-shiftExpr :
+        ShiftExprSRR(shiftExpr, addExpr)
+        ->
+        <concat> [ desugared-shiftExpr,
+        [ |[ writer.println(">>>"); ]| ],
+        desugared-addExpr ]
+        where <desugar-shiftExpr> shiftExpr => desugared-shiftExpr
+        ; <desugar-addExpr> addExpr => desugared-addExpr
+       
+        desugar-shiftExpr :
+        (addExpr)
+        ->
+        <desugar-addExpr> addExpr
+
+        desugar-addExpr :
+        (mulExpr)
+        ->
+        <desugar-mulExpr> mulExpr
+
+        desugar-mulExpr :
+        Plus(addExpr, mulExpr)
+        ->
+        <concat> [ desugared-addExpr,
+        [ |[ writer.println("+"); ]| ],
+        desugared-mulExpr ]
+        where <desugar-addExpr> addExpr => desugared-addExpr
+        ; <desugar-mulExpr> mulExpr => desugared-mulExpr
+
+         desugar-mulExpr :
+        Minus(addExpr, mulExpr)
+        ->
+        <concat> [ desugared-addExpr,
+        [ |[ writer.println("-"); ]| ],
+        desugared-mulExpr ]
+        where <desugar-addExpr> addExpr => desugared-addExpr
+        ; <desugar-mulExpr> mulExpr => desugared-mulExpr
+
+         desugar-mulExpr :
+        Mul(mulExpr, unaryExpr)
+        ->
+        <concat> [ desugared-mulExpr,
+        [ |[ writer.println("*"); ]| ],
+        desugared-unaryExpr ]
+        where <desugar-mulExpr> mulExpr => desugared-mulExpr
+        ; <desugar-unaryExpr> unaryExpr => desugared-unaryExpr
+
+        desugar-mulExpr :
+        Div(mulExpr, unaryExpr)
+        ->
+        <concat> [ desugared-mulExpr,
+        [ |[ writer.println("/"); ]| ],
+        desugared-unaryExpr ]
+        where <desugar-mulExpr> mulExpr => desugared-mulExpr
+        ; <desugar-unaryExpr> unaryExpr => desugared-unaryExpr
+
+        desugar-mulExpr :
+        Remainder(mulExpr, unaryExpr)
+        ->
+        <concat> [ desugared-mulExpr,
+        [ |[ writer.println("%"); ]| ],
+        desugared-unaryExpr ]
+        where <desugar-mulExpr> mulExpr => desugared-mulExpr
+        ; <desugar-unaryExpr> unaryExpr => desugared-unaryExpr
+
+        desugar-mulExpr :
+        (unaryExpr)
+        ->
+        <desugar-unaryExpr> unaryExpr
+
+        desugar-unaryExpr :
+        UnaryDelete(unaryExpr)
+        ->
+        <concat> [ [ |[ writer.println("delete "); ]| ],
+        desugared-unaryExpr ]
+        where <desugar-unaryExpr> unaryExpr => desugared-unaryExpr
+
+         desugar-unaryExpr :
+        UnaryVoid(unaryExpr)
+        ->
+        <concat> [ [ |[ writer.println("void "); ]| ],
+        desugared-unaryExpr ]
+        where <desugar-unaryExpr> unaryExpr => desugared-unaryExpr
+
+         desugar-unaryExpr :
+        UnaryTypeOf(unaryExpr)
+        ->
+        <concat> [ [ |[ writer.println("typeof "); ]| ],
+        desugared-unaryExpr ]
+        where <desugar-unaryExpr> unaryExpr => desugared-unaryExpr
+
+         desugar-unaryExpr :
+        UnaryInc(unaryExpr)
+        ->
+        <concat> [ [ |[ writer.println("++"); ]| ],
+        desugared-unaryExpr ]
+        where <desugar-unaryExpr> unaryExpr => desugared-unaryExpr
+
+         desugar-unaryExpr :
+        UnaryDecr(unaryExpr)
+        ->
+        <concat> [ [ |[ writer.println("--"); ]| ],
+        desugared-unaryExpr ]
+        where <desugar-unaryExpr> unaryExpr => desugared-unaryExpr
+
+         desugar-unaryExpr :
+        UnaryPlus(unaryExpr)
+        ->
+        <concat> [ [ |[ writer.println("+"); ]| ],
+        desugared-unaryExpr ]
+        where <desugar-unaryExpr> unaryExpr => desugared-unaryExpr
+
+        desugar-unaryExpr :
+        UnaryMinus(unaryExpr)
+        ->
+        <concat> [ [ |[ writer.println("-"); ]| ],
+        desugared-unaryExpr ]
+        where <desugar-unaryExpr> unaryExpr => desugared-unaryExpr
+
+         desugar-unaryExpr :
+        UnaryTilde(unaryExpr)
+        ->
+        <concat> [ [ |[ writer.println("~"); ]| ],
+        desugared-unaryExpr ]
+        where <desugar-unaryExpr> unaryExpr => desugared-unaryExpr
+
+         desugar-unaryExpr :
+        UnaryNot(unaryExpr)
+        ->
+        <concat> [ [ |[ writer.println("!"); ]| ],
+        desugared-unaryExpr ]
+        where <desugar-unaryExpr> unaryExpr => desugared-unaryExpr
+  
+        desugar-unaryExpr :
+        (postfixExpr)
+        ->
+        <desugar-postfixExpr> postfixExpr
+
+        desugar-postfixExpr :
+        PostfixInc(leftHandExpr)
+        ->
+        <concat> [ desugared-leftHandExpr,
+        [ |[ writer.println("++"); ]| ] ]
+        where <desugar-leftHandExpr> leftHandExpr => desugared-leftHandExpr
+
+        desugar-postfixExpr :
+        PostfixDecr(leftHandExpr)
+        ->
+        <concat> [ desugared-leftHandExpr,
+        [ |[ writer.println("--"); ]| ] ]
+        where <desugar-leftHandExpr> leftHandExpr => desugared-leftHandExpr
+
+        desugar-postfixExpr :
+        (leftHandExpr)
+        ->
+        <desugar-leftHandExpr> leftHandExpr
+
+        desugar-leftHandExpr :
+        MemberCall(memExpr, args)
+        ->
+        <concat> [ desugared-memExpr,
+        desugared-args ]
+        where <desugar-js-expression> memExpr => desugared-memExpr
+        ; <desugar-arguments> args => desugared-args          
+
+        desugar-leftHandExpr :
+        CallCall(callExpr, args)
+        ->
+        <concat> [ desugared-callExpr,
+        desugared-args ]
+        where <desugar-leftHandExpr> callExpr => desugared-callExpr
+        ; <desugar-arguments> args => desugared-args
+
+        desugar-leftHandExpr :
+        ExpCall(callExpr, expr)
+        ->
+        <concat> [ desugared-callExpr,
+        [ |[ writer.println("("); ]| ],
+        desugared-expr,
+        [ |[ writer.println(")"); ]| ] ]
+        where <desugar-leftHandExpr> callExpr => desugared-callExpr
+        ; <desugar-js-expression> expr => desugared-expr
+
+        desugar-leftHandExpr :
+        IDCall(callExpr, name)
+        ->
+        <concat> [ desugared-callExpr,
+        [ |[ writer.println("."); ]| ],
+        desugared-identifier ]
+        where <desugar-leftHandExpr> callExpr => desugared-callExpr
+        ; <java-lit> name => desugared-identifier
+
+        desugar-leftHandExpr :
+        NewExpr(newExpr)
+        ->
+        <concat> [ [ |[ writer.println("new "); ]| ],
+        desugared-newExpr ]
+        where <desugar-leftHandExpr> newExpr => desugared-newExpr
+
+        desugar-leftHandExpr :
+        (memberExpr) 
+        ->
+        <desugar-js-expression> memberExpr 
+
+         
+        
+        
+
+        
+}

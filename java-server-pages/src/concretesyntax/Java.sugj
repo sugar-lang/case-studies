@@ -39,12 +39,12 @@ public sugar Java {
    %% Variables for Expressions
    %%%
   variables
-    "java_" "e"    	[0-9\']*         	-> JavaExpr           {prefer}
-    "java_" "e_" 	[a-zA-Z0-9\']*     	-> JavaExpr           {prefer}
-    "java_" "e"    	[0-9\']* "*"     	-> {JavaVarInit ","}* {prefer}
-    "java_" "e_" 	[a-zA-Z0-9\']* "*" 	-> {JavaVarInit ","}* {prefer}
-    "java_" "e"    	[0-9\']* "*"     	-> {JavaExpr ","}*    {prefer}
-    "java_" "e_" 	[a-zA-Z0-9\']* "*" 	-> {JavaExpr ","}*    {prefer}
+    "java_" "e"    [0-9\']*         -> JavaExpr           {prefer}
+    "java_" "e_" [a-zA-Z0-9\']*     -> JavaExpr           {prefer}
+    "java_" "e"    [0-9\']* "*"     -> {JavaVarInit ","}* {prefer}
+    "java_" "e_" [a-zA-Z0-9\']* "*" -> {JavaVarInit ","}* {prefer}
+    "java_" "e"    [0-9\']* "*"     -> {JavaExpr ","}*    {prefer}
+    "java_" "e_" [a-zA-Z0-9\']* "*" -> {JavaExpr ","}*    {prefer}
 
   lexical syntax
     "java_" "e" [0-9\']*            -> JavaID {reject}
@@ -325,6 +325,7 @@ context-free syntax
     "java_method-dec"  "|[" JavaMethodDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
     "java"             "|[" JavaMethodDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
                        "|[" JavaMethodDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                       
    
   
   strategies
@@ -337,5 +338,6 @@ context-free syntax
     
     java-string-expr-meta : FromMetaExpr(e) -> e
     java-string-expr-plain : s -> Lit(String([Chars(s)]))
+    
   
 }

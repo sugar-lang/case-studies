@@ -1,0 +1,25 @@
+package test;
+
+import jsp.Syntax;
+import jsp.Desugar;
+
+import jsp.Editor;
+import html.Editor;
+
+public jsp SkriptletDocument {
+	<%! private boolean foo = true;	%>
+	<html>
+		<head>
+			<title>Skriptlet Document</title>
+		</head>
+		<body>
+			<%
+				if(foo) { %> bar <% }
+				else {
+					int foobar = 42;
+					%> <%= foobar %> <%
+				}
+			%>
+		</body>
+	</html>
+}

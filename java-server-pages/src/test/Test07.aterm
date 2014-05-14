@@ -1,0 +1,1122 @@
+CompilationUnit(
+  [ PackageDec([], PackageName([Id("test")]))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("javascript")), Id("HtmlWithJavaScript")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Syntax")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("javascript")), Id("Desugar")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Desugar")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("javascript")), Id("Editor")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Editor")))
+  , JSPDec(
+      [Public()]
+    , Id("Test07")
+    , JSPBody(
+        JSPDoc(
+          [ HtmlContent(
+              Element(
+                ElemName("html")
+              , []
+              , [ Element(
+                    ElemName("head")
+                  , []
+                  , [ JavaScript(
+                        amb(
+                          [ Some(
+                              Program(
+                                amb(
+                                  [ amb(
+                                      [ amb(
+                                          [ amb(
+                                              [ [ FunctionDec("testFunction", [], [EmptyStm()])
+                                                , FunctionDec("testFunction_params", ["v1", "v2", "v3"], [EmptyStm()])
+                                                , FunctionDec(
+                                                    "testLiterals"
+                                                  , []
+                                                  , [ ExprStm(
+                                                        MemberCall(
+                                                          PrimaryExpr(Id("alert"))
+                                                        , Arguments([PrimaryExpr(Literal(String("\"Hello, world!\"")))])
+                                                        )
+                                                      )
+                                                    , ExprStm(
+                                                        MemberCall(
+                                                          PrimaryExpr(Id("alert"))
+                                                        , Arguments([PrimaryExpr(Literal(Null("null")))])
+                                                        )
+                                                      )
+                                                    , ExprStm(
+                                                        MemberCall(
+                                                          PrimaryExpr(Id("alert"))
+                                                        , Arguments([PrimaryExpr(Literal(Num(Decimal("42"))))])
+                                                        )
+                                                      )
+                                                    , ExprStm(
+                                                        MemberCall(
+                                                          PrimaryExpr(Id("alert"))
+                                                        , Arguments([PrimaryExpr(Literal(Bool("true")))])
+                                                        )
+                                                      )
+                                                    , ExprStm(
+                                                        MemberCall(
+                                                          PrimaryExpr(Id("alert"))
+                                                        , Arguments([PrimaryExpr(Literal(Bool("false")))])
+                                                        )
+                                                      )
+                                                    , ExprStm(
+                                                        MemberCall(
+                                                          PrimaryExpr(Id("alert"))
+                                                        , Arguments([PrimaryExpr(Literal(Num(HexInt("0xC5"))))])
+                                                        )
+                                                      )
+                                                    ]
+                                                  )
+                                                , FunctionDec(
+                                                    "testAssignment"
+                                                  , []
+                                                  , [ VarStm(
+                                                        [VarDec("v1", Some(Init(PrimaryExpr(Literal(String("\"Hello, world!\""))))))]
+                                                      )
+                                                    , VarStm(
+                                                        [VarDec(
+                                                           "v2"
+                                                         , Some(Init(PrimaryExpr(Literal(Num(Decimal("42"))))))
+                                                         )]
+                                                      )
+                                                    , VarStm(
+                                                        [VarDec("v3", Some(Init(NewExpr(PrimaryExpr(Id("Array()"))))))]
+                                                      )
+                                                    , ExprStm(
+                                                        Assignment(
+                                                          MemberExprExpr(
+                                                            PrimaryExpr(Id("v3"))
+                                                          , PrimaryExpr(Literal(Num(Decimal("0"))))
+                                                          )
+                                                        , PrimaryExpr(Id("v1"))
+                                                        )
+                                                      )
+                                                    , VarStm(
+                                                        [ VarDec(
+                                                            "v4"
+                                                          , Some(Init(PrimaryExpr(Literal(Num(Decimal("3"))))))
+                                                          )
+                                                        , VarDec(
+                                                            "v5"
+                                                          , Some(Init(PrimaryExpr(Literal(Num(Decimal("4"))))))
+                                                          )
+                                                        ]
+                                                      )
+                                                    , VarStm(
+                                                        [VarDec("v6", Some(Init(PrimaryExpr(ObjectLiteral(ObjectLiteral([]))))))]
+                                                      )
+                                                    ]
+                                                  )
+                                                , FunctionDec(
+                                                    "testForLoop"
+                                                  , []
+                                                  , [ ForStm(
+                                                        ForVarDec(
+                                                          [VarDec(
+                                                             "i"
+                                                           , Some(Init(PrimaryExpr(Literal(Num(Decimal("0"))))))
+                                                           )]
+                                                        )
+                                                      , RelExprLT(
+                                                          PrimaryExpr(Id("i"))
+                                                        , PrimaryExpr(Literal(Num(Decimal("3"))))
+                                                        )
+                                                      , PostfixInc(PrimaryExpr(Id("i")))
+                                                      , Block(
+                                                          Some(
+                                                            StmList(
+                                                              []
+                                                            , ExprStm(
+                                                                MemberCall(
+                                                                  PrimaryExpr(Id("alert"))
+                                                                , Arguments([PrimaryExpr(Id("i"))])
+                                                                )
+                                                              )
+                                                            , Some([])
+                                                            )
+                                                          )
+                                                        )
+                                                      )
+                                                    ]
+                                                  )
+                                                , ExprStm(HtmlText(Text([CharDataPart("function testDoLoop(){\n\t\t\t\t\tdo{ alert(\"doLoop\");\n\t\t\t\t\t}while(false)\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tfunction testWhileLoop(){\n\t\t\t\t\twhile(true){\n\t\t\t\t\t\talert(\"whileLoop\");\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tfunction testTryCatch(){\n\t\t\t\t\ttry { alert(\"trycatch\"); \n\t\t\t\t\t} catch(error){\n\t\t\t\t\t\t\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tfunction testTryFinally(){\n\t\t\t\t\ttry{ alert(\"tryfinally\"); }\n\t\t\t\t\tfinally { }\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tfunction testTryCatchFinally(){\n\t\t\t\t\ttry{ alert(\"trycatchfinally\"); }\n\t\t\t\t\tcatch(error) { }\n\t\t\t\t\tfinally { }\n\t\t\t\t} \n\t\t\t")])))
+                                                ]
+                                              , [ FunctionDec("testFunction", [], [EmptyStm()])
+                                                , FunctionDec("testFunction_params", ["v1", "v2", "v3"], [EmptyStm()])
+                                                , FunctionDec(
+                                                    "testLiterals"
+                                                  , []
+                                                  , [ ExprStm(
+                                                        MemberCall(
+                                                          PrimaryExpr(Id("alert"))
+                                                        , Arguments([PrimaryExpr(Literal(String("\"Hello, world!\"")))])
+                                                        )
+                                                      )
+                                                    , ExprStm(
+                                                        MemberCall(
+                                                          PrimaryExpr(Id("alert"))
+                                                        , Arguments([PrimaryExpr(Literal(Null("null")))])
+                                                        )
+                                                      )
+                                                    , ExprStm(
+                                                        MemberCall(
+                                                          PrimaryExpr(Id("alert"))
+                                                        , Arguments([PrimaryExpr(Literal(Num(Decimal("42"))))])
+                                                        )
+                                                      )
+                                                    , ExprStm(
+                                                        MemberCall(
+                                                          PrimaryExpr(Id("alert"))
+                                                        , Arguments([PrimaryExpr(Literal(Bool("true")))])
+                                                        )
+                                                      )
+                                                    , ExprStm(
+                                                        MemberCall(
+                                                          PrimaryExpr(Id("alert"))
+                                                        , Arguments([PrimaryExpr(Literal(Bool("false")))])
+                                                        )
+                                                      )
+                                                    , ExprStm(
+                                                        MemberCall(
+                                                          PrimaryExpr(Id("alert"))
+                                                        , Arguments([PrimaryExpr(Literal(Num(HexInt("0xC5"))))])
+                                                        )
+                                                      )
+                                                    ]
+                                                  )
+                                                , FunctionDec(
+                                                    "testAssignment"
+                                                  , []
+                                                  , [ VarStm(
+                                                        [VarDec("v1", Some(Init(PrimaryExpr(Literal(String("\"Hello, world!\""))))))]
+                                                      )
+                                                    , VarStm(
+                                                        [VarDec(
+                                                           "v2"
+                                                         , Some(Init(PrimaryExpr(Literal(Num(Decimal("42"))))))
+                                                         )]
+                                                      )
+                                                    , VarStm(
+                                                        [VarDec("v3", Some(Init(NewExpr(PrimaryExpr(Id("Array()"))))))]
+                                                      )
+                                                    , ExprStm(
+                                                        Assignment(
+                                                          MemberExprExpr(
+                                                            PrimaryExpr(Id("v3"))
+                                                          , PrimaryExpr(Literal(Num(Decimal("0"))))
+                                                          )
+                                                        , PrimaryExpr(Id("v1"))
+                                                        )
+                                                      )
+                                                    , VarStm(
+                                                        [ VarDec(
+                                                            "v4"
+                                                          , Some(Init(PrimaryExpr(Literal(Num(Decimal("3"))))))
+                                                          )
+                                                        , VarDec(
+                                                            "v5"
+                                                          , Some(Init(PrimaryExpr(Literal(Num(Decimal("4"))))))
+                                                          )
+                                                        ]
+                                                      )
+                                                    , VarStm(
+                                                        [VarDec("v6", Some(Init(PrimaryExpr(ObjectLiteral(ObjectLiteral([]))))))]
+                                                      )
+                                                    ]
+                                                  )
+                                                , FunctionDec(
+                                                    "testForLoop"
+                                                  , []
+                                                  , [ ForStm(
+                                                        ForVarDec(
+                                                          [VarDec(
+                                                             "i"
+                                                           , Some(Init(PrimaryExpr(Literal(Num(Decimal("0"))))))
+                                                           )]
+                                                        )
+                                                      , RelExprLT(
+                                                          PrimaryExpr(Id("i"))
+                                                        , PrimaryExpr(Literal(Num(Decimal("3"))))
+                                                        )
+                                                      , PostfixInc(PrimaryExpr(Id("i")))
+                                                      , Block(
+                                                          Some(
+                                                            StmList(
+                                                              []
+                                                            , ExprStm(
+                                                                MemberCall(
+                                                                  PrimaryExpr(Id("alert"))
+                                                                , Arguments([PrimaryExpr(Id("i"))])
+                                                                )
+                                                              )
+                                                            , Some([])
+                                                            )
+                                                          )
+                                                        )
+                                                      )
+                                                    ]
+                                                  )
+                                                , FunctionDec(
+                                                    "testDoLoop"
+                                                  , []
+                                                  , [ DoStm(
+                                                        DoStm(
+                                                          Block(
+                                                            Some(
+                                                              StmList(
+                                                                []
+                                                              , ExprStm(
+                                                                  MemberCall(
+                                                                    PrimaryExpr(Id("alert"))
+                                                                  , Arguments([PrimaryExpr(Literal(String("\"doLoop\"")))])
+                                                                  )
+                                                                )
+                                                              , Some([])
+                                                              )
+                                                            )
+                                                          )
+                                                        , PrimaryExpr(Literal(Bool("false")))
+                                                        )
+                                                      )
+                                                    ]
+                                                  )
+                                                , ExprStm(HtmlText(Text([CharDataPart("function testWhileLoop(){\n\t\t\t\t\twhile(true){\n\t\t\t\t\t\talert(\"whileLoop\");\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tfunction testTryCatch(){\n\t\t\t\t\ttry { alert(\"trycatch\"); \n\t\t\t\t\t} catch(error){\n\t\t\t\t\t\t\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tfunction testTryFinally(){\n\t\t\t\t\ttry{ alert(\"tryfinally\"); }\n\t\t\t\t\tfinally { }\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tfunction testTryCatchFinally(){\n\t\t\t\t\ttry{ alert(\"trycatchfinally\"); }\n\t\t\t\t\tcatch(error) { }\n\t\t\t\t\tfinally { }\n\t\t\t\t} \n\t\t\t")])))
+                                                ]
+                                              ]
+                                            )
+                                          , [ FunctionDec("testFunction", [], [EmptyStm()])
+                                            , FunctionDec("testFunction_params", ["v1", "v2", "v3"], [EmptyStm()])
+                                            , FunctionDec(
+                                                "testLiterals"
+                                              , []
+                                              , [ ExprStm(
+                                                    MemberCall(
+                                                      PrimaryExpr(Id("alert"))
+                                                    , Arguments([PrimaryExpr(Literal(String("\"Hello, world!\"")))])
+                                                    )
+                                                  )
+                                                , ExprStm(
+                                                    MemberCall(
+                                                      PrimaryExpr(Id("alert"))
+                                                    , Arguments([PrimaryExpr(Literal(Null("null")))])
+                                                    )
+                                                  )
+                                                , ExprStm(
+                                                    MemberCall(
+                                                      PrimaryExpr(Id("alert"))
+                                                    , Arguments([PrimaryExpr(Literal(Num(Decimal("42"))))])
+                                                    )
+                                                  )
+                                                , ExprStm(
+                                                    MemberCall(
+                                                      PrimaryExpr(Id("alert"))
+                                                    , Arguments([PrimaryExpr(Literal(Bool("true")))])
+                                                    )
+                                                  )
+                                                , ExprStm(
+                                                    MemberCall(
+                                                      PrimaryExpr(Id("alert"))
+                                                    , Arguments([PrimaryExpr(Literal(Bool("false")))])
+                                                    )
+                                                  )
+                                                , ExprStm(
+                                                    MemberCall(
+                                                      PrimaryExpr(Id("alert"))
+                                                    , Arguments([PrimaryExpr(Literal(Num(HexInt("0xC5"))))])
+                                                    )
+                                                  )
+                                                ]
+                                              )
+                                            , FunctionDec(
+                                                "testAssignment"
+                                              , []
+                                              , [ VarStm(
+                                                    [VarDec("v1", Some(Init(PrimaryExpr(Literal(String("\"Hello, world!\""))))))]
+                                                  )
+                                                , VarStm(
+                                                    [VarDec(
+                                                       "v2"
+                                                     , Some(Init(PrimaryExpr(Literal(Num(Decimal("42"))))))
+                                                     )]
+                                                  )
+                                                , VarStm(
+                                                    [VarDec("v3", Some(Init(NewExpr(PrimaryExpr(Id("Array()"))))))]
+                                                  )
+                                                , ExprStm(
+                                                    Assignment(
+                                                      MemberExprExpr(
+                                                        PrimaryExpr(Id("v3"))
+                                                      , PrimaryExpr(Literal(Num(Decimal("0"))))
+                                                      )
+                                                    , PrimaryExpr(Id("v1"))
+                                                    )
+                                                  )
+                                                , VarStm(
+                                                    [ VarDec(
+                                                        "v4"
+                                                      , Some(Init(PrimaryExpr(Literal(Num(Decimal("3"))))))
+                                                      )
+                                                    , VarDec(
+                                                        "v5"
+                                                      , Some(Init(PrimaryExpr(Literal(Num(Decimal("4"))))))
+                                                      )
+                                                    ]
+                                                  )
+                                                , VarStm(
+                                                    [VarDec("v6", Some(Init(PrimaryExpr(ObjectLiteral(ObjectLiteral([]))))))]
+                                                  )
+                                                ]
+                                              )
+                                            , FunctionDec(
+                                                "testForLoop"
+                                              , []
+                                              , [ ForStm(
+                                                    ForVarDec(
+                                                      [VarDec(
+                                                         "i"
+                                                       , Some(Init(PrimaryExpr(Literal(Num(Decimal("0"))))))
+                                                       )]
+                                                    )
+                                                  , RelExprLT(
+                                                      PrimaryExpr(Id("i"))
+                                                    , PrimaryExpr(Literal(Num(Decimal("3"))))
+                                                    )
+                                                  , PostfixInc(PrimaryExpr(Id("i")))
+                                                  , Block(
+                                                      Some(
+                                                        StmList(
+                                                          []
+                                                        , ExprStm(
+                                                            MemberCall(
+                                                              PrimaryExpr(Id("alert"))
+                                                            , Arguments([PrimaryExpr(Id("i"))])
+                                                            )
+                                                          )
+                                                        , Some([])
+                                                        )
+                                                      )
+                                                    )
+                                                  )
+                                                ]
+                                              )
+                                            , FunctionDec(
+                                                "testDoLoop"
+                                              , []
+                                              , [ DoStm(
+                                                    DoStm(
+                                                      Block(
+                                                        Some(
+                                                          StmList(
+                                                            []
+                                                          , ExprStm(
+                                                              MemberCall(
+                                                                PrimaryExpr(Id("alert"))
+                                                              , Arguments([PrimaryExpr(Literal(String("\"doLoop\"")))])
+                                                              )
+                                                            )
+                                                          , Some([])
+                                                          )
+                                                        )
+                                                      )
+                                                    , PrimaryExpr(Literal(Bool("false")))
+                                                    )
+                                                  )
+                                                ]
+                                              )
+                                            , FunctionDec(
+                                                "testWhileLoop"
+                                              , []
+                                              , [ WhileStm(
+                                                    PrimaryExpr(Literal(Bool("true")))
+                                                  , Block(
+                                                      Some(
+                                                        StmList(
+                                                          []
+                                                        , ExprStm(
+                                                            MemberCall(
+                                                              PrimaryExpr(Id("alert"))
+                                                            , Arguments([PrimaryExpr(Literal(String("\"whileLoop\"")))])
+                                                            )
+                                                          )
+                                                        , Some([])
+                                                        )
+                                                      )
+                                                    )
+                                                  )
+                                                ]
+                                              )
+                                            , ExprStm(HtmlText(Text([CharDataPart("function testTryCatch(){\n\t\t\t\t\ttry { alert(\"trycatch\"); \n\t\t\t\t\t} catch(error){\n\t\t\t\t\t\t\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tfunction testTryFinally(){\n\t\t\t\t\ttry{ alert(\"tryfinally\"); }\n\t\t\t\t\tfinally { }\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tfunction testTryCatchFinally(){\n\t\t\t\t\ttry{ alert(\"trycatchfinally\"); }\n\t\t\t\t\tcatch(error) { }\n\t\t\t\t\tfinally { }\n\t\t\t\t} \n\t\t\t")])))
+                                            ]
+                                          ]
+                                        )
+                                      , [ FunctionDec("testFunction", [], [EmptyStm()])
+                                        , FunctionDec("testFunction_params", ["v1", "v2", "v3"], [EmptyStm()])
+                                        , FunctionDec(
+                                            "testLiterals"
+                                          , []
+                                          , [ ExprStm(
+                                                MemberCall(
+                                                  PrimaryExpr(Id("alert"))
+                                                , Arguments([PrimaryExpr(Literal(String("\"Hello, world!\"")))])
+                                                )
+                                              )
+                                            , ExprStm(
+                                                MemberCall(
+                                                  PrimaryExpr(Id("alert"))
+                                                , Arguments([PrimaryExpr(Literal(Null("null")))])
+                                                )
+                                              )
+                                            , ExprStm(
+                                                MemberCall(
+                                                  PrimaryExpr(Id("alert"))
+                                                , Arguments([PrimaryExpr(Literal(Num(Decimal("42"))))])
+                                                )
+                                              )
+                                            , ExprStm(
+                                                MemberCall(
+                                                  PrimaryExpr(Id("alert"))
+                                                , Arguments([PrimaryExpr(Literal(Bool("true")))])
+                                                )
+                                              )
+                                            , ExprStm(
+                                                MemberCall(
+                                                  PrimaryExpr(Id("alert"))
+                                                , Arguments([PrimaryExpr(Literal(Bool("false")))])
+                                                )
+                                              )
+                                            , ExprStm(
+                                                MemberCall(
+                                                  PrimaryExpr(Id("alert"))
+                                                , Arguments([PrimaryExpr(Literal(Num(HexInt("0xC5"))))])
+                                                )
+                                              )
+                                            ]
+                                          )
+                                        , FunctionDec(
+                                            "testAssignment"
+                                          , []
+                                          , [ VarStm(
+                                                [VarDec("v1", Some(Init(PrimaryExpr(Literal(String("\"Hello, world!\""))))))]
+                                              )
+                                            , VarStm(
+                                                [VarDec(
+                                                   "v2"
+                                                 , Some(Init(PrimaryExpr(Literal(Num(Decimal("42"))))))
+                                                 )]
+                                              )
+                                            , VarStm(
+                                                [VarDec("v3", Some(Init(NewExpr(PrimaryExpr(Id("Array()"))))))]
+                                              )
+                                            , ExprStm(
+                                                Assignment(
+                                                  MemberExprExpr(
+                                                    PrimaryExpr(Id("v3"))
+                                                  , PrimaryExpr(Literal(Num(Decimal("0"))))
+                                                  )
+                                                , PrimaryExpr(Id("v1"))
+                                                )
+                                              )
+                                            , VarStm(
+                                                [ VarDec(
+                                                    "v4"
+                                                  , Some(Init(PrimaryExpr(Literal(Num(Decimal("3"))))))
+                                                  )
+                                                , VarDec(
+                                                    "v5"
+                                                  , Some(Init(PrimaryExpr(Literal(Num(Decimal("4"))))))
+                                                  )
+                                                ]
+                                              )
+                                            , VarStm(
+                                                [VarDec("v6", Some(Init(PrimaryExpr(ObjectLiteral(ObjectLiteral([]))))))]
+                                              )
+                                            ]
+                                          )
+                                        , FunctionDec(
+                                            "testForLoop"
+                                          , []
+                                          , [ ForStm(
+                                                ForVarDec(
+                                                  [VarDec(
+                                                     "i"
+                                                   , Some(Init(PrimaryExpr(Literal(Num(Decimal("0"))))))
+                                                   )]
+                                                )
+                                              , RelExprLT(
+                                                  PrimaryExpr(Id("i"))
+                                                , PrimaryExpr(Literal(Num(Decimal("3"))))
+                                                )
+                                              , PostfixInc(PrimaryExpr(Id("i")))
+                                              , Block(
+                                                  Some(
+                                                    StmList(
+                                                      []
+                                                    , ExprStm(
+                                                        MemberCall(
+                                                          PrimaryExpr(Id("alert"))
+                                                        , Arguments([PrimaryExpr(Id("i"))])
+                                                        )
+                                                      )
+                                                    , Some([])
+                                                    )
+                                                  )
+                                                )
+                                              )
+                                            ]
+                                          )
+                                        , FunctionDec(
+                                            "testDoLoop"
+                                          , []
+                                          , [ DoStm(
+                                                DoStm(
+                                                  Block(
+                                                    Some(
+                                                      StmList(
+                                                        []
+                                                      , ExprStm(
+                                                          MemberCall(
+                                                            PrimaryExpr(Id("alert"))
+                                                          , Arguments([PrimaryExpr(Literal(String("\"doLoop\"")))])
+                                                          )
+                                                        )
+                                                      , Some([])
+                                                      )
+                                                    )
+                                                  )
+                                                , PrimaryExpr(Literal(Bool("false")))
+                                                )
+                                              )
+                                            ]
+                                          )
+                                        , FunctionDec(
+                                            "testWhileLoop"
+                                          , []
+                                          , [ WhileStm(
+                                                PrimaryExpr(Literal(Bool("true")))
+                                              , Block(
+                                                  Some(
+                                                    StmList(
+                                                      []
+                                                    , ExprStm(
+                                                        MemberCall(
+                                                          PrimaryExpr(Id("alert"))
+                                                        , Arguments([PrimaryExpr(Literal(String("\"whileLoop\"")))])
+                                                        )
+                                                      )
+                                                    , Some([])
+                                                    )
+                                                  )
+                                                )
+                                              )
+                                            ]
+                                          )
+                                        , FunctionDec(
+                                            "testTryCatch"
+                                          , []
+                                          , [ TryCatch(
+                                                Block(
+                                                  Some(
+                                                    StmList(
+                                                      []
+                                                    , ExprStm(
+                                                        MemberCall(
+                                                          PrimaryExpr(Id("alert"))
+                                                        , Arguments([PrimaryExpr(Literal(String("\"trycatch\"")))])
+                                                        )
+                                                      )
+                                                    , Some([])
+                                                    )
+                                                  )
+                                                )
+                                              , Catch("error", Block(None()))
+                                              )
+                                            ]
+                                          )
+                                        , ExprStm(HtmlText(Text([CharDataPart("function testTryFinally(){\n\t\t\t\t\ttry{ alert(\"tryfinally\"); }\n\t\t\t\t\tfinally { }\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tfunction testTryCatchFinally(){\n\t\t\t\t\ttry{ alert(\"trycatchfinally\"); }\n\t\t\t\t\tcatch(error) { }\n\t\t\t\t\tfinally { }\n\t\t\t\t} \n\t\t\t")])))
+                                        ]
+                                      ]
+                                    )
+                                  , [ FunctionDec("testFunction", [], [EmptyStm()])
+                                    , FunctionDec("testFunction_params", ["v1", "v2", "v3"], [EmptyStm()])
+                                    , FunctionDec(
+                                        "testLiterals"
+                                      , []
+                                      , [ ExprStm(
+                                            MemberCall(
+                                              PrimaryExpr(Id("alert"))
+                                            , Arguments([PrimaryExpr(Literal(String("\"Hello, world!\"")))])
+                                            )
+                                          )
+                                        , ExprStm(
+                                            MemberCall(
+                                              PrimaryExpr(Id("alert"))
+                                            , Arguments([PrimaryExpr(Literal(Null("null")))])
+                                            )
+                                          )
+                                        , ExprStm(
+                                            MemberCall(
+                                              PrimaryExpr(Id("alert"))
+                                            , Arguments([PrimaryExpr(Literal(Num(Decimal("42"))))])
+                                            )
+                                          )
+                                        , ExprStm(
+                                            MemberCall(
+                                              PrimaryExpr(Id("alert"))
+                                            , Arguments([PrimaryExpr(Literal(Bool("true")))])
+                                            )
+                                          )
+                                        , ExprStm(
+                                            MemberCall(
+                                              PrimaryExpr(Id("alert"))
+                                            , Arguments([PrimaryExpr(Literal(Bool("false")))])
+                                            )
+                                          )
+                                        , ExprStm(
+                                            MemberCall(
+                                              PrimaryExpr(Id("alert"))
+                                            , Arguments([PrimaryExpr(Literal(Num(HexInt("0xC5"))))])
+                                            )
+                                          )
+                                        ]
+                                      )
+                                    , FunctionDec(
+                                        "testAssignment"
+                                      , []
+                                      , [ VarStm(
+                                            [VarDec("v1", Some(Init(PrimaryExpr(Literal(String("\"Hello, world!\""))))))]
+                                          )
+                                        , VarStm(
+                                            [VarDec(
+                                               "v2"
+                                             , Some(Init(PrimaryExpr(Literal(Num(Decimal("42"))))))
+                                             )]
+                                          )
+                                        , VarStm(
+                                            [VarDec("v3", Some(Init(NewExpr(PrimaryExpr(Id("Array()"))))))]
+                                          )
+                                        , ExprStm(
+                                            Assignment(
+                                              MemberExprExpr(
+                                                PrimaryExpr(Id("v3"))
+                                              , PrimaryExpr(Literal(Num(Decimal("0"))))
+                                              )
+                                            , PrimaryExpr(Id("v1"))
+                                            )
+                                          )
+                                        , VarStm(
+                                            [ VarDec(
+                                                "v4"
+                                              , Some(Init(PrimaryExpr(Literal(Num(Decimal("3"))))))
+                                              )
+                                            , VarDec(
+                                                "v5"
+                                              , Some(Init(PrimaryExpr(Literal(Num(Decimal("4"))))))
+                                              )
+                                            ]
+                                          )
+                                        , VarStm(
+                                            [VarDec("v6", Some(Init(PrimaryExpr(ObjectLiteral(ObjectLiteral([]))))))]
+                                          )
+                                        ]
+                                      )
+                                    , FunctionDec(
+                                        "testForLoop"
+                                      , []
+                                      , [ ForStm(
+                                            ForVarDec(
+                                              [VarDec(
+                                                 "i"
+                                               , Some(Init(PrimaryExpr(Literal(Num(Decimal("0"))))))
+                                               )]
+                                            )
+                                          , RelExprLT(
+                                              PrimaryExpr(Id("i"))
+                                            , PrimaryExpr(Literal(Num(Decimal("3"))))
+                                            )
+                                          , PostfixInc(PrimaryExpr(Id("i")))
+                                          , Block(
+                                              Some(
+                                                StmList(
+                                                  []
+                                                , ExprStm(
+                                                    MemberCall(
+                                                      PrimaryExpr(Id("alert"))
+                                                    , Arguments([PrimaryExpr(Id("i"))])
+                                                    )
+                                                  )
+                                                , Some([])
+                                                )
+                                              )
+                                            )
+                                          )
+                                        ]
+                                      )
+                                    , FunctionDec(
+                                        "testDoLoop"
+                                      , []
+                                      , [ DoStm(
+                                            DoStm(
+                                              Block(
+                                                Some(
+                                                  StmList(
+                                                    []
+                                                  , ExprStm(
+                                                      MemberCall(
+                                                        PrimaryExpr(Id("alert"))
+                                                      , Arguments([PrimaryExpr(Literal(String("\"doLoop\"")))])
+                                                      )
+                                                    )
+                                                  , Some([])
+                                                  )
+                                                )
+                                              )
+                                            , PrimaryExpr(Literal(Bool("false")))
+                                            )
+                                          )
+                                        ]
+                                      )
+                                    , FunctionDec(
+                                        "testWhileLoop"
+                                      , []
+                                      , [ WhileStm(
+                                            PrimaryExpr(Literal(Bool("true")))
+                                          , Block(
+                                              Some(
+                                                StmList(
+                                                  []
+                                                , ExprStm(
+                                                    MemberCall(
+                                                      PrimaryExpr(Id("alert"))
+                                                    , Arguments([PrimaryExpr(Literal(String("\"whileLoop\"")))])
+                                                    )
+                                                  )
+                                                , Some([])
+                                                )
+                                              )
+                                            )
+                                          )
+                                        ]
+                                      )
+                                    , FunctionDec(
+                                        "testTryCatch"
+                                      , []
+                                      , [ TryCatch(
+                                            Block(
+                                              Some(
+                                                StmList(
+                                                  []
+                                                , ExprStm(
+                                                    MemberCall(
+                                                      PrimaryExpr(Id("alert"))
+                                                    , Arguments([PrimaryExpr(Literal(String("\"trycatch\"")))])
+                                                    )
+                                                  )
+                                                , Some([])
+                                                )
+                                              )
+                                            )
+                                          , Catch("error", Block(None()))
+                                          )
+                                        ]
+                                      )
+                                    , FunctionDec(
+                                        "testTryFinally"
+                                      , []
+                                      , [ TryFinally(
+                                            Block(
+                                              Some(
+                                                StmList(
+                                                  []
+                                                , ExprStm(
+                                                    MemberCall(
+                                                      PrimaryExpr(Id("alert"))
+                                                    , Arguments([PrimaryExpr(Literal(String("\"tryfinally\"")))])
+                                                    )
+                                                  )
+                                                , Some([])
+                                                )
+                                              )
+                                            )
+                                          , Finally(Block(None()))
+                                          )
+                                        ]
+                                      )
+                                    , ExprStm(HtmlText(Text([CharDataPart("function testTryCatchFinally(){\n\t\t\t\t\ttry{ alert(\"trycatchfinally\"); }\n\t\t\t\t\tcatch(error) { }\n\t\t\t\t\tfinally { }\n\t\t\t\t} \n\t\t\t")])))
+                                    ]
+                                  ]
+                                )
+                              )
+                            )
+                          , Some(
+                              Program(
+                                [ FunctionDec("testFunction", [], [EmptyStm()])
+                                , FunctionDec("testFunction_params", ["v1", "v2", "v3"], [EmptyStm()])
+                                , FunctionDec(
+                                    "testLiterals"
+                                  , []
+                                  , [ ExprStm(
+                                        MemberCall(
+                                          PrimaryExpr(Id("alert"))
+                                        , Arguments([PrimaryExpr(Literal(String("\"Hello, world!\"")))])
+                                        )
+                                      )
+                                    , ExprStm(
+                                        MemberCall(
+                                          PrimaryExpr(Id("alert"))
+                                        , Arguments([PrimaryExpr(Literal(Null("null")))])
+                                        )
+                                      )
+                                    , ExprStm(
+                                        MemberCall(
+                                          PrimaryExpr(Id("alert"))
+                                        , Arguments([PrimaryExpr(Literal(Num(Decimal("42"))))])
+                                        )
+                                      )
+                                    , ExprStm(
+                                        MemberCall(
+                                          PrimaryExpr(Id("alert"))
+                                        , Arguments([PrimaryExpr(Literal(Bool("true")))])
+                                        )
+                                      )
+                                    , ExprStm(
+                                        MemberCall(
+                                          PrimaryExpr(Id("alert"))
+                                        , Arguments([PrimaryExpr(Literal(Bool("false")))])
+                                        )
+                                      )
+                                    , ExprStm(
+                                        MemberCall(
+                                          PrimaryExpr(Id("alert"))
+                                        , Arguments([PrimaryExpr(Literal(Num(HexInt("0xC5"))))])
+                                        )
+                                      )
+                                    ]
+                                  )
+                                , FunctionDec(
+                                    "testAssignment"
+                                  , []
+                                  , [ VarStm(
+                                        [VarDec("v1", Some(Init(PrimaryExpr(Literal(String("\"Hello, world!\""))))))]
+                                      )
+                                    , VarStm(
+                                        [VarDec(
+                                           "v2"
+                                         , Some(Init(PrimaryExpr(Literal(Num(Decimal("42"))))))
+                                         )]
+                                      )
+                                    , VarStm(
+                                        [VarDec("v3", Some(Init(NewExpr(PrimaryExpr(Id("Array()"))))))]
+                                      )
+                                    , ExprStm(
+                                        Assignment(
+                                          MemberExprExpr(
+                                            PrimaryExpr(Id("v3"))
+                                          , PrimaryExpr(Literal(Num(Decimal("0"))))
+                                          )
+                                        , PrimaryExpr(Id("v1"))
+                                        )
+                                      )
+                                    , VarStm(
+                                        [ VarDec(
+                                            "v4"
+                                          , Some(Init(PrimaryExpr(Literal(Num(Decimal("3"))))))
+                                          )
+                                        , VarDec(
+                                            "v5"
+                                          , Some(Init(PrimaryExpr(Literal(Num(Decimal("4"))))))
+                                          )
+                                        ]
+                                      )
+                                    , VarStm(
+                                        [VarDec("v6", Some(Init(PrimaryExpr(ObjectLiteral(ObjectLiteral([]))))))]
+                                      )
+                                    ]
+                                  )
+                                , FunctionDec(
+                                    "testForLoop"
+                                  , []
+                                  , [ ForStm(
+                                        ForVarDec(
+                                          [VarDec(
+                                             "i"
+                                           , Some(Init(PrimaryExpr(Literal(Num(Decimal("0"))))))
+                                           )]
+                                        )
+                                      , RelExprLT(
+                                          PrimaryExpr(Id("i"))
+                                        , PrimaryExpr(Literal(Num(Decimal("3"))))
+                                        )
+                                      , PostfixInc(PrimaryExpr(Id("i")))
+                                      , Block(
+                                          Some(
+                                            StmList(
+                                              []
+                                            , ExprStm(
+                                                MemberCall(
+                                                  PrimaryExpr(Id("alert"))
+                                                , Arguments([PrimaryExpr(Id("i"))])
+                                                )
+                                              )
+                                            , Some([])
+                                            )
+                                          )
+                                        )
+                                      )
+                                    ]
+                                  )
+                                , FunctionDec(
+                                    "testDoLoop"
+                                  , []
+                                  , [ DoStm(
+                                        DoStm(
+                                          Block(
+                                            Some(
+                                              StmList(
+                                                []
+                                              , ExprStm(
+                                                  MemberCall(
+                                                    PrimaryExpr(Id("alert"))
+                                                  , Arguments([PrimaryExpr(Literal(String("\"doLoop\"")))])
+                                                  )
+                                                )
+                                              , Some([])
+                                              )
+                                            )
+                                          )
+                                        , PrimaryExpr(Literal(Bool("false")))
+                                        )
+                                      )
+                                    ]
+                                  )
+                                , FunctionDec(
+                                    "testWhileLoop"
+                                  , []
+                                  , [ WhileStm(
+                                        PrimaryExpr(Literal(Bool("true")))
+                                      , Block(
+                                          Some(
+                                            StmList(
+                                              []
+                                            , ExprStm(
+                                                MemberCall(
+                                                  PrimaryExpr(Id("alert"))
+                                                , Arguments([PrimaryExpr(Literal(String("\"whileLoop\"")))])
+                                                )
+                                              )
+                                            , Some([])
+                                            )
+                                          )
+                                        )
+                                      )
+                                    ]
+                                  )
+                                , FunctionDec(
+                                    "testTryCatch"
+                                  , []
+                                  , [ TryCatch(
+                                        Block(
+                                          Some(
+                                            StmList(
+                                              []
+                                            , ExprStm(
+                                                MemberCall(
+                                                  PrimaryExpr(Id("alert"))
+                                                , Arguments([PrimaryExpr(Literal(String("\"trycatch\"")))])
+                                                )
+                                              )
+                                            , Some([])
+                                            )
+                                          )
+                                        )
+                                      , Catch("error", Block(None()))
+                                      )
+                                    ]
+                                  )
+                                , FunctionDec(
+                                    "testTryFinally"
+                                  , []
+                                  , [ TryFinally(
+                                        Block(
+                                          Some(
+                                            StmList(
+                                              []
+                                            , ExprStm(
+                                                MemberCall(
+                                                  PrimaryExpr(Id("alert"))
+                                                , Arguments([PrimaryExpr(Literal(String("\"tryfinally\"")))])
+                                                )
+                                              )
+                                            , Some([])
+                                            )
+                                          )
+                                        )
+                                      , Finally(Block(None()))
+                                      )
+                                    ]
+                                  )
+                                , FunctionDec(
+                                    "testTryCatchFinally"
+                                  , []
+                                  , [ TryCatchFinally(
+                                        Block(
+                                          Some(
+                                            StmList(
+                                              []
+                                            , ExprStm(
+                                                MemberCall(
+                                                  PrimaryExpr(Id("alert"))
+                                                , Arguments([PrimaryExpr(Literal(String("\"trycatchfinally\"")))])
+                                                )
+                                              )
+                                            , Some([])
+                                            )
+                                          )
+                                        )
+                                      , Catch("error", Block(None()))
+                                      , Finally(Block(None()))
+                                      )
+                                    ]
+                                  )
+                                ]
+                              )
+                            )
+                          ]
+                        )
+                      )
+                    ]
+                  , ElemName("head")
+                  )
+                , Element(
+                    ElemName("body")
+                  , [ JSAttribute(
+                        HTMLEventAttr("onload")
+                      , Program(
+                          [ExprStm(CompExpr(PrimaryExpr(Id("fHello1()")), PrimaryExpr(Id("fHello1()"))))]
+                        )
+                      )
+                    , Attribute(AttrName("bgcolor"), DoubleQuoted([CharDataPart("#C0C0C0")]))
+                    ]
+                  , [ Element(
+                        ElemName("div")
+                      , [JSAttribute(
+                           HTMLEventAttr("onmouseover")
+                         , Program([ExprStm(PrimaryExpr(Id("testLiterals()")))])
+                         )]
+                      , [HtmlText(Text([CharDataPart("HTML Text")]))]
+                      , ElemName("div")
+                      )
+                    ]
+                  , ElemName("body")
+                  )
+                ]
+              , ElemName("html")
+              )
+            )
+          ]
+        )
+      )
+    )
+  ]
+)

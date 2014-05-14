@@ -1,0 +1,263 @@
+CompilationUnit(
+  [ PackageDec([], PackageName([Id("test")]))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Syntax")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Desugar")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Editor")))
+  , [ TypeImportDec(
+        TypeName(
+          PackageOrTypeName(PackageOrTypeName(Id("java")), Id("io"))
+        , Id("IOException")
+        )
+      )
+    , TypeImportDec(
+        TypeName(
+          PackageOrTypeName(PackageOrTypeName(Id("java")), Id("io"))
+        , Id("PrintWriter")
+        )
+      )
+    , TypeImportDec(
+        TypeName(
+          PackageOrTypeName(PackageOrTypeName(Id("javax")), Id("servlet"))
+        , Id("ServletException")
+        )
+      )
+    , TypeImportDec(
+        TypeName(
+          PackageOrTypeName(
+            PackageOrTypeName(PackageOrTypeName(Id("javax")), Id("servlet"))
+          , Id("annotation")
+          )
+        , Id("WebServlet")
+        )
+      )
+    , TypeImportDec(
+        TypeName(
+          PackageOrTypeName(
+            PackageOrTypeName(PackageOrTypeName(Id("javax")), Id("servlet"))
+          , Id("http")
+          )
+        , Id("HttpServlet")
+        )
+      )
+    , TypeImportDec(
+        TypeName(
+          PackageOrTypeName(
+            PackageOrTypeName(PackageOrTypeName(Id("javax")), Id("servlet"))
+          , Id("http")
+          )
+        , Id("HttpServletRequest")
+        )
+      )
+    , TypeImportDec(
+        TypeName(
+          PackageOrTypeName(
+            PackageOrTypeName(PackageOrTypeName(Id("javax")), Id("servlet"))
+          , Id("http")
+          )
+        , Id("HttpServletResponse")
+        )
+      )
+    , ClassDec(
+        ClassDecHead(
+          [ SingleElemAnno(
+              TypeName(Id("WebServlet"))
+            , Lit(String([Chars("/Test04")]))
+            )
+          , Public()
+          ]
+        , Id("Test04")
+        , None()
+        , Some(SuperDec(ClassType(TypeName(Id("HttpServlet")), None())))
+        , None()
+        )
+      , ClassBody(
+          [ MethodDec(
+              MethodDecHead(
+                [Protected()]
+              , None()
+              , Void()
+              , Id("doGet")
+              , [ Param(
+                    []
+                  , ClassOrInterfaceType(TypeName(Id("HttpServletRequest")), None())
+                  , Id("request")
+                  )
+                , Param(
+                    []
+                  , ClassOrInterfaceType(TypeName(Id("HttpServletResponse")), None())
+                  , Id("response")
+                  )
+                ]
+              , Some(
+                  ThrowsDec(
+                    [ ClassType(TypeName(Id("ServletException")), None())
+                    , ClassType(TypeName(Id("IOException")), None())
+                    ]
+                  )
+                )
+              )
+            , Block(
+                [ LocalVarDecStm(
+                    LocalVarDec(
+                      []
+                    , ClassOrInterfaceType(TypeName(Id("PrintWriter")), None())
+                    , [ VarDec(
+                          Id("writer")
+                        , Invoke(
+                            Method(MethodName(AmbName(Id("response")), Id("getWriter")))
+                          , []
+                          )
+                        )
+                      ]
+                    )
+                  )
+                , ExprStm(
+                    Invoke(
+                      Method(MethodName(AmbName(Id("writer")), Id("println")))
+                    , [ Plus(
+                          Plus(
+                            Lit(String([Chars("<")]))
+                          , Lit(String([Chars("html")]))
+                          )
+                        , Lit(String([Chars(" ")]))
+                        )
+                      ]
+                    )
+                  )
+                , ExprStm(
+                    Invoke(
+                      Method(MethodName(AmbName(Id("writer")), Id("println")))
+                    , [Lit(String([Chars(">")]))]
+                    )
+                  )
+                , ExprStm(
+                    Invoke(
+                      Method(MethodName(AmbName(Id("writer")), Id("println")))
+                    , [ Plus(
+                          Plus(
+                            Lit(String([Chars("<")]))
+                          , Lit(String([Chars("head")]))
+                          )
+                        , Lit(String([Chars(" ")]))
+                        )
+                      ]
+                    )
+                  )
+                , ExprStm(
+                    Invoke(
+                      Method(MethodName(AmbName(Id("writer")), Id("println")))
+                    , [Lit(String([Chars(">")]))]
+                    )
+                  )
+                , ExprStm(
+                    Invoke(
+                      Method(MethodName(AmbName(Id("writer")), Id("println")))
+                    , [ Plus(
+                          Plus(
+                            Lit(String([Chars("</")]))
+                          , Lit(String([Chars("head")]))
+                          )
+                        , Lit(String([Chars(">")]))
+                        )
+                      ]
+                    )
+                  )
+                , ExprStm(
+                    Invoke(
+                      Method(MethodName(AmbName(Id("writer")), Id("println")))
+                    , [ Plus(
+                          Plus(
+                            Lit(String([Chars("<")]))
+                          , Lit(String([Chars("body")]))
+                          )
+                        , Lit(String([Chars(" ")]))
+                        )
+                      ]
+                    )
+                  )
+                , ExprStm(
+                    Invoke(
+                      Method(MethodName(AmbName(Id("writer")), Id("println")))
+                    , [Lit(String([Chars(">")]))]
+                    )
+                  )
+                , For(
+                    LocalVarDec(
+                      []
+                    , Int()
+                    , [VarDec(Id("i"), Lit(Deci("0")))]
+                    )
+                  , Some(Lt(ExprName(Id("i")), Lit(Deci("3"))))
+                  , [PostIncr(ExprName(Id("i")))]
+                  , Block(
+                      [ ExprStm(
+                          Invoke(
+                            Method(MethodName(AmbName(Id("writer")), Id("println")))
+                          , [Lit(String([Chars("foobar ")]))]
+                          )
+                        )
+                      ]
+                    )
+                  )
+                , ExprStm(
+                    Invoke(
+                      Method(MethodName(AmbName(Id("writer")), Id("println")))
+                    , [ Plus(
+                          Plus(
+                            Lit(String([Chars("</")]))
+                          , Lit(String([Chars("body")]))
+                          )
+                        , Lit(String([Chars(">")]))
+                        )
+                      ]
+                    )
+                  )
+                , ExprStm(
+                    Invoke(
+                      Method(MethodName(AmbName(Id("writer")), Id("println")))
+                    , [ Plus(
+                          Plus(
+                            Lit(String([Chars("</")]))
+                          , Lit(String([Chars("html")]))
+                          )
+                        , Lit(String([Chars(">")]))
+                        )
+                      ]
+                    )
+                  )
+                ]
+              )
+            )
+          , MethodDec(
+              MethodDecHead(
+                [Protected()]
+              , None()
+              , Void()
+              , Id("doPost")
+              , [ Param(
+                    []
+                  , ClassOrInterfaceType(TypeName(Id("HttpServletRequest")), None())
+                  , Id("request")
+                  )
+                , Param(
+                    []
+                  , ClassOrInterfaceType(TypeName(Id("HttpServletResponse")), None())
+                  , Id("response")
+                  )
+                ]
+              , Some(
+                  ThrowsDec(
+                    [ ClassType(TypeName(Id("ServletException")), None())
+                    , ClassType(TypeName(Id("IOException")), None())
+                    ]
+                  )
+                )
+              )
+            , Block([])
+            )
+          ]
+        )
+      )
+    ]
+  ]
+)

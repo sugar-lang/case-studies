@@ -1,17 +1,16 @@
 package html;
  
-import editor.Origin;
-import editor.Editor;
 import org.sugarj.languages.Plain;
   
-public sugar HtmlSyntax { 
+public sugar Syntax { 
 
-sorts Document Element Content
+sorts Document Element HtmlContent
   context-free syntax
     Prologue Element Epilogue -> Document {cons("Document")}
-    Element -> Content
-    DocTypeDecl -> Content {cons("DocTypeDec")}
-    HTMLComment -> Content {cons("Comment")}    
+    Element -> HtmlContent
+    DocTypeDecl -> HtmlContent {cons("DocTypeDec")}
+    %% HTMLComment -> HtmlContent {cons("Comment")}    
+    HTMLComment -> HtmlContent{cons("Comment")}   
     
 %% module html-prolog
   context-free syntax
@@ -28,18 +27,18 @@ sorts Document Element Content
     DocTypeDecl Misc* -> DocTypePrologue {cons("DocTypePrologue")}
 
   syntax
-    CharData      -> <Content-CF>
+    CharData      -> <HtmlContent-CF> {cons("HtmlText")}
 
   context-free syntax
   	"<" ElemName Attribute* "/>" 	-> Element {cons("EmptyElement")}
    	"<" ElemName Attribute* ">" 		-> Element {cons("EmptyElement")}
-    "<" ElemName Attribute* ">" Content* "</" ElemName ">"    	-> Element {cons("Element")}
-	  NCName -> ElemName {cons("ElemName")}
+    "<" ElemName Attribute* ">" HtmlContent* "</" ElemName ">"    	-> Element {cons("Element")}
+	  NCName01 -> ElemName {cons("ElemName")}
       
   //context-free syntax
     //HTMLTagStart ElemName Attribute* HTMLSlashTagEnd 	-> Element {cons("EmptyElement")}
     //HTMLTagStart ElemName Attribute* HTMLTagEnd 		-> Element {cons("EmptyElement")}
-    //HTMLTagStart ElemName Attribute* HTMLTagEnd Content* HTMLSlashTagStart ElemName HTMLTagEnd    	-> Element {cons("Element")}
+    //HTMLTagStart ElemName Attribute* HTMLTagEnd HtmlContent* HTMLSlashTagStart ElemName HTMLTagEnd    	-> Element {cons("Element")}
 	//NCName -> ElemName {cons("ElemName")}
      
   lexical syntax
@@ -55,7 +54,7 @@ sorts Document Element Content
     
   context-free syntax
     AttrName "=" AttValue 	-> Attribute {cons("Attribute")}
-    NCName -> AttrName {cons("AttrName")}
+    NCName02 -> AttrName {cons("AttrName")}
 
   syntax
     DoubleQuotedStm -> <URI-CF> {cons("URI")}
@@ -88,7 +87,7 @@ sorts Document Element Content
     FooCharDataText 				-> CharDataPart {cons("CharDataPart")}
     Ref 							-> CharDataPart
     <CharDataText-LEX> 				-> FooCharDataText
-    "&"   <NCName-LEX>   ";" -> EntityRef  {cons("EntityRef")}
+    "&"   <NCName03-LEX>   ";" -> EntityRef  {cons("EntityRef")}
     CharRef    -> Ref
     EntityRef  -> Ref
 
@@ -104,16 +103,22 @@ sorts Document Element Content
 
 %% module html-names
   lexical syntax
-    [A-Za-z\_] [A-Za-z0-9\.\-\_]* -> NCName
+    [A-Za-z\_] [A-Za-z0-9\.\-\_]* -> NCName01
+    [A-Za-z\_] [A-Za-z0-9\.\-\_]* -> NCName02
+    [A-Za-z\_] [A-Za-z0-9\.\-\_]* -> NCName03
 
   lexical restrictions
-    NCName -/- [A-Za-z0-9\.\-\_]
+    NCName01 -/- [A-Za-z0-9\.\-\_]
+    NCName02 -/- [A-Za-z0-9\.\-\_]
+    NCName03 -/- [A-Za-z0-9\.\-\_]
+
+
 
 %% module html-comments
   lexical syntax
-    "<!--" -> CommentLeft
-    "-->" -> CommentRight
-    CommentLeft CommentContent* CommentRight -> HTMLComment
+     "<!--" -> CommentLeft
+     "-->" -> CommentRight
+     CommentLeft CommentContent* CommentRight -> HTMLComment
     Dash -> CommentContent
     ~[\-] -> CommentContent
     "-" -> Dash

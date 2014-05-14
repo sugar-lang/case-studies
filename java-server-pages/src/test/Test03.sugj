@@ -1,0 +1,36 @@
+package test;
+
+import jsp.Syntax;
+import jsp.Desugar;
+
+import jsp.Editor;
+
+import java.util.Map;
+import java.util.HashMap;
+
+//Testcase for JSP Skriptlets with simple control structures.
+
+public jsp Test03{
+	<%@ page import="java.util.LinkedList" %>
+	<%@ page import="java.util.List" %>
+	<html>
+		<head></head>
+		<body bgcolor="#FFFFFF">
+			<%	
+			for(int i = 0; i < 10; i++){
+				List list = new LinkedList();
+				Map map = new HashMap();
+			}
+
+			if(true){
+			}
+			else{
+			}
+
+			do{
+			}while(false);
+			%>	
+		</body>
+	</html>
+
+}

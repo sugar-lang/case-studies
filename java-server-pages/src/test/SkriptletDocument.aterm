@@ -1,0 +1,82 @@
+CompilationUnit(
+  [ PackageDec([], PackageName([Id("test")]))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Syntax")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Desugar")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Editor")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("html")), Id("Editor")))
+  , JSPDec(
+      [Public()]
+    , Id("SkriptletDocument")
+    , JSPBody(
+        JSPDoc(
+          [ JSPDeclaration(
+              [ FieldDec(
+                  [Private()]
+                , Boolean()
+                , [VarDec(Id("foo"), Lit(Bool(True())))]
+                )
+              , FieldDec(
+                  [Public()]
+                , Int()
+                , [VarDec(Id("x")), VarDec(Id("y")), VarDec(Id("z"))]
+                )
+              , ClassDec(
+                  ClassDecHead([], Id("nestedClass"), None(), None(), None())
+                , ClassBody([])
+                )
+              ]
+            )
+          , HtmlContent(
+              Element(
+                ElemName("html")
+              , []
+              , [ Element(
+                    ElemName("head")
+                  , []
+                  , [ Element(
+                        ElemName("title")
+                      , []
+                      , [HtmlText(Text([CharDataPart("Skriptlet Document")]))]
+                      , ElemName("title")
+                      )
+                    ]
+                  , ElemName("head")
+                  )
+                , Element(
+                    ElemName("body")
+                  , []
+                  , [ Skriptlet(
+                        JavaSkriptlet(
+                          [ If(
+                              ExprName(Id("foo"))
+                            , Block(
+                                [EscapedJSP([HtmlText(Text([CharDataPart("bar ")]))])]
+                              )
+                            , Block(
+                                [ LocalVarDecStm(
+                                    LocalVarDec(
+                                      []
+                                    , Int()
+                                    , [VarDec(Id("foobar"), Lit(Deci("42")))]
+                                    )
+                                  )
+                                , EscapedJSP([Expression(ExprName(Id("foobar")))])
+                                ]
+                              )
+                            )
+                          ]
+                        )
+                      )
+                    ]
+                  , ElemName("body")
+                  )
+                ]
+              , ElemName("html")
+              )
+            )
+          ]
+        )
+      )
+    )
+  ]
+)

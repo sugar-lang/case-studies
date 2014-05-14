@@ -1,0 +1,11 @@
+package html;
+
+import html.Syntax;
+
+public checks Checks {
+  errors 
+    Element(lname, attrs, content, rname) = 
+    [(lname, "XML start and end tag need to coincide"),
+     (rname, "XML2 start and end tag need to coincide")]
+    where <not(structurally-equal)> (lname, rname)
+}

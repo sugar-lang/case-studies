@@ -1,0 +1,89 @@
+package test;
+
+import javascript.HtmlWithJavaScript;
+import jsp.Syntax;
+
+import javascript.Desugar;
+import jsp.Desugar;
+
+import javascript.Editor;
+import jsp.Editor;
+
+// Testcase 07:	Javascript with function and onload in body
+ 
+
+
+public jsp Test07{
+	
+	<html>
+		<head>
+			<script language="javascript">
+				function testFunction(){
+					;
+				}
+				
+				function testFunction_params(v1, v2, v3){
+					;
+				}
+			
+				function testLiterals(){
+					alert("Hello, world!");
+					alert(null);
+					alert(42);
+					alert(true);
+					alert(false);
+					alert(0xC5);
+				} 
+				
+				function testAssignment(){
+					var v1 = "Hello, world!";
+					var v2 = 42;
+					var v3 = new Array();
+					v3[0] = v1;
+					var v4 = 3, v5 = 4;
+					var v6 = {}
+				}
+				
+				function testForLoop(){
+					for(var i=0;i<3;i++){
+						alert(i);
+					} 
+				} 
+				
+				function testDoLoop(){
+					do{ alert("doLoop");
+					}while(false)
+				}
+				
+				function testWhileLoop(){
+					while(true){
+						alert("whileLoop");
+					}
+				}
+				
+				function testTryCatch(){
+					try { alert("trycatch"); 
+					} catch(error){
+						
+					}
+				}
+				
+				function testTryFinally(){
+					try{ alert("tryfinally"); }
+					finally { }
+				}
+				
+				function testTryCatchFinally(){
+					try{ alert("trycatchfinally"); }
+					catch(error) { }
+					finally { }
+				}
+			</script>
+		</head>
+		<body onload="fHello1(), fHello1()" bgcolor="#C0C0C0">
+			<div onmouseover="testLiterals()">HTML Text</div>
+		</body>
+		
+	</html>
+	
+}

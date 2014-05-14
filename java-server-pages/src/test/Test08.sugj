@@ -1,0 +1,35 @@
+package test;
+
+import javascript.HtmlWithJavaScript;
+import jsp.Syntax;
+
+import javascript.Desugar;
+import jsp.Desugar;
+
+import javascript.Editor;
+import jsp.Editor;
+import html.Checks;
+
+// Testcase 08: HTML as JS Expressions
+
+
+public jsp Test08 {
+	
+	<html>
+		<head>
+			<script language="javascript">
+				function testStringLit(){
+					var v1 = <b>foobar</b>;
+				}
+				
+				function testErrorAtParsing(){
+					var error = <b>does not work</a>
+				}
+			</script>
+		</head>
+		<body>
+		</body>
+	</html>
+	
+	
+}

@@ -1,0 +1,15 @@
+package test;
+import jsp.Syntax;
+import jsp.Desugar;
+
+import jsp.Editor;
+
+// Test case for HTML Tags without contents
+
+public jsp Test00 {
+
+	<html>
+	</html>
+		
+
+}

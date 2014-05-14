@@ -1,0 +1,36 @@
+package javascript;
+
+import editor.Colors;
+import editor.Editor;
+
+import javascript.HtmlWithJavaScript;
+
+public editor services Editor{
+	
+	colorer
+	
+		
+		HtmlContent.JavaScript : red
+		HTMLEventAttr : grey
+		Attribute.JSAttribute : grey
+		HTMLEventAttr.HTMLEventAttr : grey
+		HTMLEvent : grey
+		
+		
+		
+	folding
+		FunctionDec
+		
+	strategies
+		js-to-outline-label: FunctionDec(name, _, _) -> <concat-strings> ["function ", name]
+        js-to-outline-label: JavaScript(_) -> "JavaScript"
+        
+        html-to-outline-label = js-to-outline-label
+		
+	
+				/*
+	completions
+		completion template :
+			"if(" <c> ") \n\t {" <i> "}\n else \n\t {" <e> "\n\t}"
+			*/
+}

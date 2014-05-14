@@ -1,0 +1,16 @@
+CompilationUnit(
+  [ PackageDec([], PackageName([Id("test")]))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Syntax")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Desugar")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Editor")))
+  , JSPDec(
+      [Public()]
+    , Id("Test00")
+    , JSPBody(
+        JSPDoc(
+          [HtmlContent(Element(ElemName("html"), [], [], ElemName("html")))]
+        )
+      )
+    )
+  ]
+)

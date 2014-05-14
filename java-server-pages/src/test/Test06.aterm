@@ -1,0 +1,14 @@
+JavaScript(
+  Some(
+    Program(
+      [ ExprStm(
+          MemberCall(
+            PrimaryExpr(Id("alert"))
+          , Arguments([PrimaryExpr(Literal(String("\"Hello, world!\"")))])
+          )
+        )
+      , (PrimaryExpr(Literal(Bool("true"))), [])
+      ]
+    )
+  )
+)

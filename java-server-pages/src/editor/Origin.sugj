@@ -22,5 +22,5 @@ public sugar Origin {
 	    ['*' | c*] -> <ltrim(' ' + '\t' + '\n' + '\r')> c*
 	  
 	  origin-track-forced(s) =
-	    ![<id>]; all(s); ?[<id>] 
+	    ![<id>]; all(s); ?[<id>]
 }

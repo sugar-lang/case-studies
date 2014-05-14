@@ -1,0 +1,27 @@
+package test;
+
+import javascript.HtmlWithJavaScript;
+import jsp.Syntax;
+
+import javascript.Desugar;
+import jsp.Desugar;
+
+import javascript.Editor;
+import jsp.Editor;
+
+// Testcase 06:	JavaScript with alert
+
+public jsp Test06{
+	
+	<html>
+		<head></head>
+		
+		<body>
+			<script language="javascript">
+				 alert("Hello, world!");
+			</script>
+		</body>
+		
+	</html>
+	
+}

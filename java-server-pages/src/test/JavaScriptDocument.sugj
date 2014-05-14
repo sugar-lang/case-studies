@@ -1,0 +1,24 @@
+package test;
+
+import jsp.Syntax;
+import jsp.Desugar;
+
+import javascript.HtmlWithJavaScript;
+import javascript.Desugar;
+
+import jsp.Editor;
+import html.Editor;
+import javascript.Editor;
+
+public jsp JavaScriptDocument{
+	<html>
+		<head>
+			<script language="javascript">
+				function foo(){
+					alert("bar");
+				}
+			</script>
+		</head>
+		<body onload="foo()"></body>
+	</html>
+}

@@ -1,0 +1,47 @@
+package jsp;
+
+import editor.Colors;
+import editor.Editor;
+
+import jsp.Syntax;
+
+
+
+public editor services Editor {
+	
+  	
+  colorer
+  
+	%% JSP Toplevel (for Java)
+    ToplevelDeclaration.JSPDec 		: darkgreen
+    JSPBody							: black
+    
+    %% JSP Page Information (for Java)
+	Content.JSPImport				: keyword
+ 	ImportString					: 0 0 0 italic
+	
+	%% JSP Tags (for Java)
+ 	HtmlContent.Skriptlet			: blue
+ 	JavaStm.EscapedJSP				: blue
+	
+ 	
+  folding
+    %% ToplevelDeclaration.JSPDec
+    HtmlContent.Skriptlet
+    
+  strategies
+  	outline = simple-label-outline(jsp-to-outline-label)
+  	
+  	jsp-to-outline-label: JSPDec(_, Id(name), _) -> name
+  	jsp-to-outline-label: JSPDeclaration(_) -> "<%! %>"
+  	jsp-to-outline-label: Skriptlet(_) -> "<% %>"
+  	jsp-to-outline-label: Expression(_) -> "<%= %>"
+  	
+    
+  	
+  	
+  	 
+ 
+  	
+
+}

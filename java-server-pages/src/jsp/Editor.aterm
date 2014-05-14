@@ -1,0 +1,74 @@
+CompilationUnit(
+  [ PackageDec([], PackageName([Id("jsp")]))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("editor")), Id("Colors")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("editor")), Id("Editor")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("html")), Id("Editor")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Syntax")))
+  , ExtensionDec(
+      ExtensionDecHead([Public()], Id("Editor"))
+    , ExtensionBody(
+        [ editor-elem(
+            Colorer(
+              ""
+            , [ ColorRule(SortAndConstructor(Sort("ToplevelDeclaration"), Constructor("JSPDec")), AttributeRef("darkgreen"))
+              , ColorRule(Sort("JSPBody"), AttributeRef("black"))
+              , ColorRule(SortAndConstructor(Sort("Content"), Constructor("JSPImport")), AttributeRef("keyword"))
+              , ColorRule(
+                  Sort("ImportString")
+                , Attribute(ColorRGB("0", "0", "0"), NoColor(), ITALIC())
+                )
+              , ColorRule(SortAndConstructor(Sort("HtmlContent"), Constructor("Skriptlet")), AttributeRef("blue"))
+              , ColorRule(SortAndConstructor(Sort("JavaStm"), Constructor("EscapedJSP")), AttributeRef("blue"))
+              ]
+            )
+          )
+        , editor-elem(
+            Folding(
+              ""
+            , [FoldRule(SortAndConstructor(Sort("HtmlContent"), Constructor("Skriptlet")), None())]
+            )
+          )
+        , transformation-elem(
+            Strategies(
+              [ SDefNoArgs(
+                  "outline"
+                , Call(SVar("simple-label-outline"), [CallNoArgs(SVar("jsp-to-outline-label"))])
+                )
+              , RDefNoArgs(
+                  "jsp-to-outline-label"
+                , RuleNoCond(
+                    NoAnnoList(
+                      Op(
+                        "JSPDec"
+                      , [Wld(), NoAnnoList(Op("Id", [Var("name")])), Wld()]
+                      )
+                    )
+                  , Var("name")
+                  )
+                )
+              , RDefNoArgs(
+                  "jsp-to-outline-label"
+                , RuleNoCond(
+                    NoAnnoList(Op("JSPDeclaration", [Wld()]))
+                  , NoAnnoList(List([NoAnnoList(Str("\"Declaration\""))]))
+                  )
+                )
+              , SDefNoArgs(
+                  "outline"
+                , Call(SVar("simple-label-outline"), [CallNoArgs(SVar("editor-to-outline-label"))])
+                )
+              , RDefNoArgs(
+                  "editor-to-outline-label"
+                , RuleNoCond(
+                    NoAnnoList(Op("Colorer", [Wld()]))
+                  , NoAnnoList(Str("\"Colorer\""))
+                  )
+                )
+              ]
+            )
+          )
+        ]
+      )
+    )
+  ]
+)

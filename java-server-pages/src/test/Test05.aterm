@@ -1,0 +1,33 @@
+CompilationUnit(
+  [ PackageDec([], PackageName([Id("test")]))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("javascript")), Id("HtmlWithJavaScript")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Syntax")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Desugar")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("javascript")), Id("Editor")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Editor")))
+  , JSPDec(
+      [Public()]
+    , Id("Test05")
+    , JSPBody(
+        JSPDoc(
+          [ HtmlContent(
+              Element(
+                ElemName("html")
+              , []
+              , [ Element(ElemName("head"), [], [], ElemName("head"))
+                , Element(
+                    ElemName("body")
+                  , []
+                  , [JavaScript(None())]
+                  , ElemName("body")
+                  )
+                ]
+              , ElemName("html")
+              )
+            )
+          ]
+        )
+      )
+    )
+  ]
+)

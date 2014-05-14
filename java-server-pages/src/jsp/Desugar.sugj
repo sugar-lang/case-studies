@@ -1,0 +1,394 @@
+package jsp;
+
+
+import org.sugarj.languages.Java; 
+import concretesyntax.Java;
+import jsp.Syntax;
+
+public sugar Desugar {
+	
+	desugarings
+		jspDecStart
+		
+%%		jspDoc
+	%%	transformContent
+	%%	idToStringf
+	
+	rules
+
+		jspDecStart :
+		JSPDec(a, b, c)
+		->
+		[TypeImportDec(
+      TypeName(
+        PackageOrTypeName(PackageOrTypeName(Id("java")), Id("io"))
+      , Id("IOException")
+      )
+    )
+  , TypeImportDec(
+      TypeName(
+        PackageOrTypeName(PackageOrTypeName(Id("java")), Id("io"))
+      , Id("PrintWriter")
+      )
+    )
+  , TypeImportDec(
+      TypeName(
+        PackageOrTypeName(PackageOrTypeName(Id("javax")), Id("servlet"))
+      , Id("ServletException")
+      )
+    )
+  , TypeImportDec(
+      TypeName(
+        PackageOrTypeName(
+          PackageOrTypeName(PackageOrTypeName(Id("javax")), Id("servlet"))
+        , Id("annotation")
+        )
+      , Id("WebServlet")
+      )
+    )
+  , TypeImportDec(
+      TypeName(
+        PackageOrTypeName( 
+          PackageOrTypeName(PackageOrTypeName(Id("javax")), Id("servlet"))
+        , Id("http")
+        )
+      , Id("HttpServlet")
+      )
+    )
+  , TypeImportDec(
+      TypeName(
+        PackageOrTypeName(
+          PackageOrTypeName(PackageOrTypeName(Id("javax")), Id("servlet"))
+        , Id("http")
+        )
+      , Id("HttpServletRequest")
+      )
+    )
+  , TypeImportDec(
+      TypeName(
+        PackageOrTypeName(
+          PackageOrTypeName(PackageOrTypeName(Id("javax")), Id("servlet"))
+        , Id("http")
+        )
+      , Id("HttpServletResponse")
+      )
+    ), <jspDec>JSPDec(a, b, c)]
+
+	
+	
+	
+		jspDec :
+		JSPDec(mods, Id(n), JSPBody(JSPDoc([JSPImport(imp)|body])))
+		->
+		[TypeImportDec(
+			<extract-Import-String>imp
+		)
+		,<jspDec>JSPDec(mods, Id(n), JSPBody(JSPDoc(body)))]
+	 
+	 	extract-Import-String :
+	 	ImportString(n)
+	 	->
+	 	n
+	 
+		jspDec :
+		JSPDec(mods, Id(n), JSPBody(JSPDoc(body)))
+	 	->
+%%	 	ClassDec(ClassDecHead([ SingleElemAnno(TypeName(Id("WebServlet")), Lit(String(Id(n)))), mods], Id(n), None, Some(SuperDec(ClassType(TypeName(Id("HttpServlet")), None))), None), <jspBody-to-Java>JSPBody(body))
+%%		PlainDec(PlainDecHead(mods, n, Some("jsp")), PlainBody(body))
+		ClassDec(
+      		ClassDecHead(
+        		[ SingleElemAnno(TypeName(Id("WebServlet")), Lit(String([Chars(<concat-strings>["/",n])]))) 
+        			, Public()
+        		]
+      			, Id(n)
+      			, None()
+      			, Some(SuperDec(ClassType(TypeName(Id("HttpServlet")), None())))
+      			, None()
+      		)
+    		, ClassBody(
+    		  	<concat>[[ <jspBody-to-Java>JSPBody(JSPDoc(bodyWithoutDecs))
+    		  	, MethodDec(
+            MethodDecHead(
+              [Protected()]
+            , None()
+            , Void()
+            , Id("doPost")
+            , [ Param(
+                  []
+                , ClassOrInterfaceType(TypeName(Id("HttpServletRequest")), None())
+                , Id("request")
+                )
+              , Param(
+                  []
+                , ClassOrInterfaceType(TypeName(Id("HttpServletResponse")), None())
+                , Id("response")
+                )
+              ]
+            , Some(
+                ThrowsDec(
+                  [ ClassType(TypeName(Id("ServletException")), None())
+                  , ClassType(TypeName(Id("IOException")), None())
+                  ]
+                )
+              )
+            )
+          , Block([])
+          )], desugaredDeclarations])
+    	)
+        where <filter(?JSPDeclaration(_))> body => extractedDeclarations
+        ;     <concat><map(desugar-JSPDeclaration)> extractedDeclarations => desugaredDeclarations
+		;	  <filter(not(?JSPDeclaration(_)))> body => bodyWithoutDecs
+
+
+        desugar-JSPDeclaration :
+        JSPDeclaration(decl)
+        ->
+        decl
+	  
+	  
+		jspBody-to-Java :
+		JSPBody(JSPDoc(contents))
+		->
+		MethodDec(
+            MethodDecHead(
+              [Protected()]
+            , None()
+            , Void()
+            , Id("doGet")
+            , [ Param(
+                  []
+                , ClassOrInterfaceType(TypeName(Id("HttpServletRequest")), None())
+                , Id("request")
+                )
+              , Param(
+                  []
+                , ClassOrInterfaceType(TypeName(Id("HttpServletResponse")), None())
+                , Id("response")
+                )
+              ]
+            , Some(
+                ThrowsDec(
+                  [ ClassType(TypeName(Id("ServletException")), None())
+                  , ClassType(TypeName(Id("IOException")), None())
+                  ]
+                )
+              )
+            )
+          , <lift-block>Block(
+              [ LocalVarDecStm(
+                  LocalVarDec(
+                    []
+                  , ClassOrInterfaceType(TypeName(Id("PrintWriter")), None())
+                  , [ VarDec(
+                        Id("writer")
+                      , Invoke(
+                          Method(MethodName(AmbName(Id("response")), Id("getWriter")))
+                        , []
+                        )
+                      )
+                    ]
+                  )
+                )
+              , (<jspBodyContents-to-Java> contents) %% content-dispatch
+              ]
+            )
+          )
+		
+		
+		%% "lift" the JSP-Elements to the level of BlockStatements
+		lift-block :
+		Block([LocalVarDecStm(
+                  LocalVarDec(
+                    []
+                  , ClassOrInterfaceType(TypeName(Id("PrintWriter")), None())
+                  , [ VarDec(
+                        Id("writer")
+                      , Invoke(
+                          Method(MethodName(AmbName(Id("response")), Id("getWriter")))
+                        , []
+                        )
+                      )
+                    ]
+                  )
+                ),t])
+		->
+		Block([LocalVarDecStm(
+                  LocalVarDec(
+                    []
+                  , ClassOrInterfaceType(TypeName(Id("PrintWriter")), None())
+                  , [ VarDec(
+                        Id("writer")
+                      , Invoke(
+                          Method(MethodName(AmbName(Id("response")), Id("getWriter")))
+                        , []
+                        )
+                      )
+                    ]
+                  )
+                )|t])
+				
+		%% HTML Transformation
+		jspBodyContents-to-Java : [] -> []
+		
+		jspBodyContents-to-Java :
+		[HtmlContent(cont)|contents]
+		->
+		<concat>[<html-to-Java>cont|<jspBodyContents-to-Java>contents]
+		
+		html-to-Java :
+		Element(ElemName(startname), attributes, kids, ElemName(endname))
+		->
+		<concat>[<try-concat-middle>(|[ writer.println("<" + ~startnameS + " "); ]|,
+                desugaredAttributes, 
+                |[ writer.println(">");]|) ,
+                javaKids,
+		[|[ writer.println("</" + ~endnameS + ">");]|] ]
+		where <try-concat><map(html-to-Java)> kids => javaKids 
+		; <java-lit> startname => startnameS
+		; <java-lit> endname => endnameS
+                ; <html-attributes-to-Java> attributes => desugaredAttributes
+               
+		
+		html-to-Java :
+		EmptyElement(startname, attributes) 
+		->
+		[|[ writer.println("<" + ~startnameS + " " + ~(<attributes-to-string>attributes) + "/>");]|]
+		where <java-lit> startname => startnameS
+		
+		html-to-Java :
+		HtmlText(Text([CharDataPart(n)]))
+		->
+		[|[ writer.println(~nS); ]|]
+		where <java-lit> n => nS
+		
+		html-to-Java :
+		Comment(n)
+		->
+		[]
+		
+	
+		html-to-Java :
+		Skriptlet(JavaSkriptlet(a))
+		->
+		<concat>plainJava
+		where <map(javaSkriptlet-to-Java)> a => plainJava
+
+		html-to-Java :
+		Expression(a)
+		->
+		[|[ writer.println(~a); ]|]
+
+
+                html-attributes-to-Java :
+                [Attribute(AttrName(name), DoubleQuoted([CharDataPart(value)]))|attributes] 
+                ->
+                <concat>[ [ |[ writer.println(~nameS + "=\""); ]|, |[ writer.println(~valueS); ]|, |[writer.println("\" "); ]| ],
+                <html-attributes-to-Java> attributes] 
+                where <java-lit> name => nameS
+                ; <java-lit> value => valueS
+
+                html-attributes-to-Java :
+                []
+                ->
+                []
+		
+		
+		javaSkriptlet-to-Java :
+		For(a, b, c, Block(forBlock))
+		->
+		[For(a, b, c, Block(<concat>plainJavaBlock))]
+		where <map(javaSkriptlet-to-Java)> forBlock => plainJavaBlock
+		
+		javaSkriptlet-to-Java :
+		EscapedJSP(elems)
+		->
+		<concat>plainJavaEscaped
+		where <map(html-to-Java)> elems => plainJavaEscaped
+		  
+		javaSkriptlet-to-Java :
+		If(expr, Block(ifBlock))
+		->
+		[If(expr, Block(<concat>plainJavaBlock))]
+		where <map(javaSkriptlet-to-Java)> ifBlock => plainJavaBlock
+		
+		javaSkriptlet-to-Java :
+		If(expr, Block(ifBlock), Block(elseBlock))
+		->
+		[If(expr, Block(<concat>plainJavaIf), Block(<concat>plainJavaElse))]
+		where 	<map(javaSkriptlet-to-Java)> ifBlock => plainJavaIf
+		;		<map(javaSkriptlet-to-Java)> elseBlock => plainJavaElse
+		 		
+		javaSkriptlet-to-Java :
+		DoWhile(Block(do), cond)
+		->
+		[DoWhile(Block(<concat>plainJavaBlock), cond)]
+		where <map(javaSkriptlet-to-Java)> do => plainJavaBlock
+		
+		javaSkriptlet-to-Java :
+		While(cond, Block(do))
+		->
+		[While(cond, Block(<concat>plainJavaBlock))]
+		where <map(javaSkriptlet-to-Java)> do => plainJavaBlock
+		
+		javaSkriptlet-to-Java :
+		JavaStm
+		->
+		[JavaStm] 
+		
+		java-lit : s -> Lit(String([Chars(s2)])) where <is-string; string-as-chars(escape-chars)> s => s2
+		
+		
+		
+		try-concat-middle :
+		(x1, xs, x2)
+		->
+		<concat>[[x1],xs,[x2]]
+		where <is-list> xs
+		
+		try-concat-middle :
+		(x1, x, x2)
+		->
+		[x1, x, x2]
+		where <not(is-list)> x
+		
+		try-concat :
+		[]
+		->
+		[]
+		
+		try-concat :
+		[head|tail]
+		->
+		[head|<try-concat>tail]
+		where 	<not(is-list)> head
+		
+		
+		try-concat :
+		[head|tail] 
+		->
+		<concat>[head, <try-concat>tail]
+		where <is-list> head
+		
+				
+		attributes-to-string :
+		[]
+		->
+		<java-lit> " "
+		
+		attributes-to-string :
+		[Attribute(AttrName(name), DoubleQuoted([CharDataPart(value)]))|attributes]
+		->
+		Plus(
+			Plus(
+				Plus(
+					Plus(
+						<java-lit> name,
+						<java-lit> "=\\\""
+					),
+					<java-lit> value
+				),
+				<java-lit> "\\\""
+			),
+			<attributes-to-string>attributes
+		)
+}

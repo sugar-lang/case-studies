@@ -1,0 +1,19 @@
+package test;
+
+import jsp.Syntax;
+import jsp.Desugar;
+
+import html.Editor;
+
+public jsp StaticHtml{
+	<html>
+		<head>Static HTML Document</head>
+		<body bgcolor="#C0C0C0">
+			foo
+			<div>
+			
+			
+			</div>
+		</body>
+	</html>	
+}

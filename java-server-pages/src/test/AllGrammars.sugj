@@ -1,0 +1,32 @@
+package test;
+
+import jsp.Syntax;
+import html.Syntax;
+import javascript.HtmlWithJavaScript;
+
+import jsp.Desugar;
+import javascript.Desugar;
+
+import jsp.Editor;
+import html.Editor;
+import javascript.Editor;
+
+public jsp AllGrammars{
+	<html>
+		<head>
+			<title>All Grammars in one Document</title>
+			<script language="javascript">
+                	    var htmlExpression = <i>foobar</i>;
+			</script>
+		</head>
+		<body>
+			<% if(true) {
+					%> <b>TRUE</b> <%
+				} else {
+					%>	<script language="javascript">
+							alert("FALSE");
+						</script> <%	
+				} %>	
+		</body>
+	</html>
+}

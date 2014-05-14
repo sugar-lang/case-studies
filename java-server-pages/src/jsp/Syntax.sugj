@@ -1,0 +1,91 @@
+package jsp;
+
+import org.sugarj.languages.Java;
+import html.Syntax;
+
+public sugar Syntax {
+	
+	%% Toplevel Declaration
+	context-free syntax
+ 	AnnoOrExtensionMod* "jsp" JavaId JSPBody -> ToplevelDeclaration {cons("JSPDec")}
+    "{" JSPDoc "}" 			-> JSPBody {cons("JSPBody")}
+    Content* 	-> JSPDoc {cons("JSPDoc")}
+	
+	%% Comments
+	lexical syntax
+	 "<%--" -> JSPCommentLeft
+	 "--%>" -> JSPCommentRight
+	 JSPCommentLeft JSPCommentContent* JSPCommentRight -> Content{cons(JSPComment)}
+	 ~[\-] -> JSPCommentContent
+	 
+%%	 "-" -> Dash
+%%	 Dash -> CommentContent
+	 
+%%	 lexical restrictions
+%%	 Dash -/- [\-]
+
+	%% Expressions 
+	
+	context-free syntax
+	"<%=" JSPExpression "%>"	->	HtmlContent{cons("Expression")}
+	JavaExpr					->	JSPExpression
+	 
+
+
+	%% Skriptlets
+	
+	context-free syntax
+	"<%" JSPSkriptletNotEscaped "%>"		->  HtmlContent{cons("Skriptlet"), longest-match}
+	JavaStm*								->	JSPSkriptletNotEscaped{cons("JavaSkriptlet")}
+
+        "<%!" Dec* "%>"   -> Content{cons("JSPDeclaration")}	
+        JavaMethodDec     -> Dec
+        JavaFieldDec	  -> Dec
+        JavaClassDec	  -> Dec
+	
+	 "%>" HtmlContent* "<%"				->  JavaStm{cons("EscapedJSP"), longest-match, avoid}
+	 "%>" Content* "<%"				->  JSPSkriptletNotEscaped {reject}
+	
+	/*context-free syntax
+	"%>" Content* "<%" 					-> JavaBlockStm {cons("JSPUnquote")}
+    "%>" Content* "<%" 					-> JavaBlockStmNotUnquote {reject}
+    JavaBlockStm 						-> JavaBlockStmNotUnquote
+    "<%" JavaBlockStmNotUnquote* "%>"	-> JSPBlock {cons("Block")} 
+    JSPBlock -> HtmlContent*/
+	%% Meta Information
+	context-free syntax
+%%	"<%@ page" PageAttribute* "%>"	-> Content{cons("Page")}
+	"<%@ page" ImportDecl "%>"		-> Content{cons("JSPImport")}
+	"import=\"" ImportInformation "\"" -> ImportDecl
+	JavaTypeName	-> ImportInformation{cons("ImportString")}
+	
+%%	rules
+%%  	   constraint-error :
+%%     	Page(attrs) -> errors
+%%     where
+%%        <map(?Attribute(AttrName(<id>),_))> attrs => names; 
+%%       <filter(not(page-attribute))> names => illegal-names;
+%%        <map(!(<id>, "illegal attribute"))> illegal-names => errors  
+
+%%	   page-attribute = ?"import"
+	%%   page-attribute = ?"contentType" 
+	%%   page-attribute = ?"isThreadSafe"
+	%%   page-attribute = ?"session" 
+	%%   page-attribute = ?"buffer"
+	%%   page-attribute = ?"autoflush" 
+	%%   page-attribute = ?"extends"
+	%%   page-attribute = ?"info" 
+	%%   page-attribute = ?"errorPage" 
+	%%   page-attribute = ?"isErrorPage" 
+	%%   page-attribute = ?"language"
+	%%   page-attribute = ?"pageEncoding"
+	   
+	 %% HTML
+	 context-free syntax
+	 	HtmlContent -> Content{cons("HtmlContent")}
+	 	
+	 	
+
+	
+	
+}

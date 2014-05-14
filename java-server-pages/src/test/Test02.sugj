@@ -1,0 +1,20 @@
+package test;
+
+
+import jsp.Syntax;
+import jsp.Desugar;
+
+import jsp.Editor;
+
+// Testcase for HTML Plain Text, Attributes
+
+public jsp Test02{
+	<html>
+		<head></head>
+		<body darkblue="Attribute values are darkorange">
+			HTML Text is black and italic
+			<blue></blue> 
+		</body>
+	</html> 
+
+}

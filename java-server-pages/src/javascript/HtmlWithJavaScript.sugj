@@ -1,0 +1,30 @@
+package javascript;
+
+import javascript.Syntax;
+import html.Syntax;
+import jsp.Desugar;
+
+public sugar HtmlWithJavaScript {
+	
+	%% Define Tag for HTML
+	context-free syntax
+		JavaScriptBlock -> HtmlContent{cons("JavaScript")}
+		"<" "script" "language" "=" "\"" "javascript" "\"" ">" Program? "</" "script" ">"
+			-> JavaScriptBlock
+	
+	%% Resolve ambiguities between html and javascript		
+	lexical syntax
+		"script"	->	NCName01 {reject}
+		HTMLEvent	->	NCName02 {reject}	
+		
+        %% Allow HTML elements to stand as JS Expression
+        context-free syntax
+          Element -> PrimaryExpr{cons("HtmlExpr")}
+          %% "@" HtmlContent -> HtmlExpression{cons("HtmlExpression")} 
+
+        rules
+          desugar-primary-expr :
+           HtmlExpr(element)
+           ->
+           <html-to-Java>element   
+}

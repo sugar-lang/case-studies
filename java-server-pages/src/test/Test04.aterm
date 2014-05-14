@@ -1,0 +1,48 @@
+CompilationUnit(
+  [ PackageDec([], PackageName([Id("test")]))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Syntax")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Desugar")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Editor")))
+  , JSPDec(
+      [Public()]
+    , Id("Test04")
+    , JSPBody(
+        JSPDoc(
+          [ HtmlContent(
+              Element(
+                ElemName("html")
+              , []
+              , [ Element(ElemName("head"), [], [], ElemName("head"))
+                , Element(
+                    ElemName("body")
+                  , []
+                  , [ Skriptlet(
+                        JavaSkriptlet(
+                          [ For(
+                              LocalVarDec(
+                                []
+                              , Int()
+                              , [VarDec(Id("i"), Lit(Deci("0")))]
+                              )
+                            , Some(Lt(ExprName(Id("i")), Lit(Deci("3"))))
+                            , [PostIncr(ExprName(Id("i")))]
+                            , Block(
+                                [EscapedJSP([HtmlText(Text([CharDataPart("foobar ")]))])]
+                              )
+                            )
+                          ]
+                        )
+                      )
+                    ]
+                  , ElemName("body")
+                  )
+                ]
+              , ElemName("html")
+              )
+            )
+          ]
+        )
+      )
+    )
+  ]
+)

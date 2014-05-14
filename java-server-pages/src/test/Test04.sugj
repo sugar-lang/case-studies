@@ -1,0 +1,23 @@
+
+package test;
+
+import jsp.Syntax;
+import jsp.Desugar;
+
+
+import jsp.Editor;
+
+//Testcase for escaped JSP, declarations, HTML Comments 
+     
+     
+
+public jsp Test04{
+	<html>
+		<head></head>
+		<body>
+			<% for(int i = 0; i < 3; i++){
+				%> foobar <%
+			} %>
+		</body>
+	</html>
+}

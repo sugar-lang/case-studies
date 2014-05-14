@@ -1,0 +1,29 @@
+package test;
+
+import javascript.HtmlWithJavaScript;
+import jsp.Syntax;
+
+import javascript.Desugar;
+import jsp.Desugar;
+
+import javascript.Editor;
+import jsp.Editor;
+
+// Testcase 05:	empty JavaScript Element
+
+public jsp Test05{
+	
+	<html>
+		<head>
+			<title>Empty Script</title>
+		</head>
+		
+		<body>
+			<script language="javascript">
+				
+			</script>
+		</body>
+		
+	</html>
+	
+}

@@ -1,20 +1,42 @@
 package html;
 
+import editor.Editor;
 import editor.Colors;
 
+import html.Syntax;
+
 public editor services Editor {
+	
+	colorer
+		
+		%% HTML Tags
+		Element				:	blue
+		NCName01			:	blue
+		
+		%% HTML Attributes
+		Attribute			:	darkblue
+		NCName02			:	darkblue
+		AttValue			:	darkorange
+		DoubleQuotedText   	:	darkorange
+		SingleQuotedText   	:	darkorange
+		
+		%% HTML Text
+		CharDataText		:	0 0 0 italic
+		NCName03			:	0 0 0 italic
 
-  colorer XmlHighlighting
-    ElemName : blue (recursive)
-    AttrName : darkorange (recursive)
-    HTMLEventAttr : darkorange (recursive)
-    AttValue : darkred (recursive)
-    CharData : black (recursive)
-    Comment  : gray 
-
-  folding XmlFolding
-    Element
-    
-  outliner XmlOutliner
-    Element
+        %% HTML Comments
+        Comment				:	darkorange
+        CommentLeft			:	darkorange
+        CommentRight		:	darkorange
+        CommentContent		:	darkorange
+	
+	folding
+		Element.Element
+	
+	strategies
+		html-to-outline-label: Element(ElemName(name), _, _, _) -> <concat-strings> ["<", name, ">"]
+		html-to-outline-label: EmptyElement(ElemName(name), _) -> <concat-strings> ["<", name, ">"]
+		
+		jsp-to-outline-label = html-to-outline-label
+	
 }

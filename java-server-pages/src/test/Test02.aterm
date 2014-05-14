@@ -1,0 +1,33 @@
+CompilationUnit(
+  [ PackageDec([], PackageName([Id("test")]))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Syntax")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Desugar")))
+  , TypeImportDec(TypeName(PackageOrTypeName(Id("jsp")), Id("Editor")))
+  , JSPDec(
+      [Public()]
+    , Id("Test02")
+    , JSPBody(
+        JSPDoc(
+          [ HtmlContent(
+              Element(
+                ElemName("html")
+              , []
+              , [ Element(ElemName("head"), [], [], ElemName("head"))
+                , Element(
+                    ElemName("body")
+                  , [Attribute(AttrName("darkblue"), DoubleQuoted([CharDataPart("Attribute values are darkorange")]))]
+                  , [ HtmlText(Text([CharDataPart("HTML Text is black and italic\n\t\t\t")]))
+                    , Element(ElemName("blue"), [], [], ElemName("blue"))
+                    ]
+                  , ElemName("body")
+                  )
+                ]
+              , ElemName("html")
+              )
+            )
+          ]
+        )
+      )
+    )
+  ]
+)
