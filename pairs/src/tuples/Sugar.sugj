@@ -24,6 +24,10 @@ public sugar Sugar {
       PExpr([e]) -> e 
     desugar-pair-expr : 
       PExpr([e|es]) -> |[ pair.Pair.create(~e, ~(<desugar-pair-expr> PExpr(es))) ]|
+      
+  rules
+    show-type : PType(ts) -> <concat-strings> ["(",s,")"]
+    where s := <map(show-type); intersperse(|","); concat-strings> ts
 }
 
 

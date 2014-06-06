@@ -5,7 +5,7 @@ import tuples.Sugar;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class TupleTest {
+public class TupleTest { 
   private (String, Integer, Boolean) p = ("12", 34, false);
   
   @Test
