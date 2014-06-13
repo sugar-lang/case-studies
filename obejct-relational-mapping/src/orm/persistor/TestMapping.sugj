@@ -1,0 +1,19 @@
+package orm.persistor;
+
+import orm.persistor.Syntax;
+
+public mapping TestMapping {
+	// map any field named 'a' to a field named 'aval'
+	a -> aval;
+	
+	// map any boolean field named 'b' to an integer field named 'bval'
+	boolean b -> 
+		int bval = b ? 1 : 0;
+	// map any integer field named 'b' to an integer field named 'bval'
+	int b -> bval;
+	
+	// map any String field named 's' to a String field containing the
+	// canonical representation of the string
+	String s ->
+		sval = s.intern();
+}

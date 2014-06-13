@@ -1,0 +1,11 @@
+package orm.persistor;
+
+public extension Syntax {
+	context-free syntax
+		Entity -> ToplevelDeclaration
+		AnnoOrExtensionMod* "mapping" JavaId "{" MappingRule* "}" -> Entity {cons("MappingDec")}
+	
+	context-free syntax
+		JavaType? JavaId "->" JavaType? JavaId Replacement? ";" -> MappingRule {cons("MappingRule")}
+		"=" JavaExpr -> Replacement {cons("Replacement")}
+}
