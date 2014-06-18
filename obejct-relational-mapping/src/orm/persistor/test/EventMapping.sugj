@@ -8,7 +8,7 @@ public class EventMapping {
 
 public mapping EventMapping {
 	// the target table
-	table "Events";
+	table "EVENTS";
 	
 	// state local to the mapping
 	private int nextId = 0;

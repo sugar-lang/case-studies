@@ -1,4 +1,3 @@
-// copied from the hibernate tutorial and stripped of annotations: org.hibernate.tutorial.em.Event
 package orm.persistor.test;
 
 import java.util.Date;
@@ -11,7 +10,7 @@ import javax.persistence.Transient;
 
 @Entity
 @Table(name="EVENTS")
-public class EventMapped {
+public class EventManuallyMapped {
 	// underlying object
 	private Event entity;
 	
@@ -22,12 +21,12 @@ public class EventMapped {
 	private Object[] buffer;
 	private int bufferIndex;
 
-	public EventMapped() {
+	public EventManuallyMapped() {
 		buffer = new Object[2];
 		bufferIndex = 0;
 	}
 
-	public EventMapped(String title, Date EVENT_DATE) {
+	public EventManuallyMapped(String title, Date EVENT_DATE) {
 		entity = new Event(title, EVENT_DATE);
 		setID(implicit_ID());
 	}
