@@ -1,0 +1,39 @@
+// copied from the hibernate tutorial and stripped of annotations: org.hibernate.tutorial.em.Event
+package orm.persistor.test;
+
+import java.util.Date;
+
+public class Event {
+	// We don't need an ID except for the JPA
+    // private Long id;
+
+    private String title;
+    private Date date;
+
+	// We don't need a default constructor 
+	// public Event() {
+	// 	// this form used by Hibernate
+	// }
+
+	public Event(String title, Date date) {
+		// for application use, to create new events
+		this.title = title;
+		this.date = date;
+	}
+
+    public Date getDate() {
+		return date;
+    }
+
+    public void setDate(Date date) {
+		this.date = date;
+    }
+
+    public String getTitle() {
+		return title;
+    }
+
+    public void setTitle(String title) {
+		this.title = title;
+    }
+}

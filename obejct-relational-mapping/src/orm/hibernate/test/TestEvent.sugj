@@ -1,0 +1,93 @@
+// copied from the hibernate tutorial: org.hibernate.tutorial.em.EntityManagerIllustrationTest
+package orm.hibernate.test;
+
+import orm.hibernate.test.Event;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
+import org.hibernate.ejb.Ejb3Configuration;
+
+import junit.framework.TestCase;
+
+/**
+ * Illustrates basic use of Hibernate as a JPA provider.
+ *
+ * @author Steve Ebersole
+ */
+public class TestEvent extends TestCase {
+	private EntityManagerFactory entityManagerFactory;
+
+	/**
+	 * @return an in-memory HSQL entityManager
+	 * @author Timoteo Ponce
+	 */
+	public static Properties createBaseProperties() {
+		Properties properties = new Properties();
+		properties.put("javax.persistence.provider", "org.hibernate.ejb.HibernatePersistence");
+		// properties.put("javax.persistence.transactionType", "RESOURCE_LOCAL");
+		// properties.put("hibernate.connection.username", "sa");
+		// properties.put("hibernate.connection.password" ,"");
+		properties.put("hibernate.connection.driver_class","com.mysql.jdbc.Driver");	
+		properties.put("hibernate.connection.url", "jdbc:mysql://localhost:3306/entitiesh" );
+		properties.put("hibernate.dialect" ,"org.hibernate.dialect.MySQLDialect");
+		properties.put("hibernate.hbm2ddl.auto","create");
+		// properties.put("hibernate.show_sql","true");
+		// properties.put("hibernate.format_sql" ,"true");
+		return properties;	
+		
+	}
+
+	@Override
+	protected void setUp() throws Exception {
+	    Ejb3Configuration cfg = new Ejb3Configuration();
+	    cfg.addProperties(createBaseProperties());
+		
+		cfg.addAnnotatedClass(Event.class);
+		
+		entityManagerFactory = cfg.buildEntityManagerFactory();
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		entityManagerFactory.close();
+	}
+
+	public void testBasicUsage() {
+		// create a couple of events...
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
+		entityManager.getTransaction().begin();
+		entityManager.persist( new Event( "Our very first event!", new Date() ) );
+		entityManager.persist( new Event( "A follow up event", new Date() ) );
+		entityManager.getTransaction().commit();
+		entityManager.close();
+
+		// now lets pull events from the database and list them
+		entityManager = entityManagerFactory.createEntityManager();
+		entityManager.getTransaction().begin();
+        List<Event> result = entityManager.createQuery( "from Event", Event.class ).getResultList();
+        assertEquals(result.size(), 2);
+        assertEquals(result.get(0).getTitle(), "Our very first event!");
+        assertEquals(result.get(1).getTitle(), "A follow up event");
+        
+        // let's update the second event
+        result.get(1).setTitle("A changed follow up event");
+        entityManager.getTransaction().commit();
+        entityManager.close();
+        
+        // now lets see if our change was effective
+        entityManager = entityManagerFactory.createEntityManager();
+		entityManager.getTransaction().begin();
+        List<Event> result2 = entityManager.createQuery( "from Event", Event.class ).getResultList();
+        assertEquals(result2.size(), 2);
+        assertEquals(result2.get(0).getTitle(), "Our very first event!");
+        assertEquals(result2.get(1).getTitle(), "A changed follow up event");
+        entityManager.getTransaction().commit();
+        entityManager.close();
+	}
+}

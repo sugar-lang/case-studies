@@ -1,0 +1,42 @@
+package orm.persistor.test;
+
+import orm.persistor.Syntax;
+
+public class EventMapping {
+	public static int nextId = 0;
+}
+
+public mapping EventMapping {
+	// the target table
+	table "Events";
+	
+	// state local to the mapping
+	private int nextId = 0;
+	
+	// match -> target
+	Date date -> {
+		// the target column
+		column "EVENT_DATE";
+		// the target type
+		type long;
+		// the encoding of the data for the target type
+		encode(date) = date.getTime();
+		// the decoding of the data from the target type
+		decode(stamp) = new Date(stamp);
+	}
+	
+	// this is the default mapping and does not have to be specified explicitly
+	String title -> {
+		column "TITLE";
+	}
+	
+	// synthesized attribute
+	{} -> {
+		// the target column
+		column "ID" primary key;
+		// the target type
+		type long;
+		// id cannot be provided by the user but must be implicitly generated
+		implicit = { nextId = nextId + 1; nextId };
+	}
+}

@@ -1,5 +1,5 @@
 // copied from the hibernate tutorial: org.hibernate.tutorial.em.EntityManagerIllustrationTest
-package orm.hibernate.test;
+package orm.persistor.test;
 
 import orm.hibernate.test.Event;
 
@@ -20,7 +20,7 @@ import junit.framework.TestCase;
  *
  * @author Steve Ebersole
  */
-public class EntityManagerIllustrationTest extends TestCase {
+public class TestEventMapped extends TestCase {
 	private EntityManagerFactory entityManagerFactory;
 
 	/**
@@ -48,7 +48,7 @@ public class EntityManagerIllustrationTest extends TestCase {
 	    Ejb3Configuration cfg = new Ejb3Configuration();
 	    cfg.addProperties(createBaseProperties());
 		
-		cfg.addAnnotatedClass(Event.class);
+		cfg.addAnnotatedClass(EventMapped.class);
 		
 		entityManagerFactory = cfg.buildEntityManagerFactory();
 	}
@@ -59,22 +59,40 @@ public class EntityManagerIllustrationTest extends TestCase {
 	}
 
 	public void testBasicUsage() {
+		EventMapped e1 = new EventMapped( "Our very first event!", new Date());
+		EventMapped e2 = new EventMapped("A follow up event", new Date());
+		System.out.println(e1 + ": " + e1.getID());
+		System.out.println(e2 + ": " + e2.getID());
+		
 		// create a couple of events...
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		entityManager.getTransaction().begin();
-		entityManager.persist( new Event( "Our very first event!", new Date() ) );
-		entityManager.persist( new Event( "A follow up event", new Date() ) );
+		entityManager.persist(e1);
+		entityManager.persist(e2);
 		entityManager.getTransaction().commit();
 		entityManager.close();
 
 		// now lets pull events from the database and list them
-		// entityManager = entityManagerFactory.createEntityManager();
-		// entityManager.getTransaction().begin();
-  //       List<Event> result = entityManager.createQuery( "from Event", Event.class ).getResultList();
-		// for ( Event event : result ) {
-		// 	System.out.println( "Event (" + event.getDate() + ") : " + event.getTitle() );
-		// }
-  //       entityManager.getTransaction().commit();
-  //       entityManager.close();
+		entityManager = entityManagerFactory.createEntityManager();
+		entityManager.getTransaction().begin();
+        List<EventMapped> result = entityManager.createQuery( "from EventMapped", EventMapped.class ).getResultList();
+        assertEquals(result.size(), 2);
+        assertEquals(result.get(0).getTitle(), "Our very first event!");
+        assertEquals(result.get(1).getTitle(), "A follow up event");
+        
+        // let's update the second event
+        result.get(1).setTitle("A changed follow up event");
+        entityManager.getTransaction().commit();
+        entityManager.close();
+        
+        // now lets see if our change was effective
+        entityManager = entityManagerFactory.createEntityManager();
+		entityManager.getTransaction().begin();
+        List<EventMapped> result2 = entityManager.createQuery( "from EventMapped", EventMapped.class ).getResultList();
+        assertEquals(result2.size(), 2);
+        assertEquals(result2.get(0).getTitle(), "Our very first event!");
+        assertEquals(result2.get(1).getTitle(), "A changed follow up event");
+        entityManager.getTransaction().commit();
+        entityManager.close();
 	}
 }

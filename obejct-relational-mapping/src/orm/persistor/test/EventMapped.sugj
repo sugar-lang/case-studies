@@ -1,0 +1,114 @@
+// copied from the hibernate tutorial and stripped of annotations: org.hibernate.tutorial.em.Event
+package orm.persistor.test;
+
+import java.util.Date;
+
+import orm.persistor.test.Event;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+@Entity
+@Table(name="EVENTS")
+public class EventMapped {
+	// underlying object
+	private Event entity;
+	
+	// synthesized attribute
+	private long ID;
+	
+	// deserialization buffer
+	private Object[] buffer;
+	private int bufferIndex;
+
+	public EventMapped() {
+		buffer = new Object[2];
+		bufferIndex = 0;
+	}
+
+	public EventMapped(String title, Date EVENT_DATE) {
+		entity = new Event(title, EVENT_DATE);
+		setID(implicit_ID());
+	}
+	
+	private long implicit_ID() {
+		synchronized (EventMapping.class) {
+			EventMapping.nextId = EventMapping.nextId + 1;
+			return EventMapping.nextId;
+		}
+	}
+
+	private long date_encode(Date date) {
+		return date.getTime();
+	}
+	
+	private Date date_decode(long stamp) {
+		return new Date(stamp);
+	}
+
+
+	private void tryLoadEntity() {
+		if (bufferIndex >= buffer.length) {
+			entity = new Event((String) buffer[1], date_decode((Long) buffer[0]));
+			buffer = null;	
+		}
+	}
+
+	@Id
+    public long getID() {
+		return ID;
+    }
+
+    private void setID(long ID) {
+		this.ID = ID;
+    }
+
+    public long getEVENT_DATE() {
+		return date_encode(entity.getDate());
+    }
+
+    public void setEVENT_DATE(long EVENT_DATE) {
+    	if (entity != null)
+			entity.setDate(date_decode(EVENT_DATE));
+		else {
+			buffer[bufferIndex] = EVENT_DATE;
+			bufferIndex++;
+			tryLoadEntity();
+		}
+    }
+
+    public String getTITLE() {
+		return entity.getTitle();
+    }
+
+    public void setTITLE(String TITLE) {
+    	if (entity != null)
+			entity.setTitle(TITLE);
+		else {
+			buffer[bufferIndex] = TITLE;
+			bufferIndex++;
+			tryLoadEntity();
+		}
+    }
+    
+
+	// forward methods from `Event
+	@Transient    
+    public Date getDate() {
+		return entity.getDate();
+    }
+	@Transient
+    public void setDate(Date date) {
+		entity.setDate(date);
+    }
+	@Transient
+    public String getTitle() {
+		return entity.getTitle();
+    }
+	@Transient
+    public void setTitle(String title) {
+		entity.setTitle(title);
+    }
+
+}
