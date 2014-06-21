@@ -14,20 +14,21 @@ import statemachine.ToJava;
 
 public template ToJavaIO {
   $$id-as-string = ?Id(<id>); !Lit(String([Chars(<id>)]))
-  $$pkg-type = ?PackageName(<id>); pkgs-type
-  $$pkgs-type : [y] -> PackageOrTypeName(y)
-  $$pkgs-type : ys -> PackageOrTypeName(<pkgs-type> ys', z) 
-      where <split-init-last> ys => (ys',z)
+  $$make-java-typename : [cl] -> TypeName(Id(cl))
+  $$make-java-typename : [p|rest] -> <make-java-typename(|PackageOrTypeName(Id(p)))> rest
+  $$make-java-typename(|pkg) : [cl] -> TypeName(pkg, Id(cl))
+  $$make-java-typename(|pkg) : [p|rest] -> <make-java-typename(|PackageOrTypeName(pkg, Id(p)))> rest
 
   $pkg = collect-one(?PackageDec(_,<id>))
   $classname = collect-one(?ModelDecHead(_,<id>,_))
+  $model = prim("SUGARJ_current_model_name"); string-tokenize(|"/"); make-java-typename
 
   package $pkg;
 
   import java.util.List;
   import java.util.LinkedList;
 
-  import Machine = statemachine.ToJava( ${<pkg-type> pkg}.$classname );
+  import Machine = statemachine.ToJava( $model );
 
   public class $classname {
 
