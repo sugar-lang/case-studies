@@ -3,6 +3,8 @@ package orm.persistor.test;
 import java.util.Date;
 
 import orm.persistor.test.Event;
+import orm.persistor.test.EventMapping;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;

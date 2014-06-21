@@ -1,10 +1,7 @@
 package orm.persistor.test;
 
 import orm.persistor.Syntax;
-
-public class EventMapping {
-	public static int nextId = 0;
-}
+import orm.persistor.DesugarMapping;
 
 public mapping EventMapping {
 	// the target table
@@ -16,7 +13,7 @@ public mapping EventMapping {
 	// match -> target
 	Date date -> {
 		// the target column
-		column "EVENT_DATE";
+		column "EVENT_DATE"; 
 		// the target type
 		type long;
 		// the encoding of the data for the target type

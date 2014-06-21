@@ -1,0 +1,67 @@
+package orm.persistor;
+
+import concretesyntax.Java;
+import concretesyntax.Stratego;
+
+import orm.persistor.Syntax;
+import orm.persistor.ApplyMapping;
+
+// will be generated
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+
+public extension DesugarMapping {
+
+desugarings
+	desugar-mapping
+
+rules
+	desugar-mapping :
+		MappingDec(mods, name, body) -> <conc> (<mapping-imports>, [mapping-class, mapping-trans-config])
+	where
+		mapping-class := <make-mapping-class> (mods, name, body);
+		mapping-trans-config := <make-mapping-trans-config> (mods, name, body)
+
+	mapping-imports = ![
+		|[import javax.persistence.Entity;]|,
+		|[import javax.persistence.Id;]|,
+		|[import javax.persistence.Table;]|,
+		|[import javax.persistence.Transient;]|
+	]
+	
+// mapping class
+rules
+	make-mapping-class :
+		(mods, name, MappingBody(_,fields,_)) ->
+		ClassDec(
+			ClassDecHead(mods, name, None, None, None),
+			ClassBody(static-fields))
+	where
+		static-fields := <map(FieldDec(make-public-static, id, id))> fields
+
+	make-public-static = ![Public(),Static()|<filter(not(Private());not(Protected()))>]
+
+// mapping trans config
+rules
+	make-mapping-trans-config :
+		(mods, name, MappingBody(TableDec(table),_,rulez)) -> 
+		ExtensionDec(
+			ExtensionDecHead(mods, name),
+			ExtensionBody([
+				transformation-elem(main-rules), 
+				transformation-elem(table-rules), 
+				transformation-elem(rulez-rules)]))
+	where
+		mname := <prim("SUGARJ_current_model_name")>;
+		
+		main-rules := |[rules main = apply-mapping(|string~mname)]|;
+
+		table-name := <?String(<map(?Chars(<id>))>); concat-strings> table;
+		table-rules := |[rules mapping-table : string~mname -> string~table-name]|;
+		
+		rulez-rules := |[rules mapping-rulez : string~mname -> term~(<trm-explode> rulez)]|
+		
+}

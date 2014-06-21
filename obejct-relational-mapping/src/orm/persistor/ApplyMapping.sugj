@@ -1,0 +1,7 @@
+package orm.persistor;
+
+public extension ApplyMapping {
+	
+	rules
+		apply-mapping(|name) = fail
+}
