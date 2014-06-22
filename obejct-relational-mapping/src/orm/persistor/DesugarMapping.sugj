@@ -6,13 +6,6 @@ import concretesyntax.Stratego;
 import orm.persistor.Syntax;
 import orm.persistor.ApplyMapping;
 
-// will be generated
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
-
 public extension DesugarMapping {
 
 desugarings
@@ -20,17 +13,10 @@ desugarings
 
 rules
 	desugar-mapping :
-		MappingDec(mods, name, body) -> <conc> (<mapping-imports>, [mapping-class, mapping-trans-config])
+		MappingDec(mods, name, body) -> [mapping-class, mapping-trans-config]
 	where
 		mapping-class := <make-mapping-class> (mods, name, body);
 		mapping-trans-config := <make-mapping-trans-config> (mods, name, body)
-
-	mapping-imports = ![
-		|[import javax.persistence.Entity;]|,
-		|[import javax.persistence.Id;]|,
-		|[import javax.persistence.Table;]|,
-		|[import javax.persistence.Transient;]|
-	]
 	
 // mapping class
 rules
@@ -48,12 +34,10 @@ rules
 rules
 	make-mapping-trans-config :
 		(mods, name, MappingBody(TableDec(table),_,rulez)) -> 
-		ExtensionDec(
-			ExtensionDecHead(mods, name),
-			ExtensionBody([
-				transformation-elem(main-rules), 
-				transformation-elem(table-rules), 
-				transformation-elem(rulez-rules)]))
+		TransDec(
+			TransDecHead(mods, name),
+			TransBody(TransformationDef([],
+				[main-rules, table-rules, rulez-rules])))
 	where
 		mname := <prim("SUGARJ_current_model_name")>;
 		

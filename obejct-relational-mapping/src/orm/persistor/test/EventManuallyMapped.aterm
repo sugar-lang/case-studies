@@ -1,0 +1,498 @@
+CompilationUnit(
+  [ PackageDec(
+      []
+    , PackageName([Id("orm"), Id("persistor"), Id("test")])
+    )
+  , TypeImportDec(
+      TypeName(
+        PackageOrTypeName(PackageOrTypeName(Id("java")), Id("util"))
+      , Id("Date")
+      )
+    )
+  , TypeImportDec(
+      TypeName(
+        PackageOrTypeName(
+          PackageOrTypeName(PackageOrTypeName(Id("orm")), Id("persistor"))
+        , Id("test")
+        )
+      , Id("Event")
+      )
+    )
+  , TypeImportDec(
+      TypeName(
+        PackageOrTypeName(
+          PackageOrTypeName(PackageOrTypeName(Id("orm")), Id("persistor"))
+        , Id("test")
+        )
+      , Id("EventMapping")
+      )
+    )
+  , TypeImportDec(
+      TypeName(
+        PackageOrTypeName(PackageOrTypeName(Id("javax")), Id("persistence"))
+      , Id("Entity")
+      )
+    )
+  , TypeImportDec(
+      TypeName(
+        PackageOrTypeName(PackageOrTypeName(Id("javax")), Id("persistence"))
+      , Id("Id")
+      )
+    )
+  , TypeImportDec(
+      TypeName(
+        PackageOrTypeName(PackageOrTypeName(Id("javax")), Id("persistence"))
+      , Id("Table")
+      )
+    )
+  , TypeImportDec(
+      TypeName(
+        PackageOrTypeName(PackageOrTypeName(Id("javax")), Id("persistence"))
+      , Id("Transient")
+      )
+    )
+  , ClassDec(
+      ClassDecHead(
+        [ MarkerAnno(TypeName(Id("Entity")))
+        , Anno(
+            TypeName(Id("Table"))
+          , [ElemValPair(Id("name"), Lit(String([Chars("EVENTS")])))]
+          )
+        , Public()
+        ]
+      , Id("EventManuallyMapped")
+      , None()
+      , None()
+      , None()
+      )
+    , ClassBody(
+        [ FieldDec(
+            [Private()]
+          , ClassOrInterfaceType(TypeName(Id("Event")), None())
+          , [VarDec(Id("entity"))]
+          )
+        , FieldDec([Private()], Long(), [VarDec(Id("ID"))])
+        , FieldDec(
+            [Private()]
+          , ArrayType(ClassOrInterfaceType(TypeName(Id("Object")), None()))
+          , [VarDec(Id("buffer"))]
+          )
+        , FieldDec([Private()], Int(), [VarDec(Id("bufferIndex"))])
+        , ConstrDec(
+            ConstrDecHead([Public()], None(), Id("EventManuallyMapped"), [], None())
+          , ConstrBody(
+              None()
+            , [ ExprStm(
+                  Assign(
+                    ExprName(Id("buffer"))
+                  , NewArray(
+                      TypeName(Id("Object"))
+                    , [Dim(Lit(Deci("2")))]
+                    , []
+                    )
+                  )
+                )
+              , ExprStm(Assign(ExprName(Id("bufferIndex")), Lit(Deci("0"))))
+              ]
+            )
+          )
+        , ConstrDec(
+            ConstrDecHead(
+              [Public()]
+            , None()
+            , Id("EventManuallyMapped")
+            , [ Param(
+                  []
+                , ClassOrInterfaceType(TypeName(Id("String")), None())
+                , Id("title")
+                )
+              , Param(
+                  []
+                , ClassOrInterfaceType(TypeName(Id("Date")), None())
+                , Id("EVENT_DATE")
+                )
+              ]
+            , None()
+            )
+          , ConstrBody(
+              None()
+            , [ ExprStm(
+                  Assign(
+                    ExprName(Id("entity"))
+                  , NewInstance(
+                      None()
+                    , ClassOrInterfaceType(TypeName(Id("Event")), None())
+                    , [ExprName(Id("title")), ExprName(Id("EVENT_DATE"))]
+                    , None()
+                    )
+                  )
+                )
+              , ExprStm(
+                  Invoke(
+                    Method(MethodName(Id("setID")))
+                  , [Invoke(Method(MethodName(Id("implicit_ID"))), [])]
+                  )
+                )
+              ]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [Private()]
+            , None()
+            , Long()
+            , Id("implicit_ID")
+            , []
+            , None()
+            )
+          , Block(
+              [ Synchronized(
+                  Lit(Class(ClassOrInterfaceType(TypeName(Id("EventMapping")), None())))
+                , Block(
+                    [ ExprStm(
+                        Assign(
+                          ExprName(AmbName(Id("EventMapping")), Id("nextId"))
+                        , Plus(
+                            ExprName(AmbName(Id("EventMapping")), Id("nextId"))
+                          , Lit(Deci("1"))
+                          )
+                        )
+                      )
+                    , Return(Some(ExprName(AmbName(Id("EventMapping")), Id("nextId"))))
+                    ]
+                  )
+                )
+              ]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [Private()]
+            , None()
+            , Long()
+            , Id("date_encode")
+            , [Param(
+                 []
+               , ClassOrInterfaceType(TypeName(Id("Date")), None())
+               , Id("date")
+               )]
+            , None()
+            )
+          , Block(
+              [ Return(
+                  Some(
+                    Invoke(
+                      Method(MethodName(AmbName(Id("date")), Id("getTime")))
+                    , []
+                    )
+                  )
+                )
+              ]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [Private()]
+            , None()
+            , ClassOrInterfaceType(TypeName(Id("Date")), None())
+            , Id("date_decode")
+            , [Param([], Long(), Id("stamp"))]
+            , None()
+            )
+          , Block(
+              [ Return(
+                  Some(
+                    NewInstance(
+                      None()
+                    , ClassOrInterfaceType(TypeName(Id("Date")), None())
+                    , [ExprName(Id("stamp"))]
+                    , None()
+                    )
+                  )
+                )
+              ]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [Private()]
+            , None()
+            , Void()
+            , Id("tryLoadEntity")
+            , []
+            , None()
+            )
+          , Block(
+              [ If(
+                  GtEq(
+                    ExprName(Id("bufferIndex"))
+                  , ExprName(AmbName(Id("buffer")), Id("length"))
+                  )
+                , Block(
+                    [ ExprStm(
+                        Assign(
+                          ExprName(Id("entity"))
+                        , NewInstance(
+                            None()
+                          , ClassOrInterfaceType(TypeName(Id("Event")), None())
+                          , [ CastRef(
+                                ClassOrInterfaceType(TypeName(Id("String")), None())
+                              , ArrayAccess(ExprName(Id("buffer")), Lit(Deci("1")))
+                              )
+                            , Invoke(
+                                Method(MethodName(Id("date_decode")))
+                              , [ CastRef(
+                                    ClassOrInterfaceType(TypeName(Id("Long")), None())
+                                  , ArrayAccess(ExprName(Id("buffer")), Lit(Deci("0")))
+                                  )
+                                ]
+                              )
+                            ]
+                          , None()
+                          )
+                        )
+                      )
+                    , ExprStm(Assign(ExprName(Id("buffer")), Lit(Null())))
+                    ]
+                  )
+                )
+              ]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [MarkerAnno(TypeName(Id("Id"))), Public()]
+            , None()
+            , Long()
+            , Id("getID")
+            , []
+            , None()
+            )
+          , Block([Return(Some(ExprName(Id("ID"))))])
+          )
+        , MethodDec(
+            MethodDecHead(
+              [Private()]
+            , None()
+            , Void()
+            , Id("setID")
+            , [Param([], Long(), Id("ID"))]
+            , None()
+            )
+          , Block(
+              [ExprStm(
+                 Assign(Field(This(), Id("ID")), ExprName(Id("ID")))
+               )]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [Public()]
+            , None()
+            , Long()
+            , Id("getEVENT_DATE")
+            , []
+            , None()
+            )
+          , Block(
+              [ Return(
+                  Some(
+                    Invoke(
+                      Method(MethodName(Id("date_encode")))
+                    , [Invoke(
+                         Method(MethodName(AmbName(Id("entity")), Id("getDate")))
+                       , []
+                       )]
+                    )
+                  )
+                )
+              ]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [Public()]
+            , None()
+            , Void()
+            , Id("setEVENT_DATE")
+            , [Param([], Long(), Id("EVENT_DATE"))]
+            , None()
+            )
+          , Block(
+              [ If(
+                  NotEq(ExprName(Id("entity")), Lit(Null()))
+                , ExprStm(
+                    Invoke(
+                      Method(MethodName(AmbName(Id("entity")), Id("setDate")))
+                    , [Invoke(
+                         Method(MethodName(Id("date_decode")))
+                       , [ExprName(Id("EVENT_DATE"))]
+                       )]
+                    )
+                  )
+                , Block(
+                    [ ExprStm(
+                        Assign(
+                          ArrayAccess(ExprName(Id("buffer")), ExprName(Id("bufferIndex")))
+                        , ExprName(Id("EVENT_DATE"))
+                        )
+                      )
+                    , ExprStm(PostIncr(ExprName(Id("bufferIndex"))))
+                    , ExprStm(Invoke(Method(MethodName(Id("tryLoadEntity"))), []))
+                    ]
+                  )
+                )
+              ]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [Public()]
+            , None()
+            , ClassOrInterfaceType(TypeName(Id("String")), None())
+            , Id("getTITLE")
+            , []
+            , None()
+            )
+          , Block(
+              [ Return(
+                  Some(
+                    Invoke(
+                      Method(MethodName(AmbName(Id("entity")), Id("getTitle")))
+                    , []
+                    )
+                  )
+                )
+              ]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [Public()]
+            , None()
+            , Void()
+            , Id("setTITLE")
+            , [Param(
+                 []
+               , ClassOrInterfaceType(TypeName(Id("String")), None())
+               , Id("TITLE")
+               )]
+            , None()
+            )
+          , Block(
+              [ If(
+                  NotEq(ExprName(Id("entity")), Lit(Null()))
+                , ExprStm(
+                    Invoke(
+                      Method(MethodName(AmbName(Id("entity")), Id("setTitle")))
+                    , [ExprName(Id("TITLE"))]
+                    )
+                  )
+                , Block(
+                    [ ExprStm(
+                        Assign(
+                          ArrayAccess(ExprName(Id("buffer")), ExprName(Id("bufferIndex")))
+                        , ExprName(Id("TITLE"))
+                        )
+                      )
+                    , ExprStm(PostIncr(ExprName(Id("bufferIndex"))))
+                    , ExprStm(Invoke(Method(MethodName(Id("tryLoadEntity"))), []))
+                    ]
+                  )
+                )
+              ]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [MarkerAnno(TypeName(Id("Transient"))), Public()]
+            , None()
+            , ClassOrInterfaceType(TypeName(Id("Date")), None())
+            , Id("getDate")
+            , []
+            , None()
+            )
+          , Block(
+              [ Return(
+                  Some(
+                    Invoke(
+                      Method(MethodName(AmbName(Id("entity")), Id("getDate")))
+                    , []
+                    )
+                  )
+                )
+              ]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [MarkerAnno(TypeName(Id("Transient"))), Public()]
+            , None()
+            , Void()
+            , Id("setDate")
+            , [Param(
+                 []
+               , ClassOrInterfaceType(TypeName(Id("Date")), None())
+               , Id("date")
+               )]
+            , None()
+            )
+          , Block(
+              [ ExprStm(
+                  Invoke(
+                    Method(MethodName(AmbName(Id("entity")), Id("setDate")))
+                  , [ExprName(Id("date"))]
+                  )
+                )
+              ]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [MarkerAnno(TypeName(Id("Transient"))), Public()]
+            , None()
+            , ClassOrInterfaceType(TypeName(Id("String")), None())
+            , Id("getTitle")
+            , []
+            , None()
+            )
+          , Block(
+              [ Return(
+                  Some(
+                    Invoke(
+                      Method(MethodName(AmbName(Id("entity")), Id("getTitle")))
+                    , []
+                    )
+                  )
+                )
+              ]
+            )
+          )
+        , MethodDec(
+            MethodDecHead(
+              [MarkerAnno(TypeName(Id("Transient"))), Public()]
+            , None()
+            , Void()
+            , Id("setTitle")
+            , [Param(
+                 []
+               , ClassOrInterfaceType(TypeName(Id("String")), None())
+               , Id("title")
+               )]
+            , None()
+            )
+          , Block(
+              [ ExprStm(
+                  Invoke(
+                    Method(MethodName(AmbName(Id("entity")), Id("setTitle")))
+                  , [ExprName(Id("title"))]
+                  )
+                )
+              ]
+            )
+          )
+        ]
+      )
+    )
+  ]
+)

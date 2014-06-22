@@ -1,7 +1,67 @@
 package orm.persistor;
 
+import concretesyntax.Java;
+
+// will be generated
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 public extension ApplyMapping {
 	
-	rules
-		apply-mapping(|name) = fail
+rules // mapping interface
+	mapping-table = fail
+	mapping-rulez = fail
+	
+rules		
+	mapping-imports = ![
+		|[import javax.persistence.Entity;]|,
+		|[import javax.persistence.Id;]|,
+		|[import javax.persistence.Table;]|,
+		|[import javax.persistence.Transient;]|
+	]
+	
+rules
+	apply-mapping(|map-name) :
+		CompilationUnit(decls) -> CompilationUnit(<conc> (init, <mapping-imports>, [mapped-class]))
+	where
+		(init, class) := <split-init-last> decls;
+		mapped-class := <class-mapping(|map-name)> class
+
+	class-mapping(|map-name) :
+		ClassDec(ClassDecHead(mods, name, params, super, interf), entity) -> 
+		ClassDec(
+			ClassDecHead([entity-anno, table-anno | mods], name, params, super, interf),
+			ClassBody([entity-field]))
+	where
+		entity-anno := <make-anno> "Entity";
+		table-anno := <make-anno> ("Table", "name", <mapping-table; make-java-string> map-name);
+		
+		entity-typename := <prim("SUGARJ_current_model_name"); string-tokenize(|['/']); make-java-typename; no-rename>;
+		entity-field := FieldDec([Private()], ClassOrInterfaceType(entity-typename, None()), [VarDec(Id("entity"))])
+	
+	
+	
+rules
+	make-anno : 
+		type -> 
+		MarkerAnno(TypeName(Id(type)))
+	where <is-string> type
+	make-anno : 
+		(type, valexp) -> 
+		SingleElemAnno(TypeName(Id(type)), valexp)
+	make-anno : 
+		(type, key, valexp) -> 
+		Anno(TypeName(Id(type)), [ElemValPair(Id(key), valexp)])
+
+	make-java-string = !Lit(String([Chars(<id>)]))
+	
+	make-java-typename : [cl] -> TypeName(Id(cl))
+	make-java-typename : [p|rest] -> <make-java-typename(|PackageOrTypeName(Id(p)))> rest
+	make-java-typename(|pkg) : [cl] -> TypeName(pkg, Id(cl))
+	make-java-typename(|pkg) : [p|rest] -> <make-java-typename(|PackageOrTypeName(pkg, Id(p)))> rest
+
+	no-rename : TypeName(n) -> TypeName(NoRename(n))
+	no-rename : TypeName(pkg, n) -> TypeName(pkg, NoRename(n))
 }
