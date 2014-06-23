@@ -21,7 +21,7 @@ rules
 // mapping class
 rules
 	make-mapping-class :
-		(mods, name, MappingBody(_,_,_,fields,_)) ->
+		(mods, name, MappingBody(_,_,fields,_)) ->
 		ClassDec(
 			ClassDecHead(mods, name, None, None, None),
 			ClassBody(static-fields))
@@ -33,7 +33,7 @@ rules
 // mapping trans config
 rules
 	make-mapping-trans-config :
-		(mods, name, MappingBody(TableDec(table),_,ActionDec(action),fields,rulez)) -> 
+		(mods, name, MappingBody(TableDec(table),ActionDec(action),fields,rulez)) -> 
 		TransDec(
 			TransDecHead(mods, name),
 			TransBody(TransformationDef([],

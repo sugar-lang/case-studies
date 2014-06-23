@@ -7,8 +7,6 @@ public mapping EventMapping {
 	// the target table
 	table "EVENTS";
 
-	columns $ID, $EVENT_DATE, $TITLE;
-
 	deserialization action = construct(title, date);
 	
 	// state local to the mapping
@@ -27,7 +25,7 @@ public mapping EventMapping {
 		decode(stamp) = new Date(stamp);
 	}
 	
-	// this is the default mapping and has to be specified explicitly because otherwise the field is not persisted
+	// this has to be specified explicitly because otherwise the field is not persisted
 	String title -> {
 		column $TITLE;
 	}
