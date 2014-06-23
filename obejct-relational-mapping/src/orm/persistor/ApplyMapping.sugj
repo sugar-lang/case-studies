@@ -44,16 +44,21 @@ rules
 					synthesized-fields, synthesized-generators,
 					encoders, decoders,
 					[loader],
-					column-accessors)))
+					column-accessors,
+					forward-methods)))
 	where
+		rulez := <mapping-rulez> map-name;
+
 		entity-anno := <make-anno> "Entity";
 		table-anno := <make-anno> ("Table", "name", <mapping-table; make-java-string> map-name);
 		
 		entity-typename := <prim("SUGARJ_current_model_name"); string-tokenize(|['/']); make-java-typename; no-rename>;
 		entity-field := FieldDec([Private()], ClassOrInterfaceType(entity-typename, None()), [VarDec(Id("entity"))]);
 		buffer-field := FieldDec([Private()], |[java.util.HashMap<String,Object>]|, [VarDec(Id("buffer"))]);
-		
-		rulez := <mapping-rulez> map-name;
+
+		constr-default := |[public ~Id:name() { buffer = new java.util.HashMap<String,Object>(); }]|;
+		constrs-derived := <filter(make-derived-constructor(|entity-typename, rulez))> entity;
+
 		synthesized-fields := <filter(make-synthesized-field)> rulez;
 		synthesized-generators := <filter(make-synthesized-generator(|map-name))> rulez;
 		
@@ -65,8 +70,7 @@ rules
 		
 		column-accessors := <map(make-column-accessors); concat> rulez;
 	
-		constr-default := |[public ~Id:name() { buffer = new java.util.HashMap<String,Object>(); }]|;
-		constrs-derived := <filter(make-derived-constructor(|entity-typename, rulez))> entity
+		forward-methods := <filter(make-forward-method)> entity
 	
 	make-derived-constructor(|entity-typename, rulez) :
 		ConstrDec(head@ConstrDecHead(mods, tps, name, [p|ps], throws), body) ->
@@ -180,7 +184,7 @@ rules // column accessors
 		
 		getname := <conc-strings> ("get", column);
 		getter := |[public ~type ~id:getname() { return ~id:column; }]|;
-		getter-annotated := <where(<?PrimaryKey> key) < annotate-method(|<make-anno> "Id") + id> getter;
+		getter-annotated := <where(<?Some(PrimaryKey)> key) < annotate-method(|<make-anno> "Id") + id> getter;
 		
 		setname := <conc-strings> ("set", column);
 		setter := |[public void ~id:setname(~type ~id:column) { this.~id:column = ~id:column; }]|
@@ -200,12 +204,22 @@ rules // column accessors
 		entity-getname := <conc-strings> ("get", <string-as-chars([to-upper|id])> name);
 		encodename := <conc-strings> ("encode_", name);
 		getter := |[public ~type ~id:getname() { return ~id:encodename(entity.~id:(entity-getname)()); }]|;
-		getter-annotated := <where(<?PrimaryKey> key) < annotate-method(|<make-anno> "Id") + id> getter;
+		getter-annotated := <where(<?Some(PrimaryKey)> key) < annotate-method(|<make-anno> "Id") + id> getter;
 
 		setname := <conc-strings> ("set", column);
 		entity-setname := <conc-strings> ("set", <string-as-chars([to-upper|id])> name);
 		decodename := <conc-strings> ("decode_", name);
-		setter := |[public void ~id:setname(~type ~id:column) { entity.~id:(entity-setname)(~id:decodename(~id:column)); }]|
+		setter := |[
+			public void ~id:setname(~type ~id:column) {
+				if (entity != null)
+					entity.~id:entity-setname(~id:decodename(~id:column));
+				else {
+					buffer.put(~<make-java-string>name, ~id:decodename(~id:column));
+					tryLoadEntity();
+				}
+			}
+		]|
+
 
 	make-column-accessors :
 		MappingRule(mtype, Id(name), specs) ->
@@ -220,14 +234,43 @@ rules // column accessors
 		getname := <conc-strings> ("get", column);
 		entity-getname := <conc-strings> ("get", <string-as-chars([to-upper|id])> name);
 		getter := |[public ~type ~id:getname() { return entity.~id:(entity-getname)(); }]|;
-		getter-annotated := <where(<?PrimaryKey> key) < annotate-method(|<make-anno> "Id") + id> getter;
+		getter-annotated := <where(<?Some(PrimaryKey)> key) < annotate-method(|<make-anno> "Id") + id> getter;
 
 		setname := <conc-strings> ("set", column);
 		entity-setname := <conc-strings> ("set", <string-as-chars([to-upper|id])> name);
-		setter := |[public void ~id:setname(~type ~id:column) { entity.~id:(entity-setname)(~id:column); }]|
+		setter := |[
+			public void ~id:setname(~type ~id:column) {
+				if (entity != null)
+					entity.~id:entity-setname(~id:column);
+				else {
+					buffer.put(~<make-java-string>name, ~id:column);
+					tryLoadEntity();
+				}
+			}
+		]|
+
 
 	
 	annotate-method(|anno) = MethodDec(MethodDecHead(![anno|<id>], id, id, id, id, id), id)
+
+rules // method forwarding
+	make-forward-method :
+		MethodDec(MethodDecHead(mods, tps, rt, name, ps, ts), _) ->
+		MethodDec(
+			MethodDecHead([<make-anno>"Transient"|mods], tps, rt, name, ps, ts),
+			Block([stm]))
+	where
+		<not(elem)> (Private(), mods);
+		targs := <?None <+ ?Some(<make-type-args>)> tps;
+		args := <map(?Param(_,_,<id>); !ExprName(<id>))> ps;
+		invoke := Invoke(Method(ExprName(Id("entity")), targs, name), args);
+		stm := <where(<?Void()> rt) < !ExprStm(<id>) + !Return(Some(<id>))> invoke
+	
+	make-type-args :
+		TypeParams(ps) ->
+		TypeArgs(as)
+	where
+		as := <map(?TypeParam(<id>,_); !ClassOrInterfaceType(TypeName(<id>), None()))> ps
 
 rules
 	val-to-java(cont|map-name) = 

@@ -62,8 +62,8 @@ public class EventMappingTest extends TestCase {
 	}
 
 	public void testBasicUsage() {
-		EventMapped e1 = new EventMapped("Our very first manually mapped event!", new Date());
-		EventMapped e2 = new EventMapped("A follow up manually mapped event", new Date());
+		EventMapped e1 = new EventMapped("Our very first automatically mapped event!", new Date());
+		EventMapped e2 = new EventMapped("A follow up automatically mapped event", new Date());
 		System.out.println(e1 + ": " + e1.getID());
 		System.out.println(e2 + ": " + e2.getID());
 		
@@ -80,11 +80,11 @@ public class EventMappingTest extends TestCase {
 		entityManager.getTransaction().begin();
         List<EventMapped> result = entityManager.createQuery( "from " + EventMapped.class.getSimpleName(), EventMapped.class ).getResultList();
         assertEquals(result.size(), 2);
-        assertEquals(result.get(0).getTitle(), "Our very first manually mapped event!");
-        assertEquals(result.get(1).getTitle(), "A follow up manually mapped event");
+        assertEquals(result.get(0).getTitle(), "Our very first automatically mapped event!");
+        assertEquals(result.get(1).getTitle(), "A follow up automatically mapped event");
         
         // let's update the second event
-        result.get(1).setTitle("A changed follow up manually mapped event");
+        result.get(1).setTitle("A changed follow up automatically mapped event");
         entityManager.getTransaction().commit();
         entityManager.close();
         
@@ -93,8 +93,8 @@ public class EventMappingTest extends TestCase {
 		entityManager.getTransaction().begin();
         List<EventMapped> result2 = entityManager.createQuery( "from " + EventMapped.class.getSimpleName(), EventMapped.class ).getResultList();
         assertEquals(result2.size(), 2);
-        assertEquals(result2.get(0).getTitle(), "Our very first manually mapped event!");
-        assertEquals(result2.get(1).getTitle(), "A changed follow up manually mapped event");
+        assertEquals(result2.get(0).getTitle(), "Our very first automatically mapped event!");
+        assertEquals(result2.get(1).getTitle(), "A changed follow up automatically mapped event");
         entityManager.getTransaction().commit();
         entityManager.close();
 	}
