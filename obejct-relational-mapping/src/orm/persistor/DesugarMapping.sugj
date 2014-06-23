@@ -21,7 +21,7 @@ rules
 // mapping class
 rules
 	make-mapping-class :
-		(mods, name, MappingBody(_,fields,_)) ->
+		(mods, name, MappingBody(_,_,_,fields,_)) ->
 		ClassDec(
 			ClassDecHead(mods, name, None, None, None),
 			ClassBody(static-fields))
@@ -33,19 +33,21 @@ rules
 // mapping trans config
 rules
 	make-mapping-trans-config :
-		(mods, name, MappingBody(TableDec(table),_,rulez)) -> 
+		(mods, name, MappingBody(TableDec(table),_,ActionDec(action),fields,rulez)) -> 
 		TransDec(
 			TransDecHead(mods, name),
 			TransBody(TransformationDef([],
-				[main-rules, table-rules, rulez-rules])))
+				[main-rules, table-rules, action-rules, field-rules, rulez-rules])))
 	where
 		mname := <prim("SUGARJ_current_model_name")>;
+		field-vars := <map(?FieldDec(_,_,<id>)); concat> fields;
+		field-names := <map(?VarDec(Id(<id>)) + ?VarDec(Id(<id>), _))> field-vars;
 		
 		main-rules := |[rules main = apply-mapping(|string~mname)]|;
 
-		table-name := <?String(<map(?Chars(<id>))>); concat-strings> table;
+		table-name := <from-java-string> table;
 		table-rules := |[rules mapping-table : string~mname -> string~table-name]|;
-		
+		action-rules := |[rules mapping-action : string~mname -> term~(<trm-explode> action)]|;
+		field-rules := |[rules mapping-field-names : string~mname -> term~(<trm-explode> field-names)]|;
 		rulez-rules := |[rules mapping-rulez : string~mname -> term~(<trm-explode> rulez)]|
-		
 }

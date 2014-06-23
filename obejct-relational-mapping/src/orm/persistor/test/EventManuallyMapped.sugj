@@ -20,22 +20,20 @@ public class EventManuallyMapped {
 	private long ID;
 	
 	// deserialization buffer
-	private Object[] buffer;
-	private int bufferIndex;
-
+	private java.util.HashMap<String,Object> buffer;
+	
 	public EventManuallyMapped() {
-		buffer = new Object[2];
-		bufferIndex = 0;
+		buffer = new java.util.HashMap<String,Object>();
 	}
 
-	public EventManuallyMapped(String title, Date EVENT_DATE) {
-		entity = new Event(title, EVENT_DATE);
-		setID(implicit_ID());
+	public EventManuallyMapped(String title, Date date) {
+		entity = new Event(title, date);
+		setID(generate_ID());
 	}
 	
-	private long implicit_ID() {
+	private long generate_ID() {
 		synchronized (EventMapping.class) {
-			EventMapping.nextId = EventMapping.nextId + 1;
+			orm.persistor.test.EventMapping.nextId = orm.persistor.test.EventMapping.nextId + 1;
 			return EventMapping.nextId;
 		}
 	}
@@ -50,8 +48,8 @@ public class EventManuallyMapped {
 
 
 	private void tryLoadEntity() {
-		if (bufferIndex >= buffer.length) {
-			entity = new Event((String) buffer[1], date_decode((Long) buffer[0]));
+		if (buffer.containsKey("title") && buffer.containsKey("date")) {
+			entity = new Event((String) buffer.get("title"), (Date) buffer.get("date"));
 			buffer = null;	
 		}
 	}
@@ -73,8 +71,7 @@ public class EventManuallyMapped {
     	if (entity != null)
 			entity.setDate(date_decode(EVENT_DATE));
 		else {
-			buffer[bufferIndex] = EVENT_DATE;
-			bufferIndex++;
+			buffer.put("date", date_decode(EVENT_DATE));
 			tryLoadEntity();
 		}
     }
@@ -87,8 +84,7 @@ public class EventManuallyMapped {
     	if (entity != null)
 			entity.setTitle(TITLE);
 		else {
-			buffer[bufferIndex] = TITLE;
-			bufferIndex++;
+			buffer.put("title", TITLE);
 			tryLoadEntity();
 		}
     }
@@ -111,5 +107,12 @@ public class EventManuallyMapped {
     public void setTitle(String title) {
 		entity.setTitle(title);
     }
-
+	@Transient
+    public boolean isProcessed() {
+		return entity.isProcessed();
+    }
+	@Transient
+    public void setProcessed(boolean processed) {
+		entity.setProcessed(processed);
+    }
 }

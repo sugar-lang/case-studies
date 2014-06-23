@@ -6,14 +6,19 @@ import orm.persistor.DesugarMapping;
 public mapping EventMapping {
 	// the target table
 	table "EVENTS";
+
+	columns $ID, $EVENT_DATE, $TITLE;
+
+	deserialization action = construct(title, date);
 	
 	// state local to the mapping
 	private int nextId = 0;
 	
+	
 	// match -> target
 	Date date -> {
 		// the target column
-		column "EVENT_DATE"; 
+		column $EVENT_DATE; 
 		// the target type
 		type long;
 		// the encoding of the data for the target type
@@ -22,18 +27,18 @@ public mapping EventMapping {
 		decode(stamp) = new Date(stamp);
 	}
 	
-	// this is the default mapping and does not have to be specified explicitly
+	// this is the default mapping and has to be specified explicitly because otherwise the field is not persisted
 	String title -> {
-		column "TITLE";
+		column $TITLE;
 	}
 	
 	// synthesized attribute
-	{} -> {
+	synthesized {
 		// the target column
-		column "ID" primary key;
+		column $ID primary key;
 		// the target type
 		type long;
 		// id cannot be provided by the user but must be implicitly generated
-		implicit = { nextId = nextId + 1; nextId };
+		value = { nextId = nextId + 1; nextId };
 	}
 }

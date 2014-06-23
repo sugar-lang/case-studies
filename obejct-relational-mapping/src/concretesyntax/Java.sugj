@@ -223,6 +223,7 @@ context-free syntax
   context-free syntax
     "~"          StrategoTerm -> JavaType {cons("FromMetaExpr")}
     "~type:"     StrategoTerm -> JavaType {cons("FromMetaExpr")}
+    "~typename:"     StrategoTerm -> JavaTypeName {cons("FromMetaExpr")}
     "~"          StrategoTerm -> JavaArrayBaseType {cons("FromMetaExpr")}
     "~arraybasetype:"     StrategoTerm -> JavaArrayBaseType {cons("FromMetaExpr")}
     "~"  StrategoTerm -> JavaRefType {cons("FromMetaExpr"), avoid}
@@ -325,6 +326,9 @@ context-free syntax
     "java_method-dec"  "|[" JavaMethodDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
     "java"             "|[" JavaMethodDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
                        "|[" JavaMethodDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
+    "java_constr-dec"  "|[" JavaConstrDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
+    "java"             "|[" JavaConstrDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                       "|[" JavaConstrDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
    
   
   strategies

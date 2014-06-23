@@ -4,21 +4,32 @@ public extension Syntax {
 	context-free syntax
 		Entity -> ToplevelDeclaration
 		AnnoOrExtensionMod* "mapping" JavaId "{" MappingBody "}" -> Entity {cons("MappingDec")}
-		TableDec JavaFieldDec* MappingRule* -> MappingBody {cons("MappingBody")}
+		TableDec ColumnsDec ActionDec JavaFieldDec* MappingRule* -> MappingBody {cons("MappingBody")}
 	
 	context-free syntax
 		"table" JavaStringLiteral ";" -> TableDec {cons("TableDec")}
+		
+		"$" JavaID -> ColumnId {cons("ColumnId")}
+		"columns" {ColumnId ","}* ";" -> ColumnsDec {cons("ColumnsDec")}
+		
+	lexical syntax
+		"construct" -> JavaID {reject}
+		"$" JavaID -> JavaID {reject}
+	context-free syntax
+		ColumnId -> JavaExpr
+		"construct" "(" {JavaExpr ","}* ")" -> JavaExpr {cons("ConstructInstance")}
+		"deserialization" "action" "=" ValDef ";" -> ActionDec {cons("ActionDec")}
 	
 	context-free syntax
 		JavaType? JavaId "->" "{" RelSpec* "}" -> MappingRule {cons("MappingRule")}
-		"{" "}" "->" "{" RelSpec* "}" -> MappingRule {cons("SynMappingRule")}
+		"synthesized" "{" RelSpec* "}" -> MappingRule {cons("SynMappingRule")}
 		
-		"column" JavaStringLiteral KeySpec? ";" -> RelSpec {cons("ColumnSpec")}
+		"column" ColumnId KeySpec? ";" -> RelSpec {cons("ColumnSpec")}
 		"primary" "key" -> KeySpec {cons("PrimaryKey")}
 		
-		"type" JavaType ";" -> RelSpec {cons("ColumnSpec")}
+		"type" JavaType ";" -> RelSpec {cons("TypeSpec")}
 		
-		"implicit" "=" ValDef ";" -> RelSpec {cons("ImplicitSpec")}
+		"value" "=" ValDef ";" -> RelSpec {cons("ValueSpec")}
 		
 		"encode" "(" JavaId ")" "=" ValDef ";" -> RelSpec {cons("EncodeSpec")}
 		"decode" "(" JavaId ")" "=" ValDef ";" -> RelSpec {cons("DecodeSpec")}
