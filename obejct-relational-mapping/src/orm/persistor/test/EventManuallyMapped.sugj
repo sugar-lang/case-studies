@@ -12,22 +12,23 @@ import javax.persistence.Transient;
 
 @Entity
 @Table(name="EVENTS")
-public class EventManuallyMapped {
-	// underlying object
-	private Event entity;
+public class EventManuallyMapped extends Event {
+	// // underlying object
+	// private Event entity;
 	
 	// synthesized attribute
 	private long ID;
 	
-	// deserialization buffer
-	private java.util.HashMap<String,Object> buffer;
+	// // deserialization buffer
+	// private java.util.HashMap<String,Object> buffer;
 	
 	public EventManuallyMapped() {
-		buffer = new java.util.HashMap<String,Object>();
+		super(null, null);
+		// buffer = new java.util.HashMap<String,Object>();
 	}
 
 	public EventManuallyMapped(String title, Date date) {
-		entity = new Event(title, date);
+		super(title, date);
 		setID(generate_ID());
 	}
 	
@@ -47,12 +48,12 @@ public class EventManuallyMapped {
 	}
 
 
-	private void tryLoadEntity() {
-		if (buffer.containsKey("title") && buffer.containsKey("date")) {
-			entity = new Event((String) buffer.get("title"), (Date) buffer.get("date"));
-			buffer = null;	
-		}
-	}
+	// private void tryLoadEntity() {
+	// 	if (buffer.containsKey("title") && buffer.containsKey("date")) {
+	// 		entity = new Event((String) buffer.get("title"), (Date) buffer.get("date"));
+	// 		buffer = null;	
+	// 	}
+	// }
 
 	@Id
     public long getID() {
@@ -64,55 +65,55 @@ public class EventManuallyMapped {
     }
 
     public long getEVENT_DATE() {
-		return date_encode(entity.getDate());
+		return date_encode(super.getDate());
     }
 
     public void setEVENT_DATE(long EVENT_DATE) {
-    	if (entity != null)
-			entity.setDate(date_decode(EVENT_DATE));
-		else {
-			buffer.put("date", date_decode(EVENT_DATE));
-			tryLoadEntity();
-		}
+    	// if (entity != null)
+			super.setDate(date_decode(EVENT_DATE));
+		// else {
+		// 	buffer.put("date", date_decode(EVENT_DATE));
+		// 	tryLoadEntity();
+		// }
     }
 
     public String getTITLE() {
-		return entity.getTitle();
+		return super.getTitle();
     }
 
     public void setTITLE(String TITLE) {
-    	if (entity != null)
-			entity.setTitle(TITLE);
-		else {
-			buffer.put("title", TITLE);
-			tryLoadEntity();
-		}
+    	// if (entity != null)
+			super.setTitle(TITLE);
+		// else {
+		// 	buffer.put("title", TITLE);
+		// 	tryLoadEntity();
+		// }
     }
     
 
 	// forward methods from `Event
-	@Transient    
-    public Date getDate() {
-		return entity.getDate();
-    }
-	@Transient
-    public void setDate(Date date) {
-		entity.setDate(date);
-    }
-	@Transient
-    public String getTitle() {
-		return entity.getTitle();
-    }
-	@Transient
-    public void setTitle(String title) {
-		entity.setTitle(title);
-    }
-	@Transient
-    public boolean isProcessed() {
-		return entity.isProcessed();
-    }
-	@Transient
-    public void setProcessed(boolean processed) {
-		entity.setProcessed(processed);
-    }
+	// @Transient    
+ //    public Date getDate() {
+	// 	return entity.getDate();
+ //    }
+	// @Transient
+ //    public void setDate(Date date) {
+	// 	entity.setDate(date);
+ //    }
+	// @Transient
+ //    public String getTitle() {
+	// 	return entity.getTitle();
+ //    }
+	// @Transient
+ //    public void setTitle(String title) {
+	// 	entity.setTitle(title);
+ //    }
+	// @Transient
+ //    public boolean isProcessed() {
+	// 	return entity.isProcessed();
+ //    }
+	// @Transient
+ //    public void setProcessed(boolean processed) {
+	// 	entity.setProcessed(processed);
+ //    }
 }

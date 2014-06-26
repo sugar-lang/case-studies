@@ -36,16 +36,17 @@ rules
 	class-mapping(|map-name) :
 		ClassDec(ClassDecHead(mods, name, params, super, interf), ClassBody(entity)) -> 
 		ClassDec(
-			ClassDecHead([entity-anno, table-anno | mods], name, params, super, interf),
+			ClassDecHead([entity-anno, table-anno | mods], name, params, Some(SuperDec(ClassType(entity-typename, None()))), interf),
 			ClassBody(
 				<conc>(
-					[entity-field, buffer-field],
+					// [entity-field, buffer-field],
 					[constr-default | constrs-derived],
 					synthesized-fields, synthesized-generators,
 					encoders, decoders,
-					[loader],
+					// [loader],
 					column-accessors,
-					forward-methods)))
+					//forward-methods,
+					[])))
 	where
 		rulez := <mapping-rulez> map-name;
 
@@ -53,10 +54,10 @@ rules
 		table-anno := <make-anno> ("Table", "name", <mapping-table; make-java-string> map-name);
 		
 		entity-typename := <prim("SUGARJ_current_model_name"); string-tokenize(|['/']); make-java-typename; no-rename>;
-		entity-field := FieldDec([Private()], ClassOrInterfaceType(entity-typename, None()), [VarDec(Id("entity"))]);
-		buffer-field := FieldDec([Private()], |[java.util.HashMap<String,Object>]|, [VarDec(Id("buffer"))]);
+		// entity-field := FieldDec([Private()], ClassOrInterfaceType(entity-typename, None()), [VarDec(Id("entity"))]);
+		// buffer-field := FieldDec([Private()], |[java.util.HashMap<String,Object>]|, [VarDec(Id("buffer"))]);
 
-		constr-default := |[public ~Id:name() { buffer = new java.util.HashMap<String,Object>(); }]|;
+		constr-default := <(filter(make-default-constructor); ?[<id>]) <+ make-default-default-constructor(|name)> entity;
 		constrs-derived := <filter(make-derived-constructor(|entity-typename, rulez))> entity;
 
 		synthesized-fields := <filter(make-synthesized-field)> rulez;
@@ -66,22 +67,42 @@ rules
 		decoders := <filter(make-decoder(|map-name))> rulez;
 	
 		field-types := <filter(get-field-type)> rulez;
-		loader := <mapping-action; make-loader(|map-name, field-types)> map-name;
+		// loader := <mapping-action; make-loader(|map-name, field-types)> map-name;
 		
 		column-accessors := <map(make-column-accessors); concat> rulez;
 	
-		forward-methods := <filter(make-forward-method)> entity
+		// forward-methods := <filter(make-forward-method)> entity;
+		id
+	
+	make-default-constructor :
+		ConstrDec(ConstrDecHead(mods, tps, name, [p|ps], throws), body) ->
+		ConstrDec(
+			ConstrDecHead(mods, tps, name, [], throws), 
+			ConstrBody(
+				Some(SuperConstrInv(None(), constr-args)),
+				[]))
+	where
+		<not(elem)> (Private(), mods);
+		constr-args := <map(?Param(_,_,<id>); !Lit(Null()))> [p|ps]
+	
+	make-default-default-constructor(|name) :
+		_ ->
+		ConstrDec(
+			ConstrDecHead([Public()], [], name, [], None()), 
+			ConstrBody(
+				Some(SuperConstrInv(None(), [])),
+				[]))
 	
 	make-derived-constructor(|entity-typename, rulez) :
 		ConstrDec(head@ConstrDecHead(mods, tps, name, [p|ps], throws), body) ->
 		ConstrDec(
 			head, 
-			ConstrBody(None(), 
-			[|[ entity = ~entity-constr; ]| | init-implicits]))
+			ConstrBody(
+				Some(SuperConstrInv(None(), constr-args)), 
+				init-implicits))
 	where
 		<not(elem)> (Private(), mods);
 		constr-args := <map(?Param(_,_,<id>); !ExprName(<id>))> [p|ps];
-		entity-constr := NewInstance(None(), ClassOrInterfaceType(entity-typename, None()), constr-args, None());
 		init-implicits := <filter(make-synthesized-init)> rulez
 
 rules // synthesized stuff
@@ -203,7 +224,7 @@ rules // column accessors
 		getname := <conc-strings> ("get", column);
 		entity-getname := <conc-strings> ("get", <string-as-chars([to-upper|id])> name);
 		encodename := <conc-strings> ("encode_", name);
-		getter := |[public ~type ~id:getname() { return ~id:encodename(entity.~id:(entity-getname)()); }]|;
+		getter := |[public ~type ~id:getname() { return ~id:encodename(super.~id:(entity-getname)()); }]|;
 		getter-annotated := <where(<?Some(PrimaryKey)> key) < annotate-method(|<make-anno> "Id") + id> getter;
 
 		setname := <conc-strings> ("set", column);
@@ -211,12 +232,12 @@ rules // column accessors
 		decodename := <conc-strings> ("decode_", name);
 		setter := |[
 			public void ~id:setname(~type ~id:column) {
-				if (entity != null)
-					entity.~id:entity-setname(~id:decodename(~id:column));
-				else {
-					buffer.put(~<make-java-string>name, ~id:decodename(~id:column));
-					tryLoadEntity();
-				}
+				// if (entity != null)
+					super.~id:entity-setname(~id:decodename(~id:column));
+				// else {
+				// 	buffer.put(~<make-java-string>name, ~id:decodename(~id:column));
+				// 	tryLoadEntity();
+				// }
 			}
 		]|
 
@@ -233,19 +254,19 @@ rules // column accessors
 		
 		getname := <conc-strings> ("get", column);
 		entity-getname := <conc-strings> ("get", <string-as-chars([to-upper|id])> name);
-		getter := |[public ~type ~id:getname() { return entity.~id:(entity-getname)(); }]|;
+		getter := |[public ~type ~id:getname() { return super.~id:(entity-getname)(); }]|;
 		getter-annotated := <where(<?Some(PrimaryKey)> key) < annotate-method(|<make-anno> "Id") + id> getter;
 
 		setname := <conc-strings> ("set", column);
 		entity-setname := <conc-strings> ("set", <string-as-chars([to-upper|id])> name);
 		setter := |[
 			public void ~id:setname(~type ~id:column) {
-				if (entity != null)
-					entity.~id:entity-setname(~id:column);
-				else {
-					buffer.put(~<make-java-string>name, ~id:column);
-					tryLoadEntity();
-				}
+				// if (entity != null)
+					super.~id:entity-setname(~id:column);
+				// else {
+				// 	buffer.put(~<make-java-string>name, ~id:column);
+				// 	tryLoadEntity();
+				// }
 			}
 		]|
 
