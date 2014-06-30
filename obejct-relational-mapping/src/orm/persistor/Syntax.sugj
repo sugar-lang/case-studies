@@ -28,7 +28,7 @@ public extension Syntax {
 		"init" "=" ValDef ";" -> RelSpec {cons("InitSpec")}
 		
 		"persist" "(" JavaId ")" "=" ValDef ";" -> RelSpec {cons("PersistSpec")}
-		"load" "(" JavaId ")" "=" ValDef ";" -> RelSpec {cons("LoadSpec")}
+		"load" "(" JavaId "," JavaId ")" "=" ValDef ";" -> RelSpec {cons("LoadSpec")}
 		
 		JavaExpr -> ValDef {cons("ExprVal")}
 		"{" JavaBlockStm* JavaExpr "}" -> ValDef {cons("BlockVal")}

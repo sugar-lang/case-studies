@@ -210,7 +210,7 @@ rules // column accessors
 		key := <filter(?PrimaryKey()); (?[<id>] <+ !())> specs;
 		
 		PersistSpec(persistvar, persistval) := <filter(?PersistSpec(_,_)); ?[<id>]> specs;
-		LoadSpec(loadvar, loadval) := <filter(?LoadSpec(_,_)); ?[<id>]> specs;
+		LoadSpec(loadvar1, loadvar2, loadval) := <filter(?LoadSpec(_,_,_)); ?[<id>]> specs;
 		
 		getname := <conc-strings> ("get", column);
 		getbody := <val-to-java(return|map-name); bottomup(try(rename-to-this(|persistvar)))> persistval;
@@ -218,8 +218,8 @@ rules // column accessors
 		getter-annotated := <where(<?PrimaryKey()> key) < annotate-method(|<make-anno> "Id") + id> getter;
 
 		setname := <conc-strings> ("set", column);
-		setbody := <val-to-java(stmt|map-name)> loadval;
-		setter := |[ public void ~id:setname(~type ~Id:loadvar) ~block:setbody ]|
+		setbody := <val-to-java(stmt|map-name); bottomup(try(rename-to-this(|loadvar1)))> loadval;
+		setter := |[ public void ~id:setname(~type ~Id:loadvar2) ~block:setbody ]|
 
 	rename-to-this(|persistvar) : ExprName(persistvar) -> ExprName(Id("this"))
 	rename-to-this(|persistvar) : AmbName(persistvar) -> AmbName(Id("this"))

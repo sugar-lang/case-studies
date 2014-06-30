@@ -11,12 +11,12 @@ public mapping EventMapping {
 
 	column EVENT_DATE: long = {
 		persist(e) = e.getDate().getTime();
-		load(stamp) = setDate(new Date(stamp));
+		load(e, stamp) = e.setDate(new Date(stamp));
 	}
 	
 	column TITLE: String = {
 		persist(e) = e.getTitle();
-		load(t) = setTitle(t);
+		load(e, t) = e.setTitle(t);
 	}
 	
 	synthesized column ID: long = {
