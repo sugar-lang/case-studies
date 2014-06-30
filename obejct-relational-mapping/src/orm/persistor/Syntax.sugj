@@ -4,34 +4,31 @@ public extension Syntax {
 	context-free syntax
 		Entity -> ToplevelDeclaration
 		AnnoOrExtensionMod* "mapping" JavaId "{" MappingBody "}" -> Entity {cons("MappingDec")}
-		TableDec ActionDec JavaFieldDec* MappingRule* -> MappingBody {cons("MappingBody")}
+		TableDec JavaFieldDec* MappingRule* -> MappingBody {cons("MappingBody")}
 	
 	context-free syntax
 		"table" JavaStringLiteral ";" -> TableDec {cons("TableDec")}
 		
-		"$" JavaID -> ColumnId {cons("ColumnId")}
+		// "$" JavaID -> ColumnId {cons("ColumnId")}
 		
-	lexical syntax
-		"construct" -> JavaID {reject}
-		"$" JavaID -> JavaID {reject}
-	context-free syntax
-		ColumnId -> JavaExpr
-		"construct" "(" {JavaExpr ","}* ")" -> JavaExpr {cons("ConstructInstance")}
-		"deserialization" "action" "=" ValDef ";" -> ActionDec {cons("ActionDec")}
+	// lexical syntax
+	// 	"construct" -> JavaID {reject}
+	// 	"$" JavaID -> JavaID {reject}
+	// context-free syntax
+	// 	ColumnId -> JavaExpr
+	// 	"construct" "(" {JavaExpr ","}* ")" -> JavaExpr {cons("ConstructInstance")}
+	// 	"load" "action" "=" ValDef ";" -> ActionDec {cons("ActionDec")}
 	
 	context-free syntax
-		JavaType? JavaId "->" "{" RelSpec* "}" -> MappingRule {cons("MappingRule")}
-		"synthesized" "{" RelSpec* "}" -> MappingRule {cons("SynMappingRule")}
+		"column" JavaID ":" JavaType "="  "{" RelSpec* "}" -> MappingRule {cons("MappingRule")}
+		"synthesized" "column" JavaID ":" JavaType "="  "{" RelSpec* "}" -> MappingRule {cons("SynMappingRule")}
 		
-		"column" ColumnId KeySpec? ";" -> RelSpec {cons("ColumnSpec")}
-		"primary" "key" -> KeySpec {cons("PrimaryKey")}
+		"primary" "key" ";" -> RelSpec {cons("PrimaryKey")}
 		
-		"type" JavaType ";" -> RelSpec {cons("TypeSpec")}
+		"init" "=" ValDef ";" -> RelSpec {cons("InitSpec")}
 		
-		"value" "=" ValDef ";" -> RelSpec {cons("ValueSpec")}
-		
-		"encode" "(" JavaId ")" "=" ValDef ";" -> RelSpec {cons("EncodeSpec")}
-		"decode" "(" JavaId ")" "=" ValDef ";" -> RelSpec {cons("DecodeSpec")}
+		"persist" "(" JavaId ")" "=" ValDef ";" -> RelSpec {cons("PersistSpec")}
+		"load" "(" JavaId ")" "=" ValDef ";" -> RelSpec {cons("LoadSpec")}
 		
 		JavaExpr -> ValDef {cons("ExprVal")}
 		"{" JavaBlockStm* JavaExpr "}" -> ValDef {cons("BlockVal")}

@@ -42,7 +42,7 @@ rules
 					// [entity-field, buffer-field],
 					[constr-default | constrs-derived],
 					synthesized-fields, synthesized-generators,
-					encoders, decoders,
+					// encoders, decoders,
 					// [loader],
 					column-accessors,
 					//forward-methods,
@@ -63,13 +63,13 @@ rules
 		synthesized-fields := <filter(make-synthesized-field)> rulez;
 		synthesized-generators := <filter(make-synthesized-generator(|map-name))> rulez;
 		
-		encoders := <filter(make-encoder(|map-name))> rulez;
-		decoders := <filter(make-decoder(|map-name))> rulez;
+		// encoders := <filter(make-encoder(|map-name))> rulez;
+		// decoders := <filter(make-decoder(|map-name))> rulez;
 	
 		field-types := <filter(get-field-type)> rulez;
 		// loader := <mapping-action; make-loader(|map-name, field-types)> map-name;
 		
-		column-accessors := <map(make-column-accessors); concat> rulez;
+		column-accessors := <map(make-column-accessors(|map-name)); concat> rulez;
 	
 		// forward-methods := <filter(make-forward-method)> entity;
 		id
@@ -107,87 +107,80 @@ rules
 
 rules // synthesized stuff
 	make-synthesized-field : 
-		SynMappingRule(specs) -> 
+		SynMappingRule(column, type, specs) -> 
 		FieldDec([Private],type,[VarDec(Id(column))])
-	where
-		column := <filter(?ColumnSpec(ColumnId(<id>),_)); ?[<id>]> specs;
-		type := <filter(?TypeSpec(<id>)); ?[<id>]> specs
 
 	make-synthesized-init : 
-		SynMappingRule(specs) ->
+		SynMappingRule(column, type, specs) ->
 		ExprStm(Invoke(Method(MethodName(Id(setter))), [Invoke(Method(MethodName(Id(generator))), [])])) 
 	where
-		column := <filter(?ColumnSpec(ColumnId(<id>),_)); ?[<id>]> specs;
 		setter := <conc-strings> ("set", column);
 		generator := <conc-strings> ("generate_", column)
 	
 	make-synthesized-generator(|map-name) : 
-		SynMappingRule(specs) -> 
+		SynMappingRule(column, type, specs) -> 
 		|[	private ~type ~id:name() ~block:block ]|
 	where
-		column := <filter(?ColumnSpec(ColumnId(<id>),_)); ?[<id>]> specs;
-		type := <filter(?TypeSpec(<id>)); ?[<id>]> specs;
 		name := <conc-strings> ("generate_", column);
-		trans-typename := <prim("SUGARJ_current_transformation_name"); string-tokenize(|['/']); make-java-typename>;
-		val := <filter(?ValueSpec(<id>)); ?[<id>]> specs;
+		val := <filter(?InitSpec(<id>)); ?[<id>]> specs;
 		block := <val-to-java(return|map-name)> val
 
-rules // encoder decoder
+// rules // encoder decoder
+// 
+// 	make-encoder(|map-name) :
+// 		MappingRule(Some(origType), Id(name), specs) ->
+// 		|[private ~type ~id:mname(~origType ~id:param) ~block:body]|
+// 	where
+// 		(param, val) := <filter(\EncodeSpec(Id(p),v) -> (p,v)\); ?[<id>]> specs;
+// 		type := <filter(?TypeSpec(<id>)); ?[<id>]> specs;
+// 		mname := <conc-strings> ("encode_", name);
+// 		body := <val-to-java(return|map-name)> val
+// 
+// 	make-decoder(|map-name) :
+// 		MappingRule(Some(origType), Id(name), specs) ->
+// 		|[private ~origType ~id:mname(~type ~id:param) ~block:body]|
+// 	where
+// 		(param, val) := <filter(\DecodeSpec(Id(p),v) -> (p,v)\); ?[<id>]> specs;
+// 		type := <filter(?TypeSpec(<id>)); ?[<id>]> specs;
+// 		mname := <conc-strings> ("decode_", name);
+// 		body := <val-to-java(return|map-name)> val
 
-	make-encoder(|map-name) :
-		MappingRule(Some(origType), Id(name), specs) ->
-		|[private ~type ~id:mname(~origType ~id:param) ~block:body]|
-	where
-		(param, val) := <filter(\EncodeSpec(Id(p),v) -> (p,v)\); ?[<id>]> specs;
-		type := <filter(?TypeSpec(<id>)); ?[<id>]> specs;
-		mname := <conc-strings> ("encode_", name);
-		body := <val-to-java(return|map-name)> val
 
-	make-decoder(|map-name) :
-		MappingRule(Some(origType), Id(name), specs) ->
-		|[private ~origType ~id:mname(~type ~id:param) ~block:body]|
-	where
-		(param, val) := <filter(\DecodeSpec(Id(p),v) -> (p,v)\); ?[<id>]> specs;
-		type := <filter(?TypeSpec(<id>)); ?[<id>]> specs;
-		mname := <conc-strings> ("decode_", name);
-		body := <val-to-java(return|map-name)> val
-
-
-rules // loader
-	make-loader(|map-name, field-types) :
-		val ->
-		|[	private void tryLoadEntity() {
-				if (~composed-test) {
-					~block:jval2
-					buffer = null;
-				}
-			}
-		]|
-	where
-		used-names := <collect-all(?ExprName(Id(<id>)))> val;
-		bound-vars := <collect-all(?LocalVarDec(_,_,<id>)); concat> val;
-		bound-names := <map(?VarDec(<id>) + ?VarDec(<id>,_))> bound-vars;
-		used-field-names := <diff> (used-names, bound-names);
-		
-		column-tests := <map(make-column-load-test)> used-field-names;
-		composed-test := <foldr(!Lit(Bool(True())), \(e1,e2) -> LazyAnd(e1,e2)\)> column-tests;
-		jval := <val-to-java(init-entity|map-name)> val;
-		jval2 := <bottomup(try(read-from-buffer(|used-field-names, field-types) + desugar-constr))> jval
+// rules // loader
+// 	make-loader(|map-name, field-types) :
+// 		val ->
+// 		|[	private void tryLoadEntity() {
+// 				if (~composed-test) {
+// 					~block:jval2
+// 					buffer = null;
+// 				}
+// 			}
+// 		]|
+// 	where
+// 		used-names := <collect-all(?ExprName(Id(<id>)))> val;
+// 		bound-vars := <collect-all(?LocalVarDec(_,_,<id>)); concat> val;
+// 		bound-names := <map(?VarDec(<id>) + ?VarDec(<id>,_))> bound-vars;
+// 		used-field-names := <diff> (used-names, bound-names);
+// 		
+// 		column-tests := <map(make-column-load-test)> used-field-names;
+// 		composed-test := <foldr(!Lit(Bool(True())), \(e1,e2) -> LazyAnd(e1,e2)\)> column-tests;
+// 		jval := <val-to-java(init-entity|map-name)> val;
+// 		jval2 := <bottomup(try(read-from-buffer(|used-field-names, field-types) + desugar-constr))> jval
 	
-	make-column-load-test :
-		name ->
-		|[ buffer.containsKey(~<make-java-string> name) ]|
+	// make-column-load-test :
+	// 	name ->
+	// 	|[ buffer.containsKey(~<make-java-string> name) ]|
+	// 
+	// read-from-buffer(|field-names, field-types) :
+	// 	ExprName(Id(name)) ->
+	// 	|[ (~type) buffer.get(~<make-java-string>name)]|
+	// where
+	// 	<elem> (name, field-names);
+	// 	type := <lookup> (name, field-types)
 	
-	read-from-buffer(|field-names, field-types) :
-		ExprName(Id(name)) ->
-		|[ (~type) buffer.get(~<make-java-string>name)]|
-	where
-		<elem> (name, field-names);
-		type := <lookup> (name, field-types)
-	
-	desugar-constr : ConstructInstance(args) -> NewInstance(None(), entity-typename, args, None())
-	where
-		entity-typename := <prim("SUGARJ_current_model_name"); string-tokenize(|['/']); make-java-typename; no-rename>
+	// desugar-constr : ConstructInstance(args) -> NewInstance(None(), entity-typename, args, None())
+	// where
+	// 	entity-typename := <prim("SUGARJ_current_model_name"); string-tokenize(|['/']); make-java-typename; no-rename>
 
 	get-field-type :
 		MappingRule(Some(type), Id(name), _) ->
@@ -196,79 +189,67 @@ rules // loader
 
 rules // column accessors
 	// synthesized
-	make-column-accessors :
-		SynMappingRule(specs) ->
+	make-column-accessors(|map-name) :
+		SynMappingRule(column, type, specs) ->
 		[getter-annotated, setter]
 	where
-		(column,key) := <filter(\ColumnSpec(ColumnId(name),key) -> (name,key)\); ?[<id>]> specs;
-		type := <filter(?TypeSpec(<id>)); ?[<id>]> specs;
+		key := <filter(?PrimaryKey()); (?[<id>] <+ !())> specs;
 		
 		getname := <conc-strings> ("get", column);
 		getter := |[public ~type ~id:getname() { return ~id:column; }]|;
-		getter-annotated := <where(<?Some(PrimaryKey)> key) < annotate-method(|<make-anno> "Id") + id> getter;
+		getter-annotated := <where(<?PrimaryKey()> key) < annotate-method(|<make-anno> "Id") + id> getter;
 		
 		setname := <conc-strings> ("set", column);
 		setter := |[public void ~id:setname(~type ~id:column) { this.~id:column = ~id:column; }]|
 	
-	// with en/decoding
-	make-column-accessors :
-		MappingRule(mtype, Id(name), specs) ->
+	// with persit/load
+	make-column-accessors(|map-name) :
+		MappingRule(column, type, specs) ->
 		[getter-annotated, setter]
 	where
-		(column,key) := <filter(\ColumnSpec(ColumnId(name),key) -> (name,key)\); (?[<id>] <+ !(<string-as-chars(to-upper)> name, None()))> specs;
-		type := <filter(?TypeSpec(<id>)); (?[<id>] <+ <?Some(<id>)> mtype)> specs;
+		key := <filter(?PrimaryKey()); (?[<id>] <+ !())> specs;
 		
-		<filter(?EncodeSpec(_,_)); ?[<id>]> specs;
-		<filter(?DecodeSpec(_,_)); ?[<id>]> specs;
-		
-		getname := <conc-strings> ("get", column);
-		entity-getname := <conc-strings> ("get", <string-as-chars([to-upper|id])> name);
-		encodename := <conc-strings> ("encode_", name);
-		getter := |[public ~type ~id:getname() { return ~id:encodename(super.~id:(entity-getname)()); }]|;
-		getter-annotated := <where(<?Some(PrimaryKey)> key) < annotate-method(|<make-anno> "Id") + id> getter;
-
-		setname := <conc-strings> ("set", column);
-		entity-setname := <conc-strings> ("set", <string-as-chars([to-upper|id])> name);
-		decodename := <conc-strings> ("decode_", name);
-		setter := |[
-			public void ~id:setname(~type ~id:column) {
-				// if (entity != null)
-					super.~id:entity-setname(~id:decodename(~id:column));
-				// else {
-				// 	buffer.put(~<make-java-string>name, ~id:decodename(~id:column));
-				// 	tryLoadEntity();
-				// }
-			}
-		]|
-
-
-	make-column-accessors :
-		MappingRule(mtype, Id(name), specs) ->
-		[getter-annotated, setter]
-	where
-		(column,key) := <filter(\ColumnSpec(ColumnId(name),key) -> (name,key)\); (?[<id>] <+ !(<string-as-chars(to-upper)> name, None()))> specs;
-		type := <filter(?TypeSpec(<id>)); (?[<id>] <+ <?Some(<id>)> mtype)> specs;
-		
-		<not(filter(?EncodeSpec(_,_)); ?[<id>])> specs;
-		<not(filter(?DecodeSpec(_,_)); ?[<id>])> specs;
+		PersistSpec(persistvar, persistval) := <filter(?PersistSpec(_,_)); ?[<id>]> specs;
+		LoadSpec(loadvar, loadval) := <filter(?LoadSpec(_,_)); ?[<id>]> specs;
 		
 		getname := <conc-strings> ("get", column);
-		entity-getname := <conc-strings> ("get", <string-as-chars([to-upper|id])> name);
-		getter := |[public ~type ~id:getname() { return super.~id:(entity-getname)(); }]|;
-		getter-annotated := <where(<?Some(PrimaryKey)> key) < annotate-method(|<make-anno> "Id") + id> getter;
+		getbody := <val-to-java(return|map-name); bottomup(try(rename-to-this(|persistvar)))> persistval;
+		getter := |[ public ~type ~id:getname() ~block:getbody ]|;
+		getter-annotated := <where(<?PrimaryKey()> key) < annotate-method(|<make-anno> "Id") + id> getter;
 
 		setname := <conc-strings> ("set", column);
-		entity-setname := <conc-strings> ("set", <string-as-chars([to-upper|id])> name);
-		setter := |[
-			public void ~id:setname(~type ~id:column) {
-				// if (entity != null)
-					super.~id:entity-setname(~id:column);
-				// else {
-				// 	buffer.put(~<make-java-string>name, ~id:column);
-				// 	tryLoadEntity();
-				// }
-			}
-		]|
+		setbody := <val-to-java(stmt|map-name)> loadval;
+		setter := |[ public void ~id:setname(~type ~Id:loadvar) ~block:setbody ]|
+
+	rename-to-this(|persistvar) : ExprName(persistvar) -> ExprName(Id("this"))
+	rename-to-this(|persistvar) : AmbName(persistvar) -> AmbName(Id("this"))
+
+// 	make-column-accessors :
+// 		MappingRule(column, type, specs) ->
+// 		[getter-annotated, setter]
+// 	where
+// 		key := <filter(?PrimaryKey()); (?[<id>] <+ !())> specs;
+// 		
+// 		<not(filter(?EncodeSpec(_,_)); ?[<id>])> specs;
+// 		<not(filter(?DecodeSpec(_,_)); ?[<id>])> specs;
+// 		
+// 		getname := <conc-strings> ("get", column);
+// 		entity-getname := <conc-strings> ("get", <string-as-chars([to-upper|id])> name);
+// 		getter := |[public ~type ~id:getname() { return super.~id:(entity-getname)(); }]|;
+// 		getter-annotated := <where(<?PrimaryKey()> key) < annotate-method(|<make-anno> "Id") + id> getter;
+// 
+// 		setname := <conc-strings> ("set", column);
+// 		entity-setname := <conc-strings> ("set", <string-as-chars([to-upper|id])> name);
+// 		setter := |[
+// 			public void ~id:setname(~type ~id:column) {
+// 				// if (entity != null)
+// 					super.~id:entity-setname(~id:column);
+// 				// else {
+// 				// 	buffer.put(~<make-java-string>name, ~id:column);
+// 				// 	tryLoadEntity();
+// 				// }
+// 			}
+// 		]|
 
 
 	
@@ -300,6 +281,7 @@ rules
 		
 	init-entity : e -> |[entity = ~e;]|
 	return : e -> |[return ~e;]|
+	stmt : e -> |[~e;]|
 
 
 	val-to-java-block(cont) :

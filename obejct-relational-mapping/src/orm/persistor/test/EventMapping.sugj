@@ -7,36 +7,23 @@ public mapping EventMapping {
 	// the target table
 	table "EVENTS";
 
-	deserialization action = construct(title, date);
-	
 	// state local to the mapping
 	private int nextId = 0;
+
+	// load action = construct(TITLE, EVENT_DATE);
 	
-	
-	// match -> target
-	Date date -> {
-		// the target column
-		column $EVENT_DATE; 
-		// the target type
-		type long;
-		// the encoding of the data for the target type
-		encode(date) = date.getTime();
-		// the decoding of the data from the target type
-		decode(stamp) = new Date(stamp);
+	column EVENT_DATE: long = {
+		persist(e) = e.getDate().getTime();
+		load(stamp) = setDate(new Date(stamp));
 	}
 	
-	// this has to be specified explicitly because otherwise the field is not persisted
-	String title -> {
-		column $TITLE;
+	column TITLE: String = {
+		persist(e) = e.getTitle();
+		load(t) = setTitle(t);
 	}
 	
-	// synthesized attribute
-	synthesized {
-		// the target column
-		column $ID primary key;
-		// the target type
-		type long;
-		// id cannot be provided by the user but must be implicitly generated
-		value = { nextId = nextId + 1; nextId };
+	synthesized column ID: long = {
+		primary key;
+		init = { nextId = nextId + 1; nextId };
 	}
 }
