@@ -4,14 +4,11 @@ import orm.persistor.Syntax;
 import orm.persistor.DesugarMapping;
 
 public mapping EventMapping {
-	// the target table
 	table "EVENTS";
 
 	// state local to the mapping
 	private int nextId = 0;
 
-	// load action = construct(TITLE, EVENT_DATE);
-	
 	column EVENT_DATE: long = {
 		persist(e) = e.getDate().getTime();
 		load(stamp) = setDate(new Date(stamp));
