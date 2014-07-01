@@ -12,7 +12,7 @@ import org.sugarj.languages.Java;
 
 import statemachine.Simulator;
 
-public template EventIO {
+public template StatemachineIO {
   $$id-as-string = ?Id(<id>); !Lit(String([Chars(<id>)]))
   $$make-java-typename : [cl] -> TypeName(Id(cl))
   $$make-java-typename : [p|rest] -> <make-java-typename(|PackageOrTypeName(Id(p)))> rest
@@ -32,6 +32,16 @@ public template EventIO {
  
   public class $classname {
 
+    public static List<String> stateNames() {
+      List<String> res = new LinkedList<String>();
+
+      $for(State(name, _) in collect-all(?State(_,_))) {
+        res.add(${<id-as-string> name});
+      }
+
+      return res;
+    }
+    
     public static List<String> eventNames() {
       List<String> res = new LinkedList<String>();
 
@@ -42,7 +52,19 @@ public template EventIO {
       return res;
     } 
 
-    public static Machine.Event parseEvent(Machine machine, String input) {
+    public static Machine.Event parseState(Machine machine, String input) {
+      if (input == null)
+        return null;
+
+      $for(State(name, _) in collect-all(?State(_,_))) {
+        if(input.equals(${<id-as-string> name}))
+          return machine.state_#$name();
+      }
+
+      return null;
+    } 
+
+	public static Machine.Event parseEvent(Machine machine, String input) {
       if (input == null)
         return null;
 
@@ -52,7 +74,6 @@ public template EventIO {
       }
 
       return null;
-    } 
-
+    }
   }
 }
