@@ -3,7 +3,7 @@ package entity;
 import entity.Metamodel;
 
 public transformation ToRecord {
-  main = CompilationUnit(map(?ModelDec(_,_) < entity-to-record 
+  main = CompilationUnit(map(?ModelDec(ModelDecHead(_,_,Id("entity.Metamodel")),_) < entity-to-record 
                            + ?TypeImportDec(_) < trans-entity-import
                            + id))
   trans-entity-import :
