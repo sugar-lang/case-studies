@@ -1,14 +1,15 @@
 package banking.test;
 
-import statemachine.ToJava(banking.atm.ATM);
+import statemachine.Simulator(banking.atm.ATM);
+import EventIO = statemachine.EventIO(banking.atm.ATM);
 
 public class ATMTest { 
   public static void main(String[] args) {
     ATM machine = new ATM(); 
-    machine.step(machine.event_InsertCard());
-    machine.step(machine.event_PinOK());
-    machine.step(machine.event_MoneyTaken());
-    machine.step(machine.event_CardTaken());
+    machine.step(EventIO.parseEvent(machine, "InsertCard"));
+    machine.step(EventIO.parseEvent(machine, "PinOK"));
+    machine.step(EventIO.parseEvent(machine, "MoneyTaken"));
+    machine.step(EventIO.parseEvent(machine, "CardTaken"));
     
     if (machine.currentState() == machine.state_Init())
       System.out.println("success");

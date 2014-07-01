@@ -10,9 +10,9 @@ import template.IdentifierComposition;
 import statemachine.Metamodel;
 import org.sugarj.languages.Java;
 
-import statemachine.ToJava;
+import statemachine.Simulator;
 
-public template ToJavaIO {
+public template EventIO {
   $$id-as-string = ?Id(<id>); !Lit(String([Chars(<id>)]))
   $$make-java-typename : [cl] -> TypeName(Id(cl))
   $$make-java-typename : [p|rest] -> <make-java-typename(|PackageOrTypeName(Id(p)))> rest
@@ -28,8 +28,8 @@ public template ToJavaIO {
   import java.util.List;
   import java.util.LinkedList;
 
-  import Machine = statemachine.ToJava( $model );
-
+  import Machine = statemachine.Simulator( typename{$model} );
+ 
   public class $classname {
 
     public static List<String> eventNames() {

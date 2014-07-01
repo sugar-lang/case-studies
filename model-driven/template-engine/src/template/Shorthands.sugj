@@ -14,7 +14,7 @@ public sugar Shorthands {
     UnquoteShorthand -> JavaPackageName
     UnquoteShorthand -> JavaImportDec
     UnquoteShorthand -> JavaType
-	UnquoteShorthand -> JavaTypeName
+    "typename" "{" UnquoteShorthand "}" -> JavaTypeName
     
     "id" UnquoteShorthand -> JavaId
     UnquoteShorthand -> JavaId {avoid}
