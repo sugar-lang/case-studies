@@ -1,6 +1,6 @@
 package string.interpolation;
 
-import org.sugarj.languages.java;
+import org.sugarj.languages.Java;
 import concretesyntax.Java;
 
 public extension StringInterpolation {
