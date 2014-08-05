@@ -63,4 +63,10 @@ public class StringInterpolationTest extends TestCase {
 		String test = s"A simple\ntest.";
 		assertEquals("A simple\ntest.", test);
 	}
+	
+	@Test
+	public void testInterpolationEscapeChars3() {
+		String test = s"\$\n\$\$\$\t\$${42}";
+		assertEquals("$\n$$$\t$42", test);
+	}
 }
