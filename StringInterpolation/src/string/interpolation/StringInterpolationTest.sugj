@@ -1,0 +1,66 @@
+package string.interpolation;
+
+import org.junit.Assert;
+import org.junit.Test;
+import junit.framework.TestCase;
+import string.interpolation.StringInterpolation;
+
+
+public class StringInterpolationTest extends TestCase {
+	
+	public StringInterpolationTest() {
+		
+	}
+	
+	@Test
+	public void testEmptyInterpolation() {
+		String s = s"";
+		assertEquals("", s);
+	}
+	
+	@Test
+	public void testStringLiteral() {
+		String s = s"String";
+		assertEquals("String", s);
+	}
+	
+	@Test
+	public void testInterpolationWithIdentifier() {
+		String foo = "42";
+		String truth = s"$foo";
+		assertEquals("42", truth);
+	}
+	
+	@Test
+	public void testInterpolationWithExpr() {
+		String truth = s"${40+2}";
+		assertEquals("42", truth);
+	}
+	
+	@Test
+	public void testInterpolationWithExpr2() {
+		String truth = s"The answer: ${new String("42")}";
+		assertEquals("The answer: 42", truth);
+	}
+	
+	@Test
+	public void testInterpolationMultiple() {
+		String weather = "sunny";
+		String name = "John";
+		
+		String greeting = s"Welcome $name. Enjoy the $weather weather.";
+		assertEquals("Welcome John. Enjoy the sunny weather.", greeting);
+	}
+	
+	@Test
+	public void testInterpolationEscapeChars1() {
+		String test = s"A simple test with \$.";
+		assertEquals("A simple test with $.", test);
+	}
+	
+	@Test
+	public void testInterpolationEscapeChars2() {
+		String test = s"A simple\ntest.";
+		assertEquals("A simple\ntest.", test);
+	}
+}

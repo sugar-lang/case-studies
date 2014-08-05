@@ -1,0 +1,75 @@
+package string.interpolation;
+
+import org.sugarj.languages.java;
+import concretesyntax.Java;
+
+public extension StringInterpolation {
+  lexical syntax
+    [A-Za-z\_] [A-Za-z0-9\_]*     -> SpliceID 
+    Keyword                       -> SpliceID {reject}
+    "true"                        -> SpliceID {reject}
+    "false"                       -> SpliceID {reject}
+    "null"                        -> SpliceID {reject}
+    ~[\\\$\"]+ -> StringLitChars
+    "\\" [btnfr\"\$\\] -> StringLitEscape
+    StringLitChars -> StringLit
+    StringLitEscape -> StringLit
+
+  lexical restrictions
+    SpliceID -/- [a-zA-Z0-9\_]
+    StringLitChars -/- ~[\\\$\"]
+	
+  syntax
+    "s" "\"" StringFragment* "\"" -> <JavaExpr-CF> {cons("StringInterpol")} 
+    "$" <SpliceID-LEX> -> StringFragment {cons("StringIdSplice")}
+    "${" <JavaExpr-CF> "}" -> StringFragment {cons("StringExprSplice")}
+    <StringLit-LEX> -> StringFragment {cons("StringLit")}
+    
+  desugarings
+    desugar-string-interpol
+   
+  rules
+    desugar-string-interpol :
+    	StringInterpol([]) -> Lit(String([]))
+    desugar-string-interpol :
+    	StringInterpol(es) -> <string-interpol-rec> (sb, es)
+    where sb := |[ new java.lang.StringBuilder() ]|
+	
+	string-interpol-rec:
+		(rcv, []) -> |[~rcv.toString()]|
+	string-interpol-rec:
+		(rcv, [e|es]) -> <string-interpol-rec> (|[~rcv.append(~(<make-expr> e))]|, es)
+		
+	make-expr:
+		StringExprSplice(e) -> e
+	make-expr:
+		StringLit(e) -> Lit(String([Chars(<dollar-unescape> e)]))
+	make-expr:
+		StringIdSplice(e) -> ExprName(Id(e))
+	
+  colorer
+	StringLit : blue  
+		
+  rules	
+	  /**
+	   * @type String -> String
+	   */
+	  dollar-unescape = 
+	    string-as-chars(dollar-unescape-chars)
+	
+	  /**
+	   * @type  List(Char) -> List(Char)
+	   */
+	  dollar-unescape-chars =
+	      rec x(
+	          try(
+	            unescape-dollar  
+	          )
+	        ; ([id | x] <+ [])
+	      )
+	
+	  /**
+	   * @type  List(Char) -> List(Char)
+	   */
+	  unescape-dollar  : ['\', '$' | cs] -> ['$'  | cs]
+}
