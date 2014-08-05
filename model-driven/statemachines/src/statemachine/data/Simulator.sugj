@@ -2,8 +2,8 @@ package statemachine.data;
 
 import statemachine.data.Metamodel;
 
-import statemachine.ToJava;
-import statemachine.data.ToJavaAux;
+import statemachine.Simulator;
+import statemachine.data.SimulatorAux;
 
 import statemachine.data.InternalData;
 import statemachine.data.ParametricEvent;
@@ -12,11 +12,11 @@ import statemachine.data.TransitionEffect;
 
 import template.Language;
 
-public transformation ToJava {
+public transformation Simulator {
   rules
     main :
          CompilationUnit([pkg | decls])
-      -> CompilationUnit([pkg, > import statemachine.data.ToJavaAux; <
+      -> CompilationUnit([pkg, > import statemachine.data.SimulatorAux; <
                          |trans-decls])
     where trans-name := <current-model-name>
         ; trans-decls := <map(?TypeImportDec(_) <+ make-data-statemachine-trans(|trans-name))> decls

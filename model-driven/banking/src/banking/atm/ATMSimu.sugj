@@ -1,7 +1,7 @@
 package banking.atm;
 
-import statemachine.ToJava(banking.atm.ATM);
-import ATM_IO = statemachine.ToJavaIO(banking.atm.ATM);
+import statemachine.Simulator(banking.atm.ATM);
+import IO = statemachine.StatemachineIO(banking.atm.ATM);
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -15,7 +15,7 @@ public class ATMSimu {
     String in;
     
     System.out.println("Welcome. Possible events are:");
-    for (String s : ATM_IO.eventNames())
+    for (String s : IO.eventNames())
       System.out.print(s + ", ");
     System.out.println("reset, and exit.");
 
@@ -27,7 +27,7 @@ public class ATMSimu {
 	      machine = new ATM();
 	    else {
           try {
-	        ATM.Event e = ATM_IO.parseEvent(machine, in);
+	        ATM.Event e = IO.parseEvent(machine, in);
 	        if (e == null)
 	          throw new IllegalArgumentException("Unknown event " + in);
 		    machine.step(e);

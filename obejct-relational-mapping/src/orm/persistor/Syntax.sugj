@@ -8,20 +8,27 @@ public extension Syntax {
 	
 	context-free syntax
 		"table" JavaStringLiteral ";" -> TableDec {cons("TableDec")}
+		
+		// "$" JavaID -> ColumnId {cons("ColumnId")}
+		
+	// lexical syntax
+	// 	"construct" -> JavaID {reject}
+	// 	"$" JavaID -> JavaID {reject}
+	// context-free syntax
+	// 	ColumnId -> JavaExpr
+	// 	"construct" "(" {JavaExpr ","}* ")" -> JavaExpr {cons("ConstructInstance")}
+	// 	"load" "action" "=" ValDef ";" -> ActionDec {cons("ActionDec")}
 	
 	context-free syntax
-		JavaType? JavaId "->" "{" RelSpec* "}" -> MappingRule {cons("MappingRule")}
-		"{" "}" "->" "{" RelSpec* "}" -> MappingRule {cons("SynMappingRule")}
+		"column" JavaID ":" JavaType "="  "{" RelSpec* "}" -> MappingRule {cons("MappingRule")}
+		"synthesized" "column" JavaID ":" JavaType "="  "{" RelSpec* "}" -> MappingRule {cons("SynMappingRule")}
 		
-		"column" JavaStringLiteral KeySpec? ";" -> RelSpec {cons("ColumnSpec")}
-		"primary" "key" -> KeySpec {cons("PrimaryKey")}
+		"primary" "key" ";" -> RelSpec {cons("PrimaryKey")}
 		
-		"type" JavaType ";" -> RelSpec {cons("ColumnSpec")}
+		"init" "=" ValDef ";" -> RelSpec {cons("InitSpec")}
 		
-		"implicit" "=" ValDef ";" -> RelSpec {cons("ImplicitSpec")}
-		
-		"encode" "(" JavaId ")" "=" ValDef ";" -> RelSpec {cons("EncodeSpec")}
-		"decode" "(" JavaId ")" "=" ValDef ";" -> RelSpec {cons("DecodeSpec")}
+		"persist" "(" JavaId ")" "=" ValDef ";" -> RelSpec {cons("PersistSpec")}
+		"load" "(" JavaId "," JavaId ")" "=" ValDef ";" -> RelSpec {cons("LoadSpec")}
 		
 		JavaExpr -> ValDef {cons("ExprVal")}
 		"{" JavaBlockStm* JavaExpr "}" -> ValDef {cons("BlockVal")}

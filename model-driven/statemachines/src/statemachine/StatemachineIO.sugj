@@ -1,0 +1,79 @@
+package statemachine;
+
+import template.Unquote;
+import template.Shorthands;
+import template.Foreach;
+import template.UnquoteEnum;
+import template.LocalStrategies;
+import template.IdentifierComposition;
+
+import statemachine.Metamodel;
+import org.sugarj.languages.Java;
+
+import statemachine.Simulator;
+
+public template StatemachineIO {
+  $$id-as-string = ?Id(<id>); !Lit(String([Chars(<id>)]))
+  $$make-java-typename : [cl] -> TypeName(Id(cl))
+  $$make-java-typename : [p|rest] -> <make-java-typename(|PackageOrTypeName(Id(p)))> rest
+  $$make-java-typename(|pkg) : [cl] -> TypeName(pkg, Id(cl))
+  $$make-java-typename(|pkg) : [p|rest] -> <make-java-typename(|PackageOrTypeName(pkg, Id(p)))> rest
+
+  $pkg = collect-one(?PackageDec(_,<id>))
+  $classname = collect-one(?ModelDecHead(_,<id>,_))
+  $model = prim("SUGARJ_current_model_name"); string-tokenize(|"/"); make-java-typename
+
+  package $pkg;
+
+  import java.util.List;
+  import java.util.LinkedList;
+
+  import Machine = statemachine.Simulator( typename{$model} );
+ 
+  public class $classname {
+
+    public static List<String> stateNames() {
+      List<String> res = new LinkedList<String>();
+
+      $for(State(name, _) in collect-all(?State(_,_))) {
+        res.add(${<id-as-string> name});
+      }
+
+      return res;
+    }
+    
+    public static List<String> eventNames() {
+      List<String> res = new LinkedList<String>();
+
+      $for(EventName(name) in collect-all(?EventName(_))) {
+        res.add(${<id-as-string> name});
+      }
+
+      return res;
+    } 
+
+    public static Machine.Event parseState(Machine machine, String input) {
+      if (input == null)
+        return null;
+
+      $for(State(name, _) in collect-all(?State(_,_))) {
+        if(input.equals(${<id-as-string> name}))
+          return machine.state_#$name();
+      }
+
+      return null;
+    } 
+
+	public static Machine.Event parseEvent(Machine machine, String input) {
+      if (input == null)
+        return null;
+
+      $for(EventName(name) in collect-all(?EventName(_))) {
+        if(input.equals(${<id-as-string> name}))
+          return machine.event_#$name();
+      }
+
+      return null;
+    }
+  }
+}

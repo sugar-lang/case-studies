@@ -2,7 +2,7 @@ package banking.test;
 
 import entity.ToRecord(banking.data.Account);
 import entity.ToRecord(banking.data.Customer);
-import statemachine.data.ToJava(entity.ToRecord)(banking.atm.DataATM);
+import statemachine.data.Simulator(entity.ToRecord)(banking.atm.DataATM);
 
 import java.util.HashSet;
 

@@ -1,42 +1,26 @@
 package orm.persistor.test;
 
 import orm.persistor.Syntax;
-
-public class EventMapping {
-	public static int nextId = 0;
-}
+import orm.persistor.DesugarMapping;
 
 public mapping EventMapping {
-	// the target table
 	table "EVENTS";
-	
+
 	// state local to the mapping
 	private int nextId = 0;
-	
-	// match -> target
-	Date date -> {
-		// the target column
-		column "EVENT_DATE";
-		// the target type
-		type long;
-		// the encoding of the data for the target type
-		encode(date) = date.getTime();
-		// the decoding of the data from the target type
-		decode(stamp) = new Date(stamp);
+
+	column EVENT_DATE: long = {
+		persist(e) = e.getDate().getTime();
+		load(e, stamp) = e.setDate(new Date(stamp));
 	}
 	
-	// this is the default mapping and does not have to be specified explicitly
-	String title -> {
-		column "TITLE";
+	column TITLE: String = {
+		persist(e) = e.getTitle();
+		load(e, t) = e.setTitle(t);
 	}
 	
-	// synthesized attribute
-	{} -> {
-		// the target column
-		column "ID" primary key;
-		// the target type
-		type long;
-		// id cannot be provided by the user but must be implicitly generated
-		implicit = { nextId = nextId + 1; nextId };
+	synthesized column ID: long = {
+		primary key;
+		init = { nextId = nextId + 1; nextId };
 	}
 }

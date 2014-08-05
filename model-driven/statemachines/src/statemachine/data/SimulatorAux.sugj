@@ -3,7 +3,7 @@ package statemachine.data;
 import statemachine.data.Metamodel;
 
 import entity.ToRecordTemp;
-import statemachine.ToJava;
+import statemachine.Simulator;
 
 import statemachine.data.InternalData;
 import statemachine.data.ParametricEvent;
@@ -12,11 +12,11 @@ import statemachine.data.TransitionEffect;
 
 import template.Language;
 
-public transformation ToJavaAux {
+public transformation SimulatorAux {
   
   rules
     data-statemachine-to-java(|trans-name) = ?orig;
-           main-statemachine_ToJava;
+           main-statemachine_Simulator;
            transform-entity-imports(|orig, trans-name);
            add-internal-data-decls(|orig)
   
@@ -43,7 +43,7 @@ public transformation ToJavaAux {
       ParametricEvent(eventname, ss) ->
       > public class $eventname implements Event {
           $names = <event-data-names> ss
-          // sort-to-type reused from entity.ToJava
+          // sort-to-type reused from entity.ToRecord
           $types = <map(sort-to-type)> ss
           $names_types = <zip> (names, types)
 

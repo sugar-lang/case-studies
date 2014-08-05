@@ -14,10 +14,11 @@ public sugar Shorthands {
     UnquoteShorthand -> JavaPackageName
     UnquoteShorthand -> JavaImportDec
     UnquoteShorthand -> JavaType
-
+    "typename" "{" UnquoteShorthand "}" -> JavaTypeName
+    
     "id" UnquoteShorthand -> JavaId
     UnquoteShorthand -> JavaId {avoid}
-
+    
     UnquotedShorthand -> UnquoteShorthand {cons("FromMetaExpr")}
     "$" StrategoId -> UnquotedShorthand {cons("UnquotedShorthand")}
 
