@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.sugarj.casestudies.string-interpolation
+Bundle-SymbolicName: org.sugarj.casestudies.string-interpolation
+Bundle-Version: 1.0.0.qualifier
+Require-Bundle: org.sugarj.test-java
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
