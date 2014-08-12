@@ -43,33 +43,10 @@ public extension StringInterpolation {
 	make-expr:
 		StringExprSplice(e) -> e
 	make-expr:
-		StringLit(e) -> Lit(String([Chars(<dollar-unescape> e)]))
+		StringLit(e) -> Lit(String([Chars(<string-replace(|"\\$","$")> e)]))
 	make-expr:
 		StringIdSplice(e) -> ExprName(Id(e))
 	
   colorer
-	StringLit : blue  
-		
-  rules	
-	  /**
-	   * @type String -> String
-	   */
-	  dollar-unescape = 
-	    string-as-chars(dollar-unescape-chars)
-	
-	  /**
-	   * @type  List(Char) -> List(Char)
-	   */
-	  dollar-unescape-chars =
-	      rec x(
-	          try(
-	            unescape-dollar  
-	          )
-	        ; ([id | x] <+ [])
-	      )
-	
-	  /**
-	   * @type  List(Char) -> List(Char)
-	   */
-	  unescape-dollar  : ['\', '$' | cs] -> ['$'  | cs]
+	StringLit : blue
 }
