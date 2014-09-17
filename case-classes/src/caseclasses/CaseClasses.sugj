@@ -1,0 +1,649 @@
+package caseclasses;
+
+import org.sugarj.languages.Java;
+import concretesyntax.Java;
+
+public sugar CaseClasses {
+		
+	context-free syntax
+		
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Allows Scala-like declaration of case classes. %%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	"abstract" "class" JavaId JavaClassBody? ";"					-> JavaClassBodyDec {cons("AbstrClassDec")}
+	"case" "class" JavaId JavaTypeParams? "(" {JavaFormalParam "," }* ")" 
+			JavaSuper? JavaClassBody? ";"  							-> JavaClassBodyDec {cons("CaseClassDec")}
+	"case" "object" JavaId JavaTypeParams? JavaSuper? 
+			JavaClassBody? ";"										-> JavaClassBodyDec {cons("CaseObjDec")}	
+		
+
+
+	desugarings
+	
+		desugar-abstr-class-dec
+		desugar-class-dec
+
+	
+	rules
+	
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Desugars an AbstrClassDec node into a common ClassDec node. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+		desugar-abstr-class-dec :
+			AbstrClassDec(name, body)			-> 	ClassDec(ClassDecHead(
+																[Abstract(), Static()]
+																, name
+																, None()
+																, None()
+																, None())
+															, classBody)
+															 		 
+			with
+				%%%
+			     %% In case no method body has been
+	   		     %% specified, create an empty one.
+			     %%%
+				classBody := <try(?None(); !ClassBody([]))> body												 		 													 		 
+		
+		
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% - Desugars case class declarations into common Java class declarations. %%
+		%% - Adds factory methods to allow creation of case classes without 'new'. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+													 		 
+		desugar-class-dec :
+			ClassDec(head, ClassBody(dec*))			->	ClassDec(head, ClassBody(decs))
+			
+			with
+				decs := <mapconcat(desugar-case-class-dec 
+								   <+ desugar-case-obj-dec
+								   <+ ![<id>])> dec*
+																		 		 
+
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Desugars a case class declaration into a list containing:     %%
+		%% 	 (1)  a corresponding Java class declaration				 %%
+		%%   (2)  a factory method to create instances of the case class %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		
+		desugar-case-class-dec :
+			CaseClassDec(name, tparam*, fparam*, base, classBody)	
+				-> 	[ClassDec(ClassDecHead([Static()], name, tparam*, base, None()),
+							  ClassBody(body))
+				   , fact]
+			with
+				%%%
+				 %% Get the constructor declaration.
+				 %%%
+				ctor := <get-ctor-dec(|tparam*, name)> fparam*;
+				
+				%%%
+				 %% Create a member declaration for every case class parameter.
+				 %%%
+				decs := <map(\Param(_, type, name)	->	
+								FieldDec([Public(), Final()], type, [VarDec(name)]) \)> fparam*;
+												
+				%%%
+				 %% Get the case class methods.
+				 %%%
+				to-str 	:= <get-to-string-method(|tparam*, name)> fparam*;
+				eq	 	:= <get-equals-method(|tparam*, name)> fparam*;
+				hash 	:= <get-hash-code-method(|tparam*, name)> fparam*;
+				unapply := <get-unapply-method(|tparam*, name)> fparam*;
+				
+				%%%
+				 %% Get 'getClass<index>' method for every case class parameter.
+				 %% (Needed to know the class of a field at compile time.)
+				 %%%
+				classes := <number(id)
+							; map(\(p, i) -> (p, <int-to-string> i) \)
+							; map(get-class-method(|tparam*))> fparam*;
+				
+				%%%
+				 %% Extract the class body declarations, if a class body has been specified.
+				 %% Else, 'bodyDecs' is bound to the empty list.
+				 %%%
+				bodyDecs := <if ?Some(ClassBody(bDecs))
+							 then !bDecs
+				 			 else ![]
+				 			 end> classBody;
+				
+				%%%
+				 %% Concatenate the class body declarations.
+				 %%%
+				body :=  <conc> ([ctor | decs], [to-str, eq, hash, unapply], classes, bodyDecs);
+				
+				%%%
+				 %% Get the factory method.
+				 %%%
+				fact := <get-fact-method(|tparam*, name)> fparam*
+				
+				
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Desugars a case object declaration into a list containing:    %%
+		%% 	 (1)  a corresponding singleton class declaration			 %%
+		%%   (2)  a static method to get the class instance				 %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
+		desugar-case-obj-dec :
+			CaseObjDec(name, tparam*, base, classBody)		
+				-> [ClassDec(ClassDecHead([Static()], name, tparam*, base, None()),
+							  ClassBody(body))
+				   , fact]		
+				
+			with	
+				%%%
+				 %% Create private field storing the 
+				 %% instance of the case object.
+				 %%%
+				inst := FieldDec([Private(), Static()]
+								, CType(name, tparam*) 
+								, [VarDec(Id("instance"))]);
+			     
+				%%%
+				 %% Create the (private) constructor declaration.
+				 %%%
+				ctor := ConstrDec(ConstrDecHead([Private()], tparam*, name, [], None()),
+		 						  ConstrBody(None(), []));
+		 						  									  	  
+				Id(s) := name;
+							
+				%%%
+				 %% Create 'toString' method.
+				 %%%
+				to-str := MethodDec(MethodDecHead([Public()]
+										 , tparam*
+										 , CType(Id("String"), tparam*)
+										 , Id("toString")
+									  	 , []
+									    , None())
+								   , Block([Return(Some(Lit(String([Chars(s)]))))]));
+				
+				%%%
+				 %% Extract the class body declarations, if a class body has been specified.
+				 %% Else, 'bodyDecs' is bound to the empty list.
+				 %%%
+				bodyDecs := <if ?Some(ClassBody(bDecs))
+							 then !bDecs
+				 			 else ![]
+				 			 end> classBody;
+				
+				newInst := NewInstance(None()
+                        			   , ClassType(name, None())
+                    		    	   , []
+    							  	   , None());
+				
+				%%%
+				 %% Create an instance, if it hasn't already been created.
+				 %% Else, return the existing one.
+				 %%%
+				get-inst-body := Block([If(Eq(ExprName(AmbName(name), Id("instance")), Lit(Null()))
+                					  , Block([ExprStm(Assign(ExprName(AmbName(name)
+                							  						   , Id("instance"))
+                        									  , newInst))]))
+              							, Return(Some(ExprName(AmbName(name)
+              							  					  , Id("instance"))))]);
+				
+				%%%
+				 %% Create method returning the instance of the case object.
+				 %%%
+				get-inst := MethodDec(MethodDecHead([Public(), Static()]
+            									, None()
+            									, CType(name, None())
+            									, Id("getInstance")
+            									, []
+            									, None())
+          						 	 , get-inst-body);
+          						   
+          		%%%
+				 %% Concatenate the class body declarations.
+				 %%%
+				body :=  <conc> ([inst, ctor, to-str, get-inst], bodyDecs);	
+				
+				%%%
+				 %% Create the 'factory' method.
+				 %%%				
+				fact := MethodDec(MethodDecHead([Public(), Static()], tparam*, CType(name, tparam*), name,
+									  	   		[], None())
+								 , Block([Return(Some(Inv(name, tparam*, Id("getInstance"), [])))]))				   	     
+				
+				
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Creates a private constructor declaration depending on the given parameter list. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		
+		get-ctor-dec(|tparam*, name) :
+		 	fparam*			->	ConstrDec(ConstrDecHead([Private()], tparam*, name, fparam*, None()),
+		 								  ConstrBody(None(), inits))
+		 	with
+		 		%%%
+		 		 %% Create a list of member initialization statements.
+		 		 %%%
+		 		inits 	:= <map(\Param(_, _, name) -> 
+		 							ExprStm(Assign(Field(This(), name)
+		 										  , name))
+		 						\)> fparam*					
+		
+		
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Creates a factory method to enable case class creation without 'new' keyword. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+			
+		get-fact-method(|tparam*, name) :
+			fparam*										->	MethodDec(head, body)
+			
+			with
+				head := MethodDecHead([Public(), Static()], tparam*, CType(name, tparam*), name,
+									  fparam*, None());
+									  									  
+				%%%
+				 %% Extract the names from the fields of the case class.
+				 %%%					  
+				args := <map(\ (_, _, name) -> name \)> fparam*;	
+				
+				%%%
+				 %% Create the body of the factory method which returns a new instance 
+				 %% of the case class depending on the given name and arguments.
+				 %%%				  
+				body := Block([Return(Some(NewInstance(tparam*, CType(name, tparam*),
+													   args, None())))])					  												  			
+		
+		
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Creates 'toString' method declaration for case classes. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		
+		get-to-string-method(|tparam*, name) :
+			fparam*								->	MethodDec(head, Block(res))
+			
+			with
+				head 	 := MethodDecHead([Public()]
+										  , tparam*
+										  , CType(Id("String"), tparam*)
+										  , Id("toString")
+									  	  , []
+									  	  , None());
+				  	  
+				Id(s) 	 := name;
+				
+				%%%
+				 %% Create a type node for class 'StringBuilder'.
+				 %%%
+				sbt 	 := CType(Id("StringBuilder"), tparam*);
+				
+				%%% 
+				 %% Create local declaration: StringBuilder sb = new StringBuilder().
+				 %%%
+				sb-dec 	 := LocalVarDecStm(LocalVarDec([], sbt, 
+									[VarDec(Id("sb"), NewInstance(tparam*, sbt, [], None()))]));
+				
+				%%%
+				 %% Create a list of expression statements which append 
+				 %% the different field Strings to the StringBuilder.
+				 %%%
+				append*  := <map(\Param(_, t, n) 
+									-> 	<if ?ClassOrInterfaceType(_, _)			
+										 %%%
+										  %% If a field has a reference type, invoke 'toString' method.
+										  %% 	--> sb.append(field.toString())
+										  %%%
+										 then !AppendSB(Inv(n, tparam*, Id("toString"), []), tparam*)												
+										 %%%
+										  %% If a field has a primitive type, just append it.
+										  %%		--> sb.append(field)
+										  %%%
+										 else !AppendSB(n, tparam*)											
+									     end > t 
+								\)> fparam*; 	
+				
+				%%%
+				 %% Add commas and whitespace to separate the field Strings.
+				 %%%							    
+				sep* := <separate-by(!AppendSB(Lit(String([Chars(", ")])), tparam*))> append*; 
+				 								    
+				%%%
+				 %% Create expression statement that
+				 %%		- invokes method 'append' on 'sb' 
+				 %%		- with a String containing the lexical tokens stored in 's' as argument
+				 %%%								    
+				app-name := AppendSB(Lit(String([Chars(s)])), tparam*);					
+				open 	 := AppendSB(Lit(String([Chars("(")])), tparam*);
+				close 	 := AppendSB(Lit(String([Chars(")")])), tparam*); 	
+				
+				%%%
+				 %% Create the return statement:
+				 %%		--> return sb.toString()
+				 %%%				
+				ret := Return(Some(Inv(Id("sb"), tparam*, Id("toString"),[])));	
+
+				res := [sb-dec, app-name, open, sep*, close, ret]
+
+		
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Creates 'equals' method declaration depending on the given parameter list. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		
+		get-equals-method(|tparam*, name) :
+			fparam*										->	MethodDec(head, body)		
+			
+			with
+				head := MethodDecHead([Public()], tparam*, Boolean(), Id("equals"), 
+									  [Param([],  CType(Id("Object"), tparam*), Id("o"))], None());
+									  
+				%%%
+				 %% Create an 'if' statement that checks for reference equality
+				 %% and returns 'true' in case of equality.
+				 %%%
+				refCheck := If(Eq(This(), ExprName(Id("o"))), 
+							   Return(Some(Lit(Bool(True)))));					  
+				
+				%%%
+				 %% Create an 'if' statement that checks whether 'o' is not an instance 
+				 %% of case class 'name' and, in that case, returns false.
+				 %%%					  
+				instanceCheck := If(Not(InstanceOf(ExprName(Id("o")), CType(name, tparam*))), 
+									Return(Some(Lit(Bool(False())))));
+					
+				%%%
+				 %% Create a declaration of a new variable 'c' which is assigned 
+				 %% the value of 'o' casted to an instance of case class 'name'.
+				 %%%					
+				cast := LocalVarDecStm(LocalVarDec([], CType(name, tparam*), [VarDec(Id("c"), 
+												  CastRef(CType(name, tparam*), ExprName(Id("o"))))])); 				
+				
+				%%%
+				 %% Create equality expressions for every field of the case class.
+				 %%%
+				fieldCheck* := <map(\Param(_, t, n) ->
+										<switch id
+										 %%%
+										  %% If a field has a class, interface or array type, 
+										  %% invoke 'equals' method.
+										  %%	--> field.equals(c.field)
+										  %%
+										  %%	Note: As arrays only inherit the 'equals' method from 'Object',
+										  %%		  only their references are compared.
+										  %%		  For efficiency reasons we decided not to use Arrays.deepEquals.
+										  %%%
+										 case ?ClassOrInterfaceType(_, _) <+ ?ArrayType(_) :
+										 	  !Inv(n, tparam*, Id("equals"), 
+											 	   [Field(ExprName(Id("c")), n)]) 
+										 	  
+										 %%%
+										  %% If a field has a primitive type, check for equality.
+										  %%	--> field == c.field
+										  %%%
+										 otherwise : 	 	  
+						   				 	  !Eq(ExprName(n), 
+						   				     	  Field(ExprName(Id("c")), n))
+						   				     	  
+										 end > t 
+								   \)> fparam*;					
+				
+				%%%
+				 %% Decompose fieldCheck* into its head ('c') and its tail ('cs').
+				 %%%				   
+				[c | cs] := fieldCheck*;				   		 
+							
+				%%%
+				 %% Fold the created equality expressions with lazy and.
+				 %%%						 				
+				fieldsEq := <foldr(!c, \(bExp, r) -> LazyAnd(r, bExp) \)> cs;
+											 
+				ret := Return(Some(fieldsEq));							 
+ 				
+				body := Block([refCheck, instanceCheck, cast, ret])
+		
+		
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Creates 'hashCode' method declaration for case classes. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+		
+		get-hash-code-method(|tparam*, name) :
+			fparam*					->		MethodDec(head, body)
+			
+			with
+				hash := Id("hashCode");	
+				
+				head :=	MethodDecHead([Public()], tparam*, Int(), hash,
+									  [], None());
+					
+				cd := Id("code");						  
+				Id(s) := name;
+				
+				%%%
+				 %% Create local declaration of integer variable 'code' which is initialized 
+				 %% with the hash code of a string containing the case class name.
+				 %%%				  
+				code := LocalVarDecStm(LocalVarDec([], Int(), 
+							[VarDec(cd, 
+									Invoke(Method(Lit(String([Chars(s)])) 
+												 , tparam*
+												 , hash)
+										  , []))]));					
+				
+				%%%
+				 %% Create statements for every field that
+				 %% 	(1) multiply 'code' with 41
+				 %%		(2) check if the field is null 
+				 %%				(in case it is not of a primitive type)
+				 %%		(3) add the hashCode of the field to 'code' 
+				 %%				(if the field is not null)
+				 %%
+				 %%		--> code = code * 41 + field.hashCode()
+				 %%
+				 %% (This implementation is based on Scala's 'hashCode' 
+				 %% implementation for case classes and the 'hashCode'
+				 %% implementation of Java's primitive wrapper classes.)
+				 %%%													  
+				fieldCode* := <mapconcat(\Param(_, t, n) -> 
+										[ExprStm(AssignMul(ExprName(cd), 
+														   Lit(Deci("41")))) |
+										<switch id
+										  %%%
+										   %% Case 1: field has class, interface or array type
+										   %%	--> if(field != null) 
+										   %%			code += field.hashCode()
+										   %%
+										   %%	Note: As arrays only inherit the 'hashCode' method from 'Object',
+										   %%		  only their references (not their contents) are considered.
+										   %%		  For efficiency reasons we decided not to use Arrays.deepHashCode.
+										   %%%
+										  case ?ClassOrInterfaceType(_, _) <+ ?ArrayType(_) : 
+										  	   ![If(NotEq(ExprName(n),
+										 	   			 Lit(Null())),
+										 		   ExprStm(AssignPlus(ExprName(cd),
+										 	    	   				  Inv(n, tparam*, hash, []))))] 				  
+										  %%%
+										   %% Case 2: field has int type
+										   %%	--> code += field
+										   %%%	    	   				   
+										  case ?Int() :
+										  	   ![ExprStm(AssignPlus(ExprName(cd),
+										  	   						ExprName(n)))]	    	   				  
+										  %%%
+										   %% Case 3: field has boolean type
+										   %%	--> code += field ? 1231 : 1237
+										   %%%	    	   				  
+										  case ?Boolean() :
+										  	   ![ExprStm(AssignPlus(ExprName(cd),
+										 	    	   			   Cond(ExprName(n),
+										 	    	   			   	    Lit(Deci("1231")),
+										 	    	   			   	    Lit(Deci("1237")))))]
+										  %%%
+										   %% Case 4: field has long type
+										   %%	--> code += (int) (field ^ (field >>> 32))
+										   %%%	    	   			   	    
+										  case ?Long() :
+											   ![ExprStm(AssignPlus(ExprName(cd),
+										  	   					   CastPrim(Int(), 
+										  	   					   			ExcOr(ExprName(n),
+										  	   					   				  URightShift(ExprName(n),
+										  	   					   				  			  Lit(Deci("32")))))))]
+										  %%%
+										   %% Case 5: field has float type
+										   %%	--> code += Float.floatToIntBits(field)
+										   %%%	   					   				  			  
+										  case ?Float() :
+										  	   ![ExprStm(AssignPlus(ExprName(cd),
+										  	   			Invoke(Method(MethodName(AmbName(Id("Float")), 
+										  	   									 Id("floatToIntBits"))), 
+										  	   				   [ExprName(n)])))]
+										  %%%
+										   %% Case 6: field has double type
+										   %%	--> long l = Double.doubleToLongBits(field)
+										   %%		code += (int) (l ^ (l >>> 32))
+										   %%%	   				   
+										  case ?Double() :
+										  	   ![LocalVarDecStm(LocalVarDec([], Long(), [VarDec(Id("l"), 
+										  	   					Invoke(Method(MethodName(AmbName(Id("Double")), 
+										  	   									 Id("doubleToLongBits"))),
+										  	   						   [ExprName(n)]))])),
+										  	     ExprStm(AssignPlus(ExprName(cd),
+										  	   						CastPrim(Int(), 
+										  	   					   			 ExcOr(ExprName(Id("l")),
+										  	   					   				   URightShift(ExprName(Id("l")),
+										  	   					   				  			   Lit(Deci("32")))))))] 
+										  %%%
+										   %% Case 7: field has byte/short/char type
+										   %%	--> code += (int) field
+										   %%%	   					   				  			  
+										  otherwise :
+										  	   ![ExprStm(AssignPlus(ExprName(cd),
+										  	   						CastPrim(Int(),
+										  	   								 ExprName(n))))]	   					   				  			  
+										  end> t ]
+										\)> fparam*;	
+										
+				ret := Return(Some(ExprName(cd)));																	  
+																	  											
+				body := Block([code, fieldCode*, ret])		
+				
+				
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Creates static 'unapply' method declaration for case classes. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		
+		get-unapply-method(|tparam*, name) :
+			fparam*					->	MethodDec(head, body)
+			
+			with		
+				%%%
+				 %% Create an Object array type node.
+				 %%%
+				at := ArrayType(CType(Id("Object"), tparam*));
+			
+				%%%
+				 %% Create the head of the 'unapply' method depending on 
+				 %% the type parameters of the case class.
+				 %%%
+				head := MethodDecHead([Public(), Static()], tparam*, at, Id("unapply"), 
+									  [Param([],  CType(Id("Object"), tparam*), Id("o"))], None());
+									  
+				%%%
+				 %% Create an 'if' statement that checks whether 'o' is not an instance 
+				 %% of case class 'name' and, in that case, returns null.
+				 %%%					  
+				instanceCheck := If(Not(InstanceOf(ExprName(Id("o")), CType(name, tparam*))), 
+									Return(Some(Lit(Null()))));
+									
+				%%%
+				 %% Create a declaration of a new variable 'c' which is assigned 
+				 %% the value of 'o' casted to an instance of case class 'name'.
+				 %%%					
+				cast := LocalVarDecStm(LocalVarDec([], CType(name, tparam*), [VarDec(Id("c"), 
+												  CastRef(CType(name, tparam*), ExprName(Id("o"))))])); 					
+				
+				%%%
+				 %% Create a list containing  all fields of 'c'.
+				 %%%					
+				fields := <mapconcat(\Param(_, t, n) ->
+										 [Field(ExprName(Id("c")), n)] 
+									\)> fparam*;					
+				
+				%%%
+				 %% Create the return statement.
+				 %%%					
+				ret := Return(Some(NewArray(TypeName(Id("Object")), [Dim()], 
+											ArrayInit(fields))));					
+																												  
+				body := Block([instanceCheck, cast, ret])
+				
+		
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Creates a method declaration for 'getClass<index>' method. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+		
+		get-class-method(|tparam*) :
+			(Param(_, t, _), i)				->		MethodDec(head, body)
+			
+			with
+			 	%%%
+				 %% Get the class type corresponding to the given type.
+				 %%%
+				ct := <get-class-type> t;
+			
+				%%%
+				 %% Create the return type node.
+				 %%%
+				rt := CType(Id("Class"), Some(TypeArgs([ct])));
+				
+				%%%
+				 %% Create the method name (ending with index 'i').
+				 %%%
+				mName := <conc-strings> ("getClass", i);	
+				
+				head := MethodDecHead([Public(), Static()]
+									  , tparam*
+									  , rt
+									  , Id(mName)
+									  , []
+									  , None());
+				
+				body := Block([Return(Some(Lit(Class(ct))))])
+				
+				
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Creates a class type node corresponding to the given type node. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%				
+				
+		get-class-type :
+			type				-> 		<if ?ClassOrInterfaceType(_, _)
+										 then id
+										 else !CType(<get-prim-class-name> type, None())
+										 end> type
+							  
+		
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Gets the class name corresponding to the given primitive type. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+		
+		get-prim-class-name :
+			primType			->		className
+			
+			with
+				className := <switch id
+					     	   case ?Boolean() :	!Id("Boolean")
+						 	   case ?Byte()    :	!Id("Byte")
+						 	   case ?Short()   :	!Id("Short")
+							   case ?Int()     :	!Id("Integer")
+							   case ?Float()   :	!Id("Float")
+							   case ?Long()    :	!Id("Long")
+							   case ?Double()  :	!Id("Double")
+							   case ?Char()    :	!Id("Character")
+							  end> primType											  	   				   	   							  	   				   	   
+					  	   				   	   	
+			
+	overlays 
+	
+		// only for abbreviation purposes
+		
+		CType(name, tparams) 			= ClassOrInterfaceType(TypeName(name), tparams)	
+		Inv(name, tparams, mname, args) = Invoke(Method(ExprName(name), tparams, mname), args)
+		AppendSB(arg, tparams) 			= ExprStm(Invoke(Method(ExprName(Id("sb"))
+															   , tparams
+															   , Id("append"))
+														 , [arg]))			
+}

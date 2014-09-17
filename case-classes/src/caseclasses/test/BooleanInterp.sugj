@@ -1,0 +1,95 @@
+package caseclasses.test;
+
+import caseclasses.CaseClasses;
+import caseclasses.PatternMatching;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+public class BooleanInterp {
+	abstract class BE;
+	case object True extends BE;
+	case object False extends BE;
+	case class Not(BE e) extends BE;
+	case class And(BE lhs, BE rhs) extends BE;
+	case class Or(BE lhs, BE rhs) extends BE;
+	case class Imp(BE lhs, BE rhs) extends BE;
+	case class BiImp(BE lhs, BE rhs) extends BE;
+	
+	public BE preproc(BE expr) {
+		return expr match @Result(BE.class) {
+			case Imp(lhs, rhs) => Or(Not(preproc(lhs)), preproc(rhs));
+    		case BiImp(lhs, rhs) =>
+      			And(Or(Not(preproc(lhs)), preproc(rhs)),
+          			Or(Not(preproc(rhs)), preproc(lhs)));
+    		case Not(e) => Not(preproc(e));
+    		case And(lhs, rhs) => And(preproc(lhs), preproc(rhs));
+    		case Or(lhs, rhs) => Or(preproc(lhs), preproc(rhs));
+    		case _ => expr;
+		};
+	}
+	
+	public boolean eval(BE expr) {
+		expr match {
+			case True => return true;
+			case False => return false;
+			case Not(e) => {
+				boolean b = eval(e);
+				return b match @Result(Boolean.class) {
+					case true => false;
+					case false => true;
+				};
+			}
+			case And(lhs, rhs) => {
+				boolean b = eval(lhs);
+				return b match @Result(Boolean.class) {
+					case false => false;
+					case true => eval(rhs);
+				};	
+			}
+			case Or(lhs, rhs) => {
+				boolean b = eval(lhs);
+				return b match @Result(Boolean.class) {
+					case true => true;
+					case false => eval(rhs);
+				};
+			}
+		}
+	}
+	
+	@Test
+	public void testPreproc() {
+		BE t = True();
+		BE f = False();
+		
+		Assert.assertEquals(true, eval(preproc(t)));
+		Assert.assertEquals(false, eval(preproc(f)));	
+		Assert.assertEquals(false, eval(preproc(And(t, f))));
+		Assert.assertEquals(true, eval(preproc(Imp(t, t))));
+		Assert.assertEquals(true, eval(preproc(Imp(Imp(t, f), f))));
+		Assert.assertEquals(false, eval(preproc(And(t, Imp(Or(t, f), And(t, f))))));
+		Assert.assertEquals(true, eval(preproc(BiImp(And(t, t), Or(t, t)))));
+		Assert.assertEquals(true, eval(preproc(BiImp(Imp(f, t), Or(And(t, Not(f)), t)))));
+	}
+	
+	@Test
+	public void testEval() {
+		BE t = True();
+		BE f = False();
+		
+		Assert.assertEquals(true, eval(t));
+		Assert.assertEquals(false, eval(f));
+		Assert.assertEquals(false, eval(Not(t)));
+		Assert.assertEquals(true, eval(Not(f)));
+		Assert.assertEquals(true, eval(And(t, t)));
+		Assert.assertEquals(false, eval(And(t, f)));
+		Assert.assertEquals(false, eval(And(f, t)));
+		Assert.assertEquals(true, eval(Or(t, t)));
+		Assert.assertEquals(true, eval(Or(t, f)));
+		Assert.assertEquals(true, eval(Or(f, t)));
+		Assert.assertEquals(false, eval(Or(f, f)));
+		Assert.assertEquals(true, eval(And(t, Or(f, t))));
+		Assert.assertEquals(true, eval(And(t, And(t, t))));
+		Assert.assertEquals(true, eval(Or(And(t, And(t, f)), Not(Or(f, f)))));		
+	}
+}

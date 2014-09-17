@@ -1,0 +1,70 @@
+package caseclasses.test;
+
+import caseclasses.CaseClasses;
+import caseclasses.PatternMatching;
+
+public class Test {
+	abstract class AE; 
+	case object Data;
+	case class Num(int i) extends AE;
+	case class Add(AE lhs, AE rhs) extends AE;
+	case class Sub(AE lhs, AE rhs) extends AE; 
+	case class Mult(AE lhs, AE rhs) extends AE;
+	case class Pizza(double cheese) {
+		String str = "case class with body";
+	};
+	
+	static class StaticClass {
+		String str = 5 match @Result(String.class){
+			case _ => "for static classes, static match methods are created";
+		};
+	}
+	
+	private static class TestClass {
+		static String str = "";		
+		
+		static int i = str match @Result(Integer.class) {
+			case "this" =>	0;
+			case "is"	=>	1;
+			case "nothing" 	=> 2;
+			case "more"		=> 3;
+			case "than"		=> 4;
+			case "... a common switch case - like construct"	=> 1000;
+		};
+		
+		String str2 = i match @Result(String.class) {
+			case _ => str match @Result(String.class) {
+				case _ => "match inside match";
+			};
+		};
+	}	
+	
+	public static void main(String[] args){ 
+		Add a = Add(Num(1), Num(2));
+		AE lhs = a.lhs;
+		
+		String s0 = 5*7 match @Result(String.class){
+			case _ => "disambiguation: match expressions are prefered over other expressions";
+		};
+				
+		// Match expression (needs Annotation)
+		String s = a match @Result(String.class){
+			case n@Num(_) => "Num: " + n;		 
+			case Add(Sub(Num(_), _), _) => "Cascaded";						
+			case x : Sub	=> "Sub: " + x;
+			case _ : Num => "Num";
+			case Data => "Upper case name --> case object match";
+			case name => "Lower case name --> matches always";
+		};			
+		
+		// Match statement
+		a match { 
+			case n@Num(_) => System.out.println("Num: " + n);		 
+			case Add(Sub(Num(_), _), _) => System.out.println("Cascaded");
+			case x : Sub	=> System.out.println("Sub: " + x);
+			case _ : Num	=> System.out.println("Num");
+			case _		=> System.out.println("a");
+		}		
+					
+	}
+}

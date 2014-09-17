@@ -1,0 +1,114 @@
+package caseclasses.test;
+
+import caseclasses.CaseClasses;
+import caseclasses.PatternMatching;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+public class WAEInterp {
+	abstract class WAE;
+	case class Num(int n) extends WAE;
+	case class Add(WAE lhs, WAE rhs) extends WAE;
+  	case class Sub(WAE lhs, WAE rhs) extends WAE;
+  	case class Let(String name, WAE namedExpr, WAE body) extends WAE;
+  	case class Id(String name) extends WAE;
+  	
+
+  	public WAE subst(WAE expr, String substId, WAE value) {
+  		return expr match @Result(WAE.class){
+  			case Num(n) => expr;
+  			
+  			case Add(lhs, rhs) =>
+  				Add(subst(lhs, substId, value), subst(rhs, substId, value));
+  				
+  			case Sub(lhs, rhs) =>
+      			Sub(subst(lhs, substId, value), subst(rhs, substId, value));
+      			
+      		case Let(boundId, namedExpr, boundExpr) =>
+      			boundId.equals(substId) ?
+        			Let(boundId, subst(namedExpr, substId, value), boundExpr) :
+        			Let(boundId, subst(namedExpr, substId, value), subst(boundExpr, substId, value));	
+    		
+    		case Id(name) => 
+      			substId.equals(name) ? value : expr;    			    			    		
+  		}; 
+  	}
+
+  	public int eagerCalc(WAE expr) {
+  		expr match {
+  			case Num(n)	=> return n;
+  			case Add(lhs, rhs) => return eagerCalc(lhs) + eagerCalc(rhs);
+    		case Sub(lhs, rhs) => return eagerCalc(lhs) - eagerCalc(rhs);
+    		case Let(boundId, namedExpr, boundExpr) =>
+      			return eagerCalc(subst(boundExpr, boundId, Num(eagerCalc(namedExpr))));
+    		case Id(name) => {
+    			throw new RuntimeException("found unbound id " + name);
+    		}
+  		}  	
+  	}
+
+  	public int lazyCalc(WAE expr) {
+  		expr match {
+  			case Num(n) => return n;
+    		case Add(lhs, rhs) => return lazyCalc(lhs) + lazyCalc(rhs);
+    		case Sub(lhs, rhs) => return lazyCalc(lhs) - lazyCalc(rhs);
+    		case Let(boundId, namedExpr, boundExpr) =>
+      			return lazyCalc(subst(boundExpr, boundId, namedExpr));
+    		case Id(name) => {
+    			throw new RuntimeException("found unbound id " + name);
+    		}
+  		}  	
+  	}
+  	
+  	@Test
+  	public void testEagerCalc() {
+   		Assert.assertEquals(20, eagerCalc(Let("x", Add(Num(5), Num(5)), Add(Id("x"), Id("x")))));
+   		Assert.assertEquals(10, eagerCalc(Let("x", Num(5), Add(Id("x"), Id("x")))));  			
+   		Assert.assertEquals(14, eagerCalc(Let("x", Add(Num(5), Num(5)), Let("y", Sub(Id("x"), Num(3)), Add(Id("y"), Id("y"))))));
+   		Assert.assertEquals(4, eagerCalc(Let("x", Num(5), Let("y", Sub(Id("x"), Num(3)), Add(Id("y"), Id("y"))))));
+   		Assert.assertEquals(15, eagerCalc(Let("x", Num(5), Add(Id("x"), Let("x", Num(3), Num(10))))));	
+   		Assert.assertEquals(8, eagerCalc(Let("x", Num(5), Add(Id("x"), Let("x", Num(3), Id("x"))))));	
+   		Assert.assertEquals(10, eagerCalc(Let("x", Num(5), Add(Id("x"), Let("y", Num(3), Id("x"))))));
+   		Assert.assertEquals(5, eagerCalc(Let("x", Num(5), Let("y", Id("x"), Id("y")))));
+   		Assert.assertEquals(5, eagerCalc(Let("x", Num(5), Let("x", Id("x"), Id("x")))));
+   		
+   		try {
+    		eagerCalc(Let("x", Add(Num(3), Id("z")), Let("y", Num(100), Id("y"))));
+    		Assert.assertTrue("expected exception for unbound id", false);
+  		} catch(RuntimeException e) {
+    		Assert.assertTrue(true);
+  		}		
+  	}	
+  	
+  	@Test
+  	public void testLazyCalc() {
+  		Assert.assertEquals(20, lazyCalc(Let("x", Add(Num(5), Num(5)), Add(Id("x"), Id("x")))));
+  		Assert.assertEquals(10, lazyCalc(Let("x", Num(5), Add(Id("x"), Id("x")))));
+  		Assert.assertEquals(14, lazyCalc(Let("x", Add(Num(5), Num(5)), Let("y", Sub(Id("x"), Num(3)), Add(Id("y"), Id("y"))))));
+  		Assert.assertEquals(4, lazyCalc(Let("x", Num(5), Let("y", Sub(Id("x"), Num(3)), Add(Id("y"), Id("y"))))));
+  		Assert.assertEquals(15, lazyCalc(Let("x", Num(5), Add(Id("x"), Let("x", Num(3), Num(10))))));
+  		Assert.assertEquals(8, lazyCalc(Let("x", Num(5), Add(Id("x"), Let("x", Num(3), Id("x"))))));
+  		Assert.assertEquals(10, lazyCalc(Let("x", Num(5), Add(Id("x"), Let("y", Num(3), Id("x"))))));
+  		Assert.assertEquals(5, lazyCalc(Let("x", Num(5), Let("y", Id("x"), Id("y")))));
+  		Assert.assertEquals(5, lazyCalc(Let("x", Num(5), Let("x", Id("x"), Id("x")))));
+  		Assert.assertEquals(100, lazyCalc(Let("x", Add(Num(3), Id("z")), Let("y", Num(100), Id("y")))));			
+  	}
+  	
+  	@Test
+  	public void testEquals() {
+  		WAE add = Add(Num(5), Num(5));
+  		
+  		Assert.assertTrue(add.equals(Add(Num(5), Num(5))));
+  		Assert.assertFalse(add.equals(Sub(Num(5), Num(5))));
+  		Assert.assertFalse(add.equals(Add(Num(6), Num(5))));
+  		Assert.assertFalse(add.equals(Add(Num(5), Id("x"))));
+  	}
+  	
+  	@Test
+  	public void testToString() {
+  		Assert.assertEquals("Add(Sub(Id(x), Num(5)), Num(5))", 
+  			Add(Sub(Id("x"), Num(5)), Num(5)).toString());
+  	}
+  	
+ } 	
