@@ -15,7 +15,7 @@ public class Test {
 	};
 	
 	static class StaticClass {
-		String str = 5 match @Result(String.class){
+		String str = 5 match<String>{
 			case _ => "for static classes, static match methods are created";
 		};
 	}
@@ -23,7 +23,7 @@ public class Test {
 	private static class TestClass {
 		static String str = "";		
 		
-		static int i = str match @Result(Integer.class) {
+		static int i = str match<int> {
 			case "this" =>	0;
 			case "is"	=>	1;
 			case "nothing" 	=> 2;
@@ -32,8 +32,8 @@ public class Test {
 			case "... a common switch case - like construct"	=> 1000;
 		};
 		
-		String str2 = i match @Result(String.class) {
-			case _ => str match @Result(String.class) {
+		String str2 = i match<String> {
+			case _ => str match<String> {
 				case _ => "match inside match";
 			};
 		};
@@ -43,12 +43,12 @@ public class Test {
 		Add a = Add(Num(1), Num(2));
 		AE lhs = a.lhs;
 		
-		String s0 = 5*7 match @Result(String.class){
+		String s0 = 5*7 match<String>{
 			case _ => "disambiguation: match expressions are prefered over other expressions";
 		};
 				
 		// Match expression (needs Annotation)
-		String s = a match @Result(String.class){
+		String s = a match<String>{
 			case n@Num(_) => "Num: " + n;		 
 			case Add(Sub(Num(_), _), _) => "Cascaded";						
 			case x : Sub	=> "Sub: " + x;

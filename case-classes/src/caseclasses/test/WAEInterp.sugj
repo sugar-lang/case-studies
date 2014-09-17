@@ -16,7 +16,7 @@ public class WAEInterp {
   	
 
   	public WAE subst(WAE expr, String substId, WAE value) {
-  		return expr match @Result(WAE.class){
+  		return expr match<WAE>{
   			case Num(n) => expr;
   			
   			case Add(lhs, rhs) =>

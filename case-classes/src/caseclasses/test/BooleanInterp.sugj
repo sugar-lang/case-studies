@@ -17,7 +17,7 @@ public class BooleanInterp {
 	case class BiImp(BE lhs, BE rhs) extends BE;
 	
 	public BE preproc(BE expr) {
-		return expr match @Result(BE.class) {
+		return expr match<BE> {
 			case Imp(lhs, rhs) => Or(Not(preproc(lhs)), preproc(rhs));
     		case BiImp(lhs, rhs) =>
       			And(Or(Not(preproc(lhs)), preproc(rhs)),
@@ -35,21 +35,21 @@ public class BooleanInterp {
 			case False => return false;
 			case Not(e) => {
 				boolean b = eval(e);
-				return b match @Result(Boolean.class) {
+				return b match<boolean> {
 					case true => false;
 					case false => true;
 				};
 			}
 			case And(lhs, rhs) => {
 				boolean b = eval(lhs);
-				return b match @Result(Boolean.class) {
+				return b match<boolean> {
 					case false => false;
 					case true => eval(rhs);
 				};	
 			}
 			case Or(lhs, rhs) => {
 				boolean b = eval(lhs);
-				return b match @Result(Boolean.class) {
+				return b match<boolean> {
 					case true => true;
 					case false => eval(rhs);
 				};

@@ -1,9 +1,9 @@
 package caseclasses;
 
 import org.sugarj.languages.Java;
-import concretesyntax.Java;
+import caseclasses.PrimToRefType;
 
-public sugar CaseClasses {
+public extension CaseClasses {
 		
 	context-free syntax
 		
@@ -602,38 +602,7 @@ public sugar CaseClasses {
 									  , []
 									  , None());
 				
-				body := Block([Return(Some(Lit(Class(ct))))])
-				
-				
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-		%% Creates a class type node corresponding to the given type node. %%
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%				
-				
-		get-class-type :
-			type				-> 		<if ?ClassOrInterfaceType(_, _)
-										 then id
-										 else !CType(<get-prim-class-name> type, None())
-										 end> type
-							  
-		
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-		%% Gets the class name corresponding to the given primitive type. %%
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
-		
-		get-prim-class-name :
-			primType			->		className
-			
-			with
-				className := <switch id
-					     	   case ?Boolean() :	!Id("Boolean")
-						 	   case ?Byte()    :	!Id("Byte")
-						 	   case ?Short()   :	!Id("Short")
-							   case ?Int()     :	!Id("Integer")
-							   case ?Float()   :	!Id("Float")
-							   case ?Long()    :	!Id("Long")
-							   case ?Double()  :	!Id("Double")
-							   case ?Char()    :	!Id("Character")
-							  end> primType											  	   				   	   							  	   				   	   
+				body := Block([Return(Some(Lit(Class(ct))))])		   	   							  	   				   	   
 					  	   				   	   	
 			
 	overlays 

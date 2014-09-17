@@ -2,8 +2,9 @@ package caseclasses;
 
 import org.sugarj.languages.Java;
 import concretesyntax.Java;
+import caseclasses.PrimToRefType;
 
-public sugar PatternMatching {
+public extension PatternMatching {
 	
 		context-free syntax
 
@@ -16,7 +17,7 @@ public sugar PatternMatching {
 		// (a) Syntax for match expressions.
 		JavaExpr "match" MatchAnno 
 					"{" (MatchExprCase ";")* "}"			-> JavaExpr {prefer, cons("MatchExpr")}
-		"@" "Result" "(" JavaElemVal ")"					-> MatchAnno {cons("MatchAnno")}			
+		"<" JavaType ">"									-> MatchAnno {cons("MatchAnno")}			
 		"case" Pattern "=>" JavaExpr						-> MatchExprCase {cons("MatchExprCase")}
 		"lift" "(" JavaExpr "," JavaMethodDec ")"			-> JavaStm {cons("Lift")}
 
@@ -377,7 +378,7 @@ public sugar PatternMatching {
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		
 		match-expr-to-lift(|params, decs, mods) :
-			MatchExpr(e, MatchAnno(Lit(Class(c))), case*)	->	 Lift(call, method)
+			MatchExpr(e, MatchAnno(t), case*)	->	 Lift(call, method)
 			
 			with
 				%%%
@@ -428,7 +429,12 @@ public sugar PatternMatching {
 				
 				call := Invoke(Method(MethodName(name)), call-args);
 				
-				method := MethodDec(MethodDecHead([Public() | mods], None(), c, name, fparams, None()), 
+				method := MethodDec(MethodDecHead([Public() | mods]
+												 , None()
+												 , <get-class-type> t
+												 , name
+												 , fparams
+												 , None()), 
 									Block([matchStm]))				  			     				  												 								
 		
 		
