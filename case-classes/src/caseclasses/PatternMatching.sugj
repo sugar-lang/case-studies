@@ -1,0 +1,567 @@
+package caseclasses;
+
+import org.sugarj.languages.Java;
+import concretesyntax.Java;
+import caseclasses.PrimToRefType;
+
+public extension PatternMatching {
+	
+		context-free syntax
+
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Allows pattern matching on case classes as %%
+		%% 	(a) Java expression or 					  %%
+		%%	(b) Java statement. 					  %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+		// (a) Syntax for match expressions.
+		JavaExpr "match" MatchAnno 
+					"{" (MatchExprCase ";")* "}"			-> JavaExpr {prefer, cons("MatchExpr")}
+		"<" JavaType ">"									-> MatchAnno {cons("MatchAnno")}			
+		"case" Pattern "=>" JavaExpr						-> MatchExprCase {cons("MatchExprCase")}
+		"lift" "(" JavaExpr "," JavaMethodDec ")"			-> JavaStm {cons("Lift")}
+
+		// (b) Syntax for match statements.
+		JavaExpr "match" "{" MatchStmCase* "}"				-> JavaStm {cons("MatchStm")}
+		"case" Pattern "=>" JavaStm							-> MatchStmCase {cons("MatchStmCase")}
+		
+		// (c) Pattern syntax.
+		(CaseTypeCheck | CaseLit | CaseComp)				-> Pattern
+		(CaseDefault | CaseId) (":" JavaId)?				-> CaseTypeCheck {prefer, cons("CaseTypeCheck")}
+		"_"													-> CaseDefault {prefer, cons("CaseDefault")}
+		JavaId												-> CaseId {cons("CaseId")}
+		JavaLiteral											-> CaseLit {cons("CaseLit")}
+		(CaseId "@" )? JavaId "(" {Pattern ","}* ")" 		-> CaseComp {cons("CaseComp")}
+	
+
+		 /* Should actually not be needed here: 
+		 	Included to circumvent SugarJ problem with array access nodes. */
+    	Expr ArraySubscript              -> ArrayAccess    {cons("ArrayAccess")}
+   
+     	
+    	
+    	desugarings
+    	  	
+ 	  		desugar-match-expr
+			desugar-match-stm
+			lift-match-methods
+						
+			
+		rules	 								
+			
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Desugars a match statement into a common Java statement. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%		
+		
+		desugar-match-stm :
+			MatchStm(e, case*)		->	<foldr(!init, 
+												\((bExp, r), folded) -> 
+													<if ?Lit(Bool(True()))
+													 %%%
+											 		  %% If the current check is 'true',
+											 		  %% take the current result statement 
+											 		  %% and discard everything after it
+											 		  %% (i.e., the folded rest).
+											 		  %%%
+													 then !r
+													 %%%
+													  %% Else, create a new 'if' statement,
+													  %% with the folded rest as 'else' part. 
+													  %%%
+													 else store-res-in-var(|If(bExp, r, folded)) 
+													 	   <+ !If(bExp, r, folded)
+													 end> bExp\)> <reverse> cs
+			
+			with
+				%%%
+				 %% Create a pair for every case consisting of: 
+				 %%		(1) a check expression
+				 %%		(2) the result statement if the check succeeds
+				 %%%				
+				check* := <foldr(!([], <try(Tl)> case*),
+								\(c, (ch*, restCase*))
+										-> (<conc> (ch*, [<match-stm-case(|e, restCase*)> c]),
+											<try(Tl)> restCase*) \)
+							; Fst
+							> <reverse> case*;
+								
+				err := MatchError;
+						 
+				[(c, res) | cs] := <if ?[]
+									%%%
+									 %% If there are no cases left,
+									 %% proceed with a match error statement.
+									 %%%
+									then ![(Lit(Bool(True())), err)]
+									%%%
+									 %% Else, take the last case.
+									 %%%
+									else reverse
+									end> check*;				
+				
+								
+				init := <if ?Lit(Bool(True()))
+						 %%%
+						  %% If the check is 'true', directly take
+						  %% the corresponding result statement as 
+						  %% initial value for folding.
+						  %%%
+						 then !res
+						 %%%
+						  %% Else, create an 'if' statement as initial value.
+						  %%%
+						 else store-res-in-var(|If(c, res, err))
+						 	  <+!If(c, res, err)
+						 end> c		 
+	
+	
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Transforms a match statement case into a pair containing:  %%
+		%% 	 (1)  a corresponding check expression					  %%
+		%%   (2)  the result statement if the check succeeds		  %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			
+		match-stm-case(|e, case*) :
+			MatchStmCase(pattern, res)					-> 	(check, newRes)
+			
+			with
+				%%%
+				 %% Get a check expression to match against the given pattern.
+				 %%%
+				check := <get-check(|e)> pattern;
+				
+				%%%
+				 %% Create the new result statement.
+				 %%%
+				newRes := <switch id
+						   %%%
+						    %% In case the pattern is an identifier,
+						    %% all occurrences of this identifier in the 
+						    %% result statement are substituted with the
+						    %% expression we are currently matching.
+						    %%%
+						   case ?CaseTypeCheck(CaseId(name), _) :
+								<substitute(?ExprName(_) <+ ?AmbName(_))> ([(ExprName(name), e),
+																			(AmbName(name), e)], res)
+						   %%%
+						    %% In case the pattern is composite,
+						    %% the result statement is replaced by a
+						    %% match statement that consequently matches 
+						    %% every child.
+						    %%%		
+						   case ?CaseComp(None(), name, param*) :
+						   		<get-child-stm-match(|e, name, param*, case*)> res
+						   %%%
+						    %% In case the pattern is composite and
+						    %% bound to an identifier, the result statement is
+						    %% first substituted and then transformed into a
+						    %% match statement that consequently matches every
+						    %% child.
+						    %%%	
+						   case ?CaseComp(Some(CaseId(name)), ctor, param*) :
+						    	<substitute(?ExprName(_) <+ ?AmbName(_))
+						    	; get-child-stm-match(|e, ctor, param*, case*)> ([(ExprName(name), e), 
+						    	  												  (AmbName(name), e)], res)
+						   %%%
+						    %% In all other cases the result statement
+						    %% remains unchanged.
+						    %%%														
+						   otherwise : 
+						   		!res
+						   end> pattern		
+				  
+		
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Creates a match statement that matches the fields of a case class instance. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+					   
+		get-child-stm-match(|e, name, param*, case*) :
+			res					->		match-children
+			
+			with
+				%%%
+				 %% (1)	Zip the parameters with indices (starting with 0).
+				 %% (2) Convert the indices to Stratego strings. 
+				 %%		(needed for creating literal nodes)
+				 %%	(3) Reverse the list (to get its last element easier).
+				 %%%
+				indexed := <number(id) 
+							; map(\(p, i) -> (p, <int-to-string> i) \)
+							; reverse
+						    > param*;
+				
+				[(p, i) | ps] := indexed;
+				
+				%%%
+				 %% Create the remaining match statement case 
+				 %% if the current case doesn't match.
+				 %%%
+				restCase := MatchStmCase(CaseTypeCheck(CaseDefault(), None()), 
+										 MatchStm(e, case*));
+						     			 						     			 				
+				%%%
+				 %% Create a match statement that consequently matches every child.
+				 %%%
+				match-children := <foldr(!MatchStm(<array-acc(|name, i)> e,
+										  	   	   [MatchStmCase(p, res), restCase]),			 
+										 \((pattern, index), folded) ->
+										 			MatchStm(<array-acc(|name, index)> e,
+										 					 [MatchStmCase(pattern, folded), restCase])
+										 \)> <reverse> ps		
+		
+		
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Stores the result of calling 'unapply' in a fresh variable. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		
+		store-res-in-var(|ifTerm) :
+			bExp@NotEq(unapply, Lit(Null()))		->	Block([varDec, substIfTerm])
+			
+			with
+				%%%
+				 %% Create a new, unique string with prefix 'unapplied'.
+				 %%%
+				newName := <newname> "unapplied";
+				
+				%%%
+				 %% Create a new local variable declaration.
+				 %%%
+				varDec := LocalVarDecStm(LocalVarDec([], ArrayType(CType(Id("Object"), None())),
+													 [VarDec(Id(newName), unapply)]));
+													 
+				unapplied := ExprName(Id(newName));						
+				
+				%%%
+				 %% Substitute all occurrences of term 'unapply' 
+				 %% in 'ifTerm' with term 'unapplied'.
+				 %%%			 
+				substIfTerm := <substitute(?unapply)> ([(unapply, unapplied)], ifTerm)								 
+
+		
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Accesses a field element and casts it to its class type. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%								 
+	
+		array-acc(|name, i) :
+			e											-> <cast-to-class-type(|class)> field
+			
+			with
+				%%%
+				 %%	Get the field value.
+				 %%%
+				field := ArrAcc(Unapply(name, e), i);
+			    
+			    %%%
+			     %% Get the field's class type.
+			     %%%
+			    class := Invoke(Method(MethodName(AmbName(name), 
+			    			Id(<conc-strings> ("getClass", i)))), [])			    	
+		
+		
+		%%%
+		 %% Casts the given expression to the given class type.
+		 %%%	    				    								   
+		cast-to-class-type(|c) :
+			e					-> |[ ~c.cast(~e) ]|   				    								   						  	   												 	   
+		
+		%%%
+		 %% Case 1: Id case without instance check.
+		 %%%	
+		get-check(|e) :
+			CaseTypeCheck(CaseId(Id(name)), None())		
+							->	<if not(explode-string; Hd; is-upper)
+								 %%%
+								  %% If the name starts with
+								  %% lower case
+								  %%	--> default case
+								  %%%
+								 then !Lit(Bool(True()))
+								 %%%
+								  %% If the name starts with
+								  %% upper case 
+								  %%	--> match case object
+								  %%%
+								 else !Invoke(Method(
+                    							Invoke(Method(MethodName(Id(name)))
+                      								  , [])
+                        						, None()
+                          						, Id("equals"))
+                      						 , [e])
+								 end> name												 											 																					 
+
+		%%%
+		 %% Case 2: Default case without instance check.
+		 %%		--> resolved to true
+		 %%%										 
+		get-check(|e) :
+			CaseTypeCheck(CaseDefault(), None())
+											->	Lit(Bool(True()))											 
+		
+		%%%
+		 %% Case 3: Default case with instance check.
+		 %%		--> resolved to instance check
+		 %%%	
+		get-check(|e) :
+			CaseTypeCheck(_, Some(type))	-> 	InstanceOf(CastRef(CType(Id("Object"), None()), 
+																	   e), 
+															   type) 		
+		
+		%%%
+		 %% Case 4: Literal.
+		 %%		--> resolved to equality check 
+		 %%%						
+		get-check(|e) :
+			CaseLit(l)						-> 	Eq(e, Lit(l))
+		
+		%%%
+		 %% Case 5: Composite pattern.
+		 %%		--> check whether the result of invoking 'unapply' is not 'null'
+		 %%%		
+		get-check(|e) :
+			CaseComp(_, name, param*)		-> 	NotEq(Unapply(name, e), 
+										  	   		  Lit(Null()))				
+	
+	
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Desugars match expressions inside method %%
+		%% declarations into 'Lift' constructs.     %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+									
+		desugar-match-expr :
+			MethodDec(head, Block(stms))		->	MethodDec(head, Block(stms'))
+			
+			with
+				MethodDecHead(mods, _, _, _, params, _) := head;
+				
+				stms' := <rules(decs := [])
+						  ; topdown(try(?LocalVarDec(_, _, _)
+											; rules(decs := <union> (<decs>, [<id>]))
+									  	<+ match-expr-to-lift(|params, <decs>
+									  						, <filter(?Static())> mods)))
+						 > stms	
+		
+		
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Desugars match expressions inside class   %%
+		%% body declarations into 'Lift' constructs. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%					 
+						 
+		desugar-match-expr :
+			ClassDec(head, ClassBody(bdecs))		->	ClassDec(head, ClassBody(bdecs'))
+			
+			with
+				ClassDecHead(mods, _, _, _, _) := head;
+			
+				bdecs' := <resolve-inner-match-expr(|mods)> bdecs							  
+		
+		
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Resolves match expressions in a given list of declarations. %%
+		%% Collects local variable declarations that are possibly      %%
+		%% needed for the match method.								   %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%				  
+						  
+		resolve-inner-match-expr(|mods) :
+			ds			->		ds'
+			
+			with
+				ds' := <rules(decs := [])
+		  				; rec x(try(?LocalVarDec(_, _, _)
+					  					; rules(decs := <union> (<decs>, [<id>]))
+					 				<+ match-expr-to-lift(|[], <decs>
+								  						  , <filter(?Static())> mods))
+				  			   ; (all({| decs : desugar-match-expr |} <+ x)))> ds	
+				  			     
+
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Converts match expressions into 'Lift' constructs. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		
+		match-expr-to-lift(|params, decs, mods) :
+			MatchExpr(e, MatchAnno(t), case*)	->	 Lift(call, method)
+			
+			with
+				%%%
+				 %% Create a new, unique name with prefix "match".
+				 %%%
+				name := Id(<newname> "match");
+				
+				%%%
+				 %% Extract all identifiers used in the
+				 %% match cases that are no pattern variables.
+				 %%%
+				var-names := <mapconcat(\(p, res) -> 
+									<diff> (<collect-all(?Id(_))> res,
+											<collect-all(?Id(_))> p) \)
+							 ; make-set
+							 > case*;
+				
+				%%%
+				 %% Create the name for the expression
+				 %% we want to match.
+				 %%%			 
+				arg-name := <if ?ExprName(n)
+							 %%%
+						 	  %% If the expression we want to match
+						 	  %% is an expression name, we take its name.
+						 	  %%%
+							 then !n
+							 %%%
+						 	  %% Else, create a new (unique) name.
+						 	  %%%
+							 else !Id(<newname> "expr")
+							 end> e;				 
+										
+				%%%
+				 %% Convert the expression cases to statement cases.
+				 %%%			 											
+				case'* := <map(convert-to-stm-case)> case*;						
+				
+				%%%
+				 %% Create a match statement from the converted cases.
+				 %%%
+				matchStm := MatchStm(ExprName(arg-name), case'*);
+				 
+				%%%
+				 %% Get the formal parameters and call arguments.
+				 %%%   
+				(fparams, call-args) := <get-match-params(|arg-name, params, decs, var-names)> e;     
+				
+				call := Invoke(Method(MethodName(name)), call-args);
+				
+				method := MethodDec(MethodDecHead([Public() | mods]
+												 , None()
+												 , <get-class-type> t
+												 , name
+												 , fparams
+												 , None()), 
+									Block([matchStm]))				  			     				  												 								
+		
+		
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Creates a pair containing lists of %%
+		%% (1) formal parameters... 		  %%
+		%% (2) actual paramters...			  %%
+		%% 		...needed for a match method. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+		
+		get-match-params(|arg-name, params, decs, used) :	
+			expr		-> 		(filtered, args)
+			
+			with
+				%%%
+				 %% Convert local variable declarations 
+				 %% into formal parameters.
+				 %%%
+				decs' := <mapconcat(to-formal-params);nub> decs;
+				
+				params' := <union> (params, decs');
+				
+				param := Param([], CType(Id("Object"), None()), arg-name);								
+				
+				%%%
+				 %% Add the parameter for the 
+				 %% matched expression if its name 
+				 %% isn't already contained.
+				 %%%
+				fparams := <map(\Param(_,_,n) -> n\)
+				 			; if(<elem> (arg-name, <id>), 
+				 			  	 !params', 
+				 			  	 ![param | params'])
+							> params';	
+				
+				%%%
+				 %% Filter the parameters that are actually used.
+				 %%%			
+				filtered :=  <mapconcat(\p@Param(_,_,n) -> 
+											<if(<elem> (n, used)
+													<+ <equal> (n, arg-name),
+												![p],
+												![])>
+										\)> fparams;			
+				
+				%%%
+				 %% Convert formal parameters into 
+				 %% corresponding expression names.
+				 %%% 			
+				fparams-as-args := <map(\Param(_,_,a) -> ExprName(a) \)> filtered; 				
+				 			
+				args := <if equal(|params')
+						 %%%
+						  %% If the matched expression
+						  %% already was an expression name,
+						  %% we are done.
+						  %%%
+						 then !fparams-as-args
+						 %%%
+						  %% Else, prepend the actual expression
+						  %% to the argument list.
+						  %%%
+				  	     else ![expr | 
+				  	     		<filter(not(equal(|ExprName(arg-name))))> fparams-as-args]			  	     
+						 end> fparams									
+		
+		
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Resolves 'Lift' constructs inside classes:		%%
+		%%	(1) Lifts the method declaration to the level 	%%
+		%%		of class body declarations. 				%%
+		%%	(2) Replaces the 'Lift' construct with the		%%
+		%%		corresponding method call.					%%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%		
+		
+		lift-match-methods :
+			ClassDec(head, ClassBody(decs))		->	ClassDec(head, ClassBody(decs'))	
+			
+			with
+				%%%
+				 %% Collect all 'lift' constructs that are
+				 %% not inside an inner class or interface.
+				 %%%
+				lifts :=<filter(not(?ClassDec(_,_) <+ ?InterfaceDec(_,_)))
+					   ; collect-all(?Lift(_,_))> decs;
+					     	     
+				methods	:= <map(\(_, m) -> m\)> lifts;
+				
+				%%%
+				 %% Replace 'lift' constructs with method call
+				 %% and add the extracted methods to the declarations.
+				 %%%
+				decs' := <union> (methods, <map(try(not(?ClassDec(_,_) <+ ?InterfaceDec(_,_))
+											   	   ; topdown(try(\ Lift(c, _) -> c \))))> decs)				  		  
+			
+			where
+				<not(?[])> lifts		
+								
+		
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Converts a match expression case into a match statement case. %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+									
+		convert-to-stm-case :
+			MatchExprCase(p, expr)		->	MatchStmCase(p, Return(Some(expr)))
+			
+			
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%% Converts a local variable declaration into a  %%
+		%% list of corresponding method parameters. 	 %%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%		
+			
+		to-formal-params :
+			LocalVarDec(m, t, ds)		->	<map(get-arguments
+												 ; Hd
+												 ; !Param(m, t, <id>))> ds											  	   			  							  	   			  											 	
+		
+	overlays 
+	
+		// only for abbreviation purposes
+		
+		CType(name, tparams) 	= ClassOrInterfaceType(TypeName(name), tparams)	
+		Unapply(name, arg)		= Invoke(Method(MethodName(AmbName(name), Id("unapply"))), [arg])
+		ArrAcc(e, i)			= ArrayAccess(e, Lit(Deci(i)))	
+		
+		MatchError				= Throw(NewInstance(None()
+                  						, ClassOrInterfaceType(TypeName(Id("RuntimeException")), None())
+                 						, [Lit(String([Chars("Match not exhaustive")]))]
+                  						, None()))				            						  
+}  	
