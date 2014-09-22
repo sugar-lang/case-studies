@@ -5,8 +5,9 @@ import caseclasses.PatternMatching;
 
 import org.junit.Assert;
 import org.junit.Test;
+import junit.framework.TestCase;
 
-public class BooleanInterp {
+public class BooleanInterpTest extends TestCase {
 	abstract class BE;
 	case object True extends BE;
 	case object False extends BE;

@@ -5,8 +5,9 @@ import caseclasses.PatternMatching;
 
 import org.junit.Assert;
 import org.junit.Test;
+import junit.framework.TestCase;
 
-public class WAEInterp {
+public class WAEInterpTest extends TestCase {
 	abstract class WAE;
 	case class Num(int n) extends WAE;
 	case class Add(WAE lhs, WAE rhs) extends WAE;
