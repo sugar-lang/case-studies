@@ -13,6 +13,6 @@ public sugar Java {
 
   context-free syntax
     ClassModel -> ToplevelDeclaration
-    AnnoOrSugarMod* "class-model" JavaId JavaClassBody -> ClassModel {cons("ClassModelDec")}
+    AnnoOrExtensionMod* "class-model" JavaId JavaClassBody -> ClassModel {cons("ClassModelDec")}
 
 }
