@@ -2,6 +2,8 @@ package quest.lang.var;
 
 import javax.swing.JPanel;
 
+import quest.lang.var.Variable;
+
 /**
  * @author seba
  *
