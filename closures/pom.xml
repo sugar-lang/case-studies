@@ -8,9 +8,9 @@
 
 	<parent>
 		<groupId>org.sugarj</groupId>
-		<artifactId>org.sugarj.maven-config</artifactId>
+		<artifactId>maven-config-eclipse</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
-		<relativePath>../../deployment/maven-config</relativePath>
+		<relativePath>../../maven-config-eclipse</relativePath>
 	</parent>
 	
 	<build>
